@@ -1,0 +1,4671 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Passport Advantage Atlas</title>
+</head>
+<body>
+  <main>
+    <h1>Passport Advantage Atlas</h1>
+  </main>
+
+  <script id="app">
+  (() => {
+    'use strict';
+
+    const PASSPORTS = [
+      { code: 'al', name: 'Albania', mobility: 123 },
+      { code: 'gr', name: 'Greece', mobility: 174 },
+      { code: 'de', name: 'Germany', mobility: 174 },
+      { code: 'us', name: 'United States', mobility: 168 },
+    ];
+
+    const TYPE_RANK = Object.freeze({
+      home: 0,
+      'visa-free': 1,
+      'visa-on-arrival': 2,
+      eta: 3,
+      registration: 3,
+      evisa: 4,
+      'visa-required': 5,
+      'not-admitted': 6,
+      unknown: 7,
+    });
+
+    const DESTINATIONS = [
+  {
+    "destination": "AFGHANISTAN",
+    "gr": {
+      "raw": "EVISA",
+      "type": "evisa",
+      "days": null
+    },
+    "al": {
+      "raw": "EVISA",
+      "type": "evisa",
+      "days": null
+    },
+    "us": {
+      "raw": "EVISA",
+      "type": "evisa",
+      "days": null
+    },
+    "de": {
+      "raw": "EVISA",
+      "type": "evisa",
+      "days": null
+    }
+  },
+  {
+    "destination": "ALBANIA",
+    "gr": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "al": {
+      "raw": "HOME COUNTRY",
+      "type": "home",
+      "days": null
+    },
+    "us": {
+      "raw": "VISA-FREE 360",
+      "type": "visa-free",
+      "days": 360
+    },
+    "de": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    }
+  },
+  {
+    "destination": "ALGERIA",
+    "gr": {
+      "raw": "VISA REQUIRED",
+      "type": "visa-required",
+      "days": null
+    },
+    "al": {
+      "raw": "VISA REQUIRED",
+      "type": "visa-required",
+      "days": null
+    },
+    "us": {
+      "raw": "VISA REQUIRED",
+      "type": "visa-required",
+      "days": null
+    },
+    "de": {
+      "raw": "VISA REQUIRED",
+      "type": "visa-required",
+      "days": null
+    }
+  },
+  {
+    "destination": "ANDORRA",
+    "gr": {
+      "raw": "VISA-FREE",
+      "type": "visa-free",
+      "days": null
+    },
+    "al": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "us": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "de": {
+      "raw": "VISA-FREE",
+      "type": "visa-free",
+      "days": null
+    }
+  },
+  {
+    "destination": "ANGOLA",
+    "gr": {
+      "raw": "VISA-FREE 30",
+      "type": "visa-free",
+      "days": 30
+    },
+    "al": {
+      "raw": "EVISA",
+      "type": "evisa",
+      "days": null
+    },
+    "us": {
+      "raw": "VISA-FREE 30",
+      "type": "visa-free",
+      "days": 30
+    },
+    "de": {
+      "raw": "VISA-FREE 30",
+      "type": "visa-free",
+      "days": 30
+    }
+  },
+  {
+    "destination": "ANTIGUA AND BARBUDA",
+    "gr": {
+      "raw": "VISA-FREE 180",
+      "type": "visa-free",
+      "days": 180
+    },
+    "al": {
+      "raw": "VISA-FREE 180",
+      "type": "visa-free",
+      "days": 180
+    },
+    "us": {
+      "raw": "VISA-FREE 180",
+      "type": "visa-free",
+      "days": 180
+    },
+    "de": {
+      "raw": "VISA-FREE 180",
+      "type": "visa-free",
+      "days": 180
+    }
+  },
+  {
+    "destination": "ARGENTINA",
+    "gr": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "al": {
+      "raw": "VISA REQUIRED",
+      "type": "visa-required",
+      "days": null
+    },
+    "us": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "de": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    }
+  },
+  {
+    "destination": "ARMENIA",
+    "gr": {
+      "raw": "VISA-FREE 180",
+      "type": "visa-free",
+      "days": 180
+    },
+    "al": {
+      "raw": "VISA-FREE 180",
+      "type": "visa-free",
+      "days": 180
+    },
+    "us": {
+      "raw": "VISA-FREE 180",
+      "type": "visa-free",
+      "days": 180
+    },
+    "de": {
+      "raw": "VISA-FREE 180",
+      "type": "visa-free",
+      "days": 180
+    }
+  },
+  {
+    "destination": "AUSTRALIA",
+    "gr": {
+      "raw": "EVISITORS 90",
+      "type": "eta",
+      "days": 90
+    },
+    "al": {
+      "raw": "EVISA",
+      "type": "evisa",
+      "days": null
+    },
+    "us": {
+      "raw": "ETA 90",
+      "type": "eta",
+      "days": 90
+    },
+    "de": {
+      "raw": "EVISITORS 90",
+      "type": "eta",
+      "days": 90
+    }
+  },
+  {
+    "destination": "AUSTRIA",
+    "gr": {
+      "raw": "VISA-FREE",
+      "type": "visa-free",
+      "days": null
+    },
+    "al": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "us": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "de": {
+      "raw": "VISA-FREE",
+      "type": "visa-free",
+      "days": null
+    }
+  },
+  {
+    "destination": "AZERBAIJAN",
+    "gr": {
+      "raw": "EVISA 30",
+      "type": "evisa",
+      "days": 30
+    },
+    "al": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "us": {
+      "raw": "EVISA 30",
+      "type": "evisa",
+      "days": 30
+    },
+    "de": {
+      "raw": "EVISA 30",
+      "type": "evisa",
+      "days": 30
+    }
+  },
+  {
+    "destination": "BAHAMAS",
+    "gr": {
+      "raw": "VISA-FREE 240",
+      "type": "visa-free",
+      "days": 240
+    },
+    "al": {
+      "raw": "EVISA",
+      "type": "evisa",
+      "days": null
+    },
+    "us": {
+      "raw": "VISA-FREE 240",
+      "type": "visa-free",
+      "days": 240
+    },
+    "de": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    }
+  },
+  {
+    "destination": "BAHRAIN",
+    "gr": {
+      "raw": "EVISA · VISA ON ARRIVAL 30",
+      "type": "visa-on-arrival",
+      "days": 30
+    },
+    "al": {
+      "raw": "EVISA",
+      "type": "evisa",
+      "days": null
+    },
+    "us": {
+      "raw": "EVISA · VISA ON ARRIVAL 30",
+      "type": "visa-on-arrival",
+      "days": 30
+    },
+    "de": {
+      "raw": "EVISA · VISA ON ARRIVAL 30",
+      "type": "visa-on-arrival",
+      "days": 30
+    }
+  },
+  {
+    "destination": "BANGLADESH",
+    "gr": {
+      "raw": "VISA ON ARRIVAL 30",
+      "type": "visa-on-arrival",
+      "days": 30
+    },
+    "al": {
+      "raw": "VISA ON ARRIVAL 30",
+      "type": "visa-on-arrival",
+      "days": 30
+    },
+    "us": {
+      "raw": "VISA ON ARRIVAL 30",
+      "type": "visa-on-arrival",
+      "days": 30
+    },
+    "de": {
+      "raw": "VISA ON ARRIVAL 30",
+      "type": "visa-on-arrival",
+      "days": 30
+    }
+  },
+  {
+    "destination": "BARBADOS",
+    "gr": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "al": {
+      "raw": "VISA-FREE 28",
+      "type": "visa-free",
+      "days": 28
+    },
+    "us": {
+      "raw": "VISA-FREE 180",
+      "type": "visa-free",
+      "days": 180
+    },
+    "de": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    }
+  },
+  {
+    "destination": "BELARUS",
+    "gr": {
+      "raw": "VISA-FREE 30",
+      "type": "visa-free",
+      "days": 30
+    },
+    "al": {
+      "raw": "VISA-FREE 30",
+      "type": "visa-free",
+      "days": 30
+    },
+    "us": {
+      "raw": "EVISA",
+      "type": "evisa",
+      "days": null
+    },
+    "de": {
+      "raw": "VISA-FREE 30",
+      "type": "visa-free",
+      "days": 30
+    }
+  },
+  {
+    "destination": "BELGIUM",
+    "gr": {
+      "raw": "VISA-FREE",
+      "type": "visa-free",
+      "days": null
+    },
+    "al": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "us": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "de": {
+      "raw": "VISA-FREE",
+      "type": "visa-free",
+      "days": null
+    }
+  },
+  {
+    "destination": "BELIZE",
+    "gr": {
+      "raw": "VISA-FREE",
+      "type": "visa-free",
+      "days": null
+    },
+    "al": {
+      "raw": "VISA REQUIRED",
+      "type": "visa-required",
+      "days": null
+    },
+    "us": {
+      "raw": "VISA-FREE 180",
+      "type": "visa-free",
+      "days": 180
+    },
+    "de": {
+      "raw": "VISA-FREE",
+      "type": "visa-free",
+      "days": null
+    }
+  },
+  {
+    "destination": "BENIN",
+    "gr": {
+      "raw": "EVISA",
+      "type": "evisa",
+      "days": null
+    },
+    "al": {
+      "raw": "EVISA",
+      "type": "evisa",
+      "days": null
+    },
+    "us": {
+      "raw": "EVISA",
+      "type": "evisa",
+      "days": null
+    },
+    "de": {
+      "raw": "EVISA",
+      "type": "evisa",
+      "days": null
+    }
+  },
+  {
+    "destination": "BHUTAN",
+    "gr": {
+      "raw": "EVISA",
+      "type": "evisa",
+      "days": null
+    },
+    "al": {
+      "raw": "EVISA",
+      "type": "evisa",
+      "days": null
+    },
+    "us": {
+      "raw": "EVISA",
+      "type": "evisa",
+      "days": null
+    },
+    "de": {
+      "raw": "EVISA",
+      "type": "evisa",
+      "days": null
+    }
+  },
+  {
+    "destination": "BOLIVIA",
+    "gr": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "al": {
+      "raw": "EVISA",
+      "type": "evisa",
+      "days": null
+    },
+    "us": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "de": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    }
+  },
+  {
+    "destination": "BOSNIA AND HERZEGOVINA",
+    "gr": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "al": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "us": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "de": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    }
+  },
+  {
+    "destination": "BOTSWANA",
+    "gr": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "al": {
+      "raw": "EVISA",
+      "type": "evisa",
+      "days": null
+    },
+    "us": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "de": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    }
+  },
+  {
+    "destination": "BRAZIL",
+    "gr": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "al": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "us": {
+      "raw": "EVISA",
+      "type": "evisa",
+      "days": null
+    },
+    "de": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    }
+  },
+  {
+    "destination": "BRUNEI",
+    "gr": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "al": {
+      "raw": "VISA REQUIRED",
+      "type": "visa-required",
+      "days": null
+    },
+    "us": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "de": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    }
+  },
+  {
+    "destination": "BULGARIA",
+    "gr": {
+      "raw": "VISA-FREE",
+      "type": "visa-free",
+      "days": null
+    },
+    "al": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "us": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "de": {
+      "raw": "VISA-FREE",
+      "type": "visa-free",
+      "days": null
+    }
+  },
+  {
+    "destination": "BURKINA FASO",
+    "gr": {
+      "raw": "EVISA",
+      "type": "evisa",
+      "days": null
+    },
+    "al": {
+      "raw": "EVISA",
+      "type": "evisa",
+      "days": null
+    },
+    "us": {
+      "raw": "NOT ADMITTED",
+      "type": "not-admitted",
+      "days": null
+    },
+    "de": {
+      "raw": "EVISA",
+      "type": "evisa",
+      "days": null
+    }
+  },
+  {
+    "destination": "BURUNDI",
+    "gr": {
+      "raw": "EVISA · VISA ON ARRIVAL 30",
+      "type": "visa-on-arrival",
+      "days": 30
+    },
+    "al": {
+      "raw": "EVISA · VISA ON ARRIVAL 30",
+      "type": "visa-on-arrival",
+      "days": 30
+    },
+    "us": {
+      "raw": "EVISA · VISA ON ARRIVAL 30",
+      "type": "visa-on-arrival",
+      "days": 30
+    },
+    "de": {
+      "raw": "EVISA · VISA ON ARRIVAL 30",
+      "type": "visa-on-arrival",
+      "days": 30
+    }
+  },
+  {
+    "destination": "CAMBODIA",
+    "gr": {
+      "raw": "EVISA · VISA ON ARRIVAL 30",
+      "type": "visa-on-arrival",
+      "days": 30
+    },
+    "al": {
+      "raw": "EVISA · VISA ON ARRIVAL 30",
+      "type": "visa-on-arrival",
+      "days": 30
+    },
+    "us": {
+      "raw": "EVISA · VISA ON ARRIVAL 30",
+      "type": "visa-on-arrival",
+      "days": 30
+    },
+    "de": {
+      "raw": "EVISA · VISA ON ARRIVAL 30",
+      "type": "visa-on-arrival",
+      "days": 30
+    }
+  },
+  {
+    "destination": "CAMEROON",
+    "gr": {
+      "raw": "EVISA",
+      "type": "evisa",
+      "days": null
+    },
+    "al": {
+      "raw": "EVISA",
+      "type": "evisa",
+      "days": null
+    },
+    "us": {
+      "raw": "EVISA",
+      "type": "evisa",
+      "days": null
+    },
+    "de": {
+      "raw": "EVISA",
+      "type": "evisa",
+      "days": null
+    }
+  },
+  {
+    "destination": "CANADA",
+    "gr": {
+      "raw": "ETA 180",
+      "type": "eta",
+      "days": 180
+    },
+    "al": {
+      "raw": "VISA REQUIRED",
+      "type": "visa-required",
+      "days": null
+    },
+    "us": {
+      "raw": "VISA-FREE 180",
+      "type": "visa-free",
+      "days": 180
+    },
+    "de": {
+      "raw": "ETA 180",
+      "type": "eta",
+      "days": 180
+    }
+  },
+  {
+    "destination": "CAPE VERDE",
+    "gr": {
+      "raw": "VISA-FREE (EASE) 30",
+      "type": "visa-free",
+      "days": 30
+    },
+    "al": {
+      "raw": "VISA ON ARRIVAL (EASE)",
+      "type": "visa-on-arrival",
+      "days": null
+    },
+    "us": {
+      "raw": "VISA-FREE (EASE) 30",
+      "type": "visa-free",
+      "days": 30
+    },
+    "de": {
+      "raw": "VISA-FREE (EASE) 30",
+      "type": "visa-free",
+      "days": 30
+    }
+  },
+  {
+    "destination": "CENTRAL AFRICAN REPUBLIC",
+    "gr": {
+      "raw": "VISA REQUIRED",
+      "type": "visa-required",
+      "days": null
+    },
+    "al": {
+      "raw": "VISA REQUIRED",
+      "type": "visa-required",
+      "days": null
+    },
+    "us": {
+      "raw": "VISA REQUIRED",
+      "type": "visa-required",
+      "days": null
+    },
+    "de": {
+      "raw": "VISA REQUIRED",
+      "type": "visa-required",
+      "days": null
+    }
+  },
+  {
+    "destination": "CHAD",
+    "gr": {
+      "raw": "EVISA",
+      "type": "evisa",
+      "days": null
+    },
+    "al": {
+      "raw": "EVISA",
+      "type": "evisa",
+      "days": null
+    },
+    "us": {
+      "raw": "NOT ADMITTED",
+      "type": "not-admitted",
+      "days": null
+    },
+    "de": {
+      "raw": "EVISA",
+      "type": "evisa",
+      "days": null
+    }
+  },
+  {
+    "destination": "CHILE",
+    "gr": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "al": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "us": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "de": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    }
+  },
+  {
+    "destination": "CHINA",
+    "gr": {
+      "raw": "VISA-FREE 30",
+      "type": "visa-free",
+      "days": 30
+    },
+    "al": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "us": {
+      "raw": "VISA REQUIRED",
+      "type": "visa-required",
+      "days": null
+    },
+    "de": {
+      "raw": "VISA-FREE 30",
+      "type": "visa-free",
+      "days": 30
+    }
+  },
+  {
+    "destination": "COLOMBIA",
+    "gr": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "al": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "us": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "de": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    }
+  },
+  {
+    "destination": "COMOROS",
+    "gr": {
+      "raw": "VISA ON ARRIVAL 45",
+      "type": "visa-on-arrival",
+      "days": 45
+    },
+    "al": {
+      "raw": "VISA ON ARRIVAL 45",
+      "type": "visa-on-arrival",
+      "days": 45
+    },
+    "us": {
+      "raw": "VISA ON ARRIVAL 45",
+      "type": "visa-on-arrival",
+      "days": 45
+    },
+    "de": {
+      "raw": "VISA ON ARRIVAL 45",
+      "type": "visa-on-arrival",
+      "days": 45
+    }
+  },
+  {
+    "destination": "CONGO",
+    "gr": {
+      "raw": "VISA REQUIRED",
+      "type": "visa-required",
+      "days": null
+    },
+    "al": {
+      "raw": "VISA REQUIRED",
+      "type": "visa-required",
+      "days": null
+    },
+    "us": {
+      "raw": "VISA REQUIRED",
+      "type": "visa-required",
+      "days": null
+    },
+    "de": {
+      "raw": "VISA REQUIRED",
+      "type": "visa-required",
+      "days": null
+    }
+  },
+  {
+    "destination": "CONGO (DEM. REP.)",
+    "gr": {
+      "raw": "EVISA 7",
+      "type": "evisa",
+      "days": 7
+    },
+    "al": {
+      "raw": "EVISA 7",
+      "type": "evisa",
+      "days": 7
+    },
+    "us": {
+      "raw": "EVISA 7",
+      "type": "evisa",
+      "days": 7
+    },
+    "de": {
+      "raw": "EVISA 7",
+      "type": "evisa",
+      "days": 7
+    }
+  },
+  {
+    "destination": "COSTA RICA",
+    "gr": {
+      "raw": "VISA-FREE 180",
+      "type": "visa-free",
+      "days": 180
+    },
+    "al": {
+      "raw": "VISA REQUIRED",
+      "type": "visa-required",
+      "days": null
+    },
+    "us": {
+      "raw": "VISA-FREE 180",
+      "type": "visa-free",
+      "days": 180
+    },
+    "de": {
+      "raw": "VISA-FREE 180",
+      "type": "visa-free",
+      "days": 180
+    }
+  },
+  {
+    "destination": "COTE D'IVOIRE (IVORY COAST)",
+    "gr": {
+      "raw": "PRE-ENROLLMENT 90",
+      "type": "registration",
+      "days": 90
+    },
+    "al": {
+      "raw": "PRE-ENROLLMENT 90",
+      "type": "registration",
+      "days": 90
+    },
+    "us": {
+      "raw": "PRE-ENROLLMENT 90",
+      "type": "registration",
+      "days": 90
+    },
+    "de": {
+      "raw": "PRE-ENROLLMENT 90",
+      "type": "registration",
+      "days": 90
+    }
+  },
+  {
+    "destination": "CROATIA",
+    "gr": {
+      "raw": "VISA-FREE",
+      "type": "visa-free",
+      "days": null
+    },
+    "al": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "us": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "de": {
+      "raw": "VISA-FREE",
+      "type": "visa-free",
+      "days": null
+    }
+  },
+  {
+    "destination": "CUBA",
+    "gr": {
+      "raw": "EVISA 90",
+      "type": "evisa",
+      "days": 90
+    },
+    "al": {
+      "raw": "EVISA 90",
+      "type": "evisa",
+      "days": 90
+    },
+    "us": {
+      "raw": "EVISA 90",
+      "type": "evisa",
+      "days": 90
+    },
+    "de": {
+      "raw": "EVISA 90",
+      "type": "evisa",
+      "days": 90
+    }
+  },
+  {
+    "destination": "CYPRUS",
+    "gr": {
+      "raw": "VISA-FREE",
+      "type": "visa-free",
+      "days": null
+    },
+    "al": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "us": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "de": {
+      "raw": "VISA-FREE",
+      "type": "visa-free",
+      "days": null
+    }
+  },
+  {
+    "destination": "CZECH REPUBLIC",
+    "gr": {
+      "raw": "VISA-FREE",
+      "type": "visa-free",
+      "days": null
+    },
+    "al": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "us": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "de": {
+      "raw": "VISA-FREE",
+      "type": "visa-free",
+      "days": null
+    }
+  },
+  {
+    "destination": "DENMARK",
+    "gr": {
+      "raw": "VISA-FREE",
+      "type": "visa-free",
+      "days": null
+    },
+    "al": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "us": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "de": {
+      "raw": "VISA-FREE",
+      "type": "visa-free",
+      "days": null
+    }
+  },
+  {
+    "destination": "DJIBOUTI",
+    "gr": {
+      "raw": "EVISA · VISA ON ARRIVAL 90",
+      "type": "visa-on-arrival",
+      "days": 90
+    },
+    "al": {
+      "raw": "EVISA · VISA ON ARRIVAL 90",
+      "type": "visa-on-arrival",
+      "days": 90
+    },
+    "us": {
+      "raw": "EVISA · VISA ON ARRIVAL 90",
+      "type": "visa-on-arrival",
+      "days": 90
+    },
+    "de": {
+      "raw": "EVISA · VISA ON ARRIVAL 90",
+      "type": "visa-on-arrival",
+      "days": 90
+    }
+  },
+  {
+    "destination": "DOMINICA",
+    "gr": {
+      "raw": "VISA-FREE 180",
+      "type": "visa-free",
+      "days": 180
+    },
+    "al": {
+      "raw": "VISA-FREE 21",
+      "type": "visa-free",
+      "days": 21
+    },
+    "us": {
+      "raw": "VISA-FREE 180",
+      "type": "visa-free",
+      "days": 180
+    },
+    "de": {
+      "raw": "VISA-FREE 180",
+      "type": "visa-free",
+      "days": 180
+    }
+  },
+  {
+    "destination": "DOMINICAN REPUBLIC",
+    "gr": {
+      "raw": "E-TICKET 30",
+      "type": "registration",
+      "days": 30
+    },
+    "al": {
+      "raw": "E-TICKET 30",
+      "type": "registration",
+      "days": 30
+    },
+    "us": {
+      "raw": "E-TICKET 30",
+      "type": "registration",
+      "days": 30
+    },
+    "de": {
+      "raw": "E-TICKET 30",
+      "type": "registration",
+      "days": 30
+    }
+  },
+  {
+    "destination": "ECUADOR",
+    "gr": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "al": {
+      "raw": "EVISA",
+      "type": "evisa",
+      "days": null
+    },
+    "us": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "de": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    }
+  },
+  {
+    "destination": "EGYPT",
+    "gr": {
+      "raw": "EVISA · VISA ON ARRIVAL 30",
+      "type": "visa-on-arrival",
+      "days": 30
+    },
+    "al": {
+      "raw": "EVISA · VISA ON ARRIVAL 30",
+      "type": "visa-on-arrival",
+      "days": 30
+    },
+    "us": {
+      "raw": "EVISA · VISA ON ARRIVAL 30",
+      "type": "visa-on-arrival",
+      "days": 30
+    },
+    "de": {
+      "raw": "EVISA · VISA ON ARRIVAL 30",
+      "type": "visa-on-arrival",
+      "days": 30
+    }
+  },
+  {
+    "destination": "EL SALVADOR",
+    "gr": {
+      "raw": "VISA-FREE 180",
+      "type": "visa-free",
+      "days": 180
+    },
+    "al": {
+      "raw": "VISA-FREE 180",
+      "type": "visa-free",
+      "days": 180
+    },
+    "us": {
+      "raw": "VISA-FREE 180",
+      "type": "visa-free",
+      "days": 180
+    },
+    "de": {
+      "raw": "VISA-FREE 180",
+      "type": "visa-free",
+      "days": 180
+    }
+  },
+  {
+    "destination": "EQUATORIAL GUINEA",
+    "gr": {
+      "raw": "EVISA",
+      "type": "evisa",
+      "days": null
+    },
+    "al": {
+      "raw": "EVISA",
+      "type": "evisa",
+      "days": null
+    },
+    "us": {
+      "raw": "EVISA",
+      "type": "evisa",
+      "days": null
+    },
+    "de": {
+      "raw": "EVISA",
+      "type": "evisa",
+      "days": null
+    }
+  },
+  {
+    "destination": "ERITREA",
+    "gr": {
+      "raw": "VISA REQUIRED",
+      "type": "visa-required",
+      "days": null
+    },
+    "al": {
+      "raw": "VISA REQUIRED",
+      "type": "visa-required",
+      "days": null
+    },
+    "us": {
+      "raw": "VISA REQUIRED",
+      "type": "visa-required",
+      "days": null
+    },
+    "de": {
+      "raw": "VISA REQUIRED",
+      "type": "visa-required",
+      "days": null
+    }
+  },
+  {
+    "destination": "ESTONIA",
+    "gr": {
+      "raw": "VISA-FREE",
+      "type": "visa-free",
+      "days": null
+    },
+    "al": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "us": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "de": {
+      "raw": "VISA-FREE",
+      "type": "visa-free",
+      "days": null
+    }
+  },
+  {
+    "destination": "ESWATINI",
+    "gr": {
+      "raw": "VISA-FREE 30",
+      "type": "visa-free",
+      "days": 30
+    },
+    "al": {
+      "raw": "VISA REQUIRED",
+      "type": "visa-required",
+      "days": null
+    },
+    "us": {
+      "raw": "VISA-FREE 30",
+      "type": "visa-free",
+      "days": 30
+    },
+    "de": {
+      "raw": "VISA-FREE 30",
+      "type": "visa-free",
+      "days": 30
+    }
+  },
+  {
+    "destination": "ETHIOPIA",
+    "gr": {
+      "raw": "EVISA · VISA ON ARRIVAL 90",
+      "type": "visa-on-arrival",
+      "days": 90
+    },
+    "al": {
+      "raw": "EVISA 90",
+      "type": "evisa",
+      "days": 90
+    },
+    "us": {
+      "raw": "EVISA · VISA ON ARRIVAL 90",
+      "type": "visa-on-arrival",
+      "days": 90
+    },
+    "de": {
+      "raw": "EVISA · VISA ON ARRIVAL 90",
+      "type": "visa-on-arrival",
+      "days": 90
+    }
+  },
+  {
+    "destination": "FIJI",
+    "gr": {
+      "raw": "VISA-FREE 120",
+      "type": "visa-free",
+      "days": 120
+    },
+    "al": {
+      "raw": "VISA REQUIRED",
+      "type": "visa-required",
+      "days": null
+    },
+    "us": {
+      "raw": "VISA-FREE 120",
+      "type": "visa-free",
+      "days": 120
+    },
+    "de": {
+      "raw": "VISA-FREE 120",
+      "type": "visa-free",
+      "days": 120
+    }
+  },
+  {
+    "destination": "FINLAND",
+    "gr": {
+      "raw": "VISA-FREE",
+      "type": "visa-free",
+      "days": null
+    },
+    "al": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "us": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "de": {
+      "raw": "VISA-FREE",
+      "type": "visa-free",
+      "days": null
+    }
+  },
+  {
+    "destination": "FRANCE",
+    "gr": {
+      "raw": "VISA-FREE",
+      "type": "visa-free",
+      "days": null
+    },
+    "al": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "us": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "de": {
+      "raw": "VISA-FREE",
+      "type": "visa-free",
+      "days": null
+    }
+  },
+  {
+    "destination": "GABON",
+    "gr": {
+      "raw": "EVISA 90",
+      "type": "evisa",
+      "days": 90
+    },
+    "al": {
+      "raw": "EVISA 90",
+      "type": "evisa",
+      "days": 90
+    },
+    "us": {
+      "raw": "NOT ADMITTED",
+      "type": "not-admitted",
+      "days": null
+    },
+    "de": {
+      "raw": "EVISA 90",
+      "type": "evisa",
+      "days": 90
+    }
+  },
+  {
+    "destination": "GAMBIA",
+    "gr": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "al": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "us": {
+      "raw": "VISA ON ARRIVAL",
+      "type": "visa-on-arrival",
+      "days": null
+    },
+    "de": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    }
+  },
+  {
+    "destination": "GEORGIA",
+    "gr": {
+      "raw": "VISA-FREE 360",
+      "type": "visa-free",
+      "days": 360
+    },
+    "al": {
+      "raw": "VISA-FREE 360",
+      "type": "visa-free",
+      "days": 360
+    },
+    "us": {
+      "raw": "VISA-FREE 360",
+      "type": "visa-free",
+      "days": 360
+    },
+    "de": {
+      "raw": "VISA-FREE 360",
+      "type": "visa-free",
+      "days": 360
+    }
+  },
+  {
+    "destination": "GERMANY",
+    "gr": {
+      "raw": "VISA-FREE",
+      "type": "visa-free",
+      "days": null
+    },
+    "al": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "us": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "de": {
+      "raw": "HOME COUNTRY",
+      "type": "home",
+      "days": null
+    }
+  },
+  {
+    "destination": "GHANA",
+    "gr": {
+      "raw": "EVISA",
+      "type": "evisa",
+      "days": null
+    },
+    "al": {
+      "raw": "EVISA",
+      "type": "evisa",
+      "days": null
+    },
+    "us": {
+      "raw": "EVISA 90",
+      "type": "evisa",
+      "days": 90
+    },
+    "de": {
+      "raw": "EVISA",
+      "type": "evisa",
+      "days": null
+    }
+  },
+  {
+    "destination": "GREECE",
+    "gr": {
+      "raw": "HOME COUNTRY",
+      "type": "home",
+      "days": null
+    },
+    "al": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "us": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "de": {
+      "raw": "VISA-FREE",
+      "type": "visa-free",
+      "days": null
+    }
+  },
+  {
+    "destination": "GRENADA",
+    "gr": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "al": {
+      "raw": "VISA REQUIRED",
+      "type": "visa-required",
+      "days": null
+    },
+    "us": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "de": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    }
+  },
+  {
+    "destination": "GUATEMALA",
+    "gr": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "al": {
+      "raw": "VISA REQUIRED",
+      "type": "visa-required",
+      "days": null
+    },
+    "us": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "de": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    }
+  },
+  {
+    "destination": "GUINEA",
+    "gr": {
+      "raw": "EVISA 90",
+      "type": "evisa",
+      "days": 90
+    },
+    "al": {
+      "raw": "EVISA 90",
+      "type": "evisa",
+      "days": 90
+    },
+    "us": {
+      "raw": "EVISA 90",
+      "type": "evisa",
+      "days": 90
+    },
+    "de": {
+      "raw": "EVISA 90",
+      "type": "evisa",
+      "days": 90
+    }
+  },
+  {
+    "destination": "GUINEA-BISSAU",
+    "gr": {
+      "raw": "VISA ON ARRIVAL 90",
+      "type": "visa-on-arrival",
+      "days": 90
+    },
+    "al": {
+      "raw": "VISA ON ARRIVAL 90",
+      "type": "visa-on-arrival",
+      "days": 90
+    },
+    "us": {
+      "raw": "VISA ON ARRIVAL 90",
+      "type": "visa-on-arrival",
+      "days": 90
+    },
+    "de": {
+      "raw": "VISA ON ARRIVAL 90",
+      "type": "visa-on-arrival",
+      "days": 90
+    }
+  },
+  {
+    "destination": "GUYANA",
+    "gr": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "al": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "us": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "de": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    }
+  },
+  {
+    "destination": "HAITI",
+    "gr": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "al": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "us": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "de": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    }
+  },
+  {
+    "destination": "HONDURAS",
+    "gr": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "al": {
+      "raw": "VISA REQUIRED",
+      "type": "visa-required",
+      "days": null
+    },
+    "us": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "de": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    }
+  },
+  {
+    "destination": "HONG KONG",
+    "gr": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "al": {
+      "raw": "VISA-FREE 14",
+      "type": "visa-free",
+      "days": 14
+    },
+    "us": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "de": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    }
+  },
+  {
+    "destination": "HUNGARY",
+    "gr": {
+      "raw": "VISA-FREE",
+      "type": "visa-free",
+      "days": null
+    },
+    "al": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "us": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "de": {
+      "raw": "VISA-FREE",
+      "type": "visa-free",
+      "days": null
+    }
+  },
+  {
+    "destination": "ICELAND",
+    "gr": {
+      "raw": "VISA-FREE",
+      "type": "visa-free",
+      "days": null
+    },
+    "al": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "us": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "de": {
+      "raw": "VISA-FREE",
+      "type": "visa-free",
+      "days": null
+    }
+  },
+  {
+    "destination": "INDIA",
+    "gr": {
+      "raw": "EVISA 30",
+      "type": "evisa",
+      "days": 30
+    },
+    "al": {
+      "raw": "EVISA 30",
+      "type": "evisa",
+      "days": 30
+    },
+    "us": {
+      "raw": "EVISA 30",
+      "type": "evisa",
+      "days": 30
+    },
+    "de": {
+      "raw": "EVISA 30",
+      "type": "evisa",
+      "days": 30
+    }
+  },
+  {
+    "destination": "INDONESIA",
+    "gr": {
+      "raw": "EVISA · VISA ON ARRIVAL 30",
+      "type": "visa-on-arrival",
+      "days": 30
+    },
+    "al": {
+      "raw": "EVISA · VISA ON ARRIVAL 30",
+      "type": "visa-on-arrival",
+      "days": 30
+    },
+    "us": {
+      "raw": "EVISA · VISA ON ARRIVAL 30",
+      "type": "visa-on-arrival",
+      "days": 30
+    },
+    "de": {
+      "raw": "EVISA · VISA ON ARRIVAL 30",
+      "type": "visa-on-arrival",
+      "days": 30
+    }
+  },
+  {
+    "destination": "IRAN",
+    "gr": {
+      "raw": "EVISA · VISA ON ARRIVAL 30",
+      "type": "visa-on-arrival",
+      "days": 30
+    },
+    "al": {
+      "raw": "EVISA · VISA ON ARRIVAL 30",
+      "type": "visa-on-arrival",
+      "days": 30
+    },
+    "us": {
+      "raw": "VISA REQUIRED",
+      "type": "visa-required",
+      "days": null
+    },
+    "de": {
+      "raw": "EVISA · VISA ON ARRIVAL 30",
+      "type": "visa-on-arrival",
+      "days": 30
+    }
+  },
+  {
+    "destination": "IRAQ",
+    "gr": {
+      "raw": "EVISA",
+      "type": "evisa",
+      "days": null
+    },
+    "al": {
+      "raw": "EVISA",
+      "type": "evisa",
+      "days": null
+    },
+    "us": {
+      "raw": "EVISA",
+      "type": "evisa",
+      "days": null
+    },
+    "de": {
+      "raw": "EVISA",
+      "type": "evisa",
+      "days": null
+    }
+  },
+  {
+    "destination": "IRELAND",
+    "gr": {
+      "raw": "VISA-FREE",
+      "type": "visa-free",
+      "days": null
+    },
+    "al": {
+      "raw": "VISA REQUIRED",
+      "type": "visa-required",
+      "days": null
+    },
+    "us": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "de": {
+      "raw": "VISA-FREE",
+      "type": "visa-free",
+      "days": null
+    }
+  },
+  {
+    "destination": "ISRAEL",
+    "gr": {
+      "raw": "ETA 90",
+      "type": "eta",
+      "days": 90
+    },
+    "al": {
+      "raw": "ETA 90",
+      "type": "eta",
+      "days": 90
+    },
+    "us": {
+      "raw": "ETA 90",
+      "type": "eta",
+      "days": 90
+    },
+    "de": {
+      "raw": "ETA 90",
+      "type": "eta",
+      "days": 90
+    }
+  },
+  {
+    "destination": "ITALY",
+    "gr": {
+      "raw": "VISA-FREE",
+      "type": "visa-free",
+      "days": null
+    },
+    "al": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "us": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "de": {
+      "raw": "VISA-FREE",
+      "type": "visa-free",
+      "days": null
+    }
+  },
+  {
+    "destination": "JAMAICA",
+    "gr": {
+      "raw": "VISA-FREE 30",
+      "type": "visa-free",
+      "days": 30
+    },
+    "al": {
+      "raw": "VISA ON ARRIVAL 30",
+      "type": "visa-on-arrival",
+      "days": 30
+    },
+    "us": {
+      "raw": "VISA-FREE 180",
+      "type": "visa-free",
+      "days": 180
+    },
+    "de": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    }
+  },
+  {
+    "destination": "JAPAN",
+    "gr": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "al": {
+      "raw": "VISA REQUIRED",
+      "type": "visa-required",
+      "days": null
+    },
+    "us": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "de": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    }
+  },
+  {
+    "destination": "JORDAN",
+    "gr": {
+      "raw": "EVISA · VISA ON ARRIVAL 30",
+      "type": "visa-on-arrival",
+      "days": 30
+    },
+    "al": {
+      "raw": "EVISA · VISA ON ARRIVAL 30",
+      "type": "visa-on-arrival",
+      "days": 30
+    },
+    "us": {
+      "raw": "EVISA · VISA ON ARRIVAL 30",
+      "type": "visa-on-arrival",
+      "days": 30
+    },
+    "de": {
+      "raw": "EVISA · VISA ON ARRIVAL 30",
+      "type": "visa-on-arrival",
+      "days": 30
+    }
+  },
+  {
+    "destination": "KAZAKHSTAN",
+    "gr": {
+      "raw": "VISA-FREE 30",
+      "type": "visa-free",
+      "days": 30
+    },
+    "al": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "us": {
+      "raw": "VISA-FREE 30",
+      "type": "visa-free",
+      "days": 30
+    },
+    "de": {
+      "raw": "VISA-FREE 30",
+      "type": "visa-free",
+      "days": 30
+    }
+  },
+  {
+    "destination": "KENYA",
+    "gr": {
+      "raw": "ETA 90",
+      "type": "eta",
+      "days": 90
+    },
+    "al": {
+      "raw": "ETA 90",
+      "type": "eta",
+      "days": 90
+    },
+    "us": {
+      "raw": "ETA 90",
+      "type": "eta",
+      "days": 90
+    },
+    "de": {
+      "raw": "ETA 90",
+      "type": "eta",
+      "days": 90
+    }
+  },
+  {
+    "destination": "KIRIBATI",
+    "gr": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "al": {
+      "raw": "VISA REQUIRED",
+      "type": "visa-required",
+      "days": null
+    },
+    "us": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "de": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    }
+  },
+  {
+    "destination": "KOSOVO",
+    "gr": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "al": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "us": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "de": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    }
+  },
+  {
+    "destination": "KUWAIT",
+    "gr": {
+      "raw": "EVISA · VISA ON ARRIVAL 90",
+      "type": "visa-on-arrival",
+      "days": 90
+    },
+    "al": {
+      "raw": "VISA REQUIRED",
+      "type": "visa-required",
+      "days": null
+    },
+    "us": {
+      "raw": "EVISA · VISA ON ARRIVAL 90",
+      "type": "visa-on-arrival",
+      "days": 90
+    },
+    "de": {
+      "raw": "EVISA · VISA ON ARRIVAL 90",
+      "type": "visa-on-arrival",
+      "days": 90
+    }
+  },
+  {
+    "destination": "KYRGYZSTAN",
+    "gr": {
+      "raw": "VISA-FREE 30",
+      "type": "visa-free",
+      "days": 30
+    },
+    "al": {
+      "raw": "VISA-FREE 60",
+      "type": "visa-free",
+      "days": 60
+    },
+    "us": {
+      "raw": "VISA-FREE 60",
+      "type": "visa-free",
+      "days": 60
+    },
+    "de": {
+      "raw": "VISA-FREE 30",
+      "type": "visa-free",
+      "days": 30
+    }
+  },
+  {
+    "destination": "LAOS",
+    "gr": {
+      "raw": "EVISA · VISA ON ARRIVAL 30",
+      "type": "visa-on-arrival",
+      "days": 30
+    },
+    "al": {
+      "raw": "EVISA · VISA ON ARRIVAL 30",
+      "type": "visa-on-arrival",
+      "days": 30
+    },
+    "us": {
+      "raw": "EVISA · VISA ON ARRIVAL 30",
+      "type": "visa-on-arrival",
+      "days": 30
+    },
+    "de": {
+      "raw": "EVISA · VISA ON ARRIVAL 30",
+      "type": "visa-on-arrival",
+      "days": 30
+    }
+  },
+  {
+    "destination": "LATVIA",
+    "gr": {
+      "raw": "VISA-FREE",
+      "type": "visa-free",
+      "days": null
+    },
+    "al": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "us": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "de": {
+      "raw": "VISA-FREE",
+      "type": "visa-free",
+      "days": null
+    }
+  },
+  {
+    "destination": "LEBANON",
+    "gr": {
+      "raw": "VISA ON ARRIVAL 30",
+      "type": "visa-on-arrival",
+      "days": 30
+    },
+    "al": {
+      "raw": "VISA REQUIRED",
+      "type": "visa-required",
+      "days": null
+    },
+    "us": {
+      "raw": "VISA ON ARRIVAL 30",
+      "type": "visa-on-arrival",
+      "days": 30
+    },
+    "de": {
+      "raw": "VISA ON ARRIVAL 30",
+      "type": "visa-on-arrival",
+      "days": 30
+    }
+  },
+  {
+    "destination": "LESOTHO",
+    "gr": {
+      "raw": "VISA-FREE 14",
+      "type": "visa-free",
+      "days": 14
+    },
+    "al": {
+      "raw": "VISA REQUIRED",
+      "type": "visa-required",
+      "days": null
+    },
+    "us": {
+      "raw": "VISA-FREE",
+      "type": "visa-free",
+      "days": null
+    },
+    "de": {
+      "raw": "VISA-FREE 14",
+      "type": "visa-free",
+      "days": 14
+    }
+  },
+  {
+    "destination": "LIBERIA",
+    "gr": {
+      "raw": "EVISA",
+      "type": "evisa",
+      "days": null
+    },
+    "al": {
+      "raw": "EVISA",
+      "type": "evisa",
+      "days": null
+    },
+    "us": {
+      "raw": "VISA REQUIRED",
+      "type": "visa-required",
+      "days": null
+    },
+    "de": {
+      "raw": "VISA REQUIRED",
+      "type": "visa-required",
+      "days": null
+    }
+  },
+  {
+    "destination": "LIBYA",
+    "gr": {
+      "raw": "EVISA",
+      "type": "evisa",
+      "days": null
+    },
+    "al": {
+      "raw": "EVISA",
+      "type": "evisa",
+      "days": null
+    },
+    "us": {
+      "raw": "EVISA",
+      "type": "evisa",
+      "days": null
+    },
+    "de": {
+      "raw": "EVISA",
+      "type": "evisa",
+      "days": null
+    }
+  },
+  {
+    "destination": "LIECHTENSTEIN",
+    "gr": {
+      "raw": "VISA-FREE",
+      "type": "visa-free",
+      "days": null
+    },
+    "al": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "us": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "de": {
+      "raw": "VISA-FREE",
+      "type": "visa-free",
+      "days": null
+    }
+  },
+  {
+    "destination": "LITHUANIA",
+    "gr": {
+      "raw": "VISA-FREE",
+      "type": "visa-free",
+      "days": null
+    },
+    "al": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "us": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "de": {
+      "raw": "VISA-FREE",
+      "type": "visa-free",
+      "days": null
+    }
+  },
+  {
+    "destination": "LUXEMBOURG",
+    "gr": {
+      "raw": "VISA-FREE",
+      "type": "visa-free",
+      "days": null
+    },
+    "al": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "us": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "de": {
+      "raw": "VISA-FREE",
+      "type": "visa-free",
+      "days": null
+    }
+  },
+  {
+    "destination": "MACAO",
+    "gr": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "al": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "us": {
+      "raw": "VISA-FREE 30",
+      "type": "visa-free",
+      "days": 30
+    },
+    "de": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    }
+  },
+  {
+    "destination": "MADAGASCAR",
+    "gr": {
+      "raw": "EVISA · VISA ON ARRIVAL 90",
+      "type": "visa-on-arrival",
+      "days": 90
+    },
+    "al": {
+      "raw": "EVISA · VISA ON ARRIVAL 90",
+      "type": "visa-on-arrival",
+      "days": 90
+    },
+    "us": {
+      "raw": "EVISA · VISA ON ARRIVAL 90",
+      "type": "visa-on-arrival",
+      "days": 90
+    },
+    "de": {
+      "raw": "EVISA · VISA ON ARRIVAL 90",
+      "type": "visa-on-arrival",
+      "days": 90
+    }
+  },
+  {
+    "destination": "MALAWI",
+    "gr": {
+      "raw": "EVISA · VISA ON ARRIVAL 30",
+      "type": "visa-on-arrival",
+      "days": 30
+    },
+    "al": {
+      "raw": "EVISA · VISA ON ARRIVAL 30",
+      "type": "visa-on-arrival",
+      "days": 30
+    },
+    "us": {
+      "raw": "EVISA · VISA ON ARRIVAL 30",
+      "type": "visa-on-arrival",
+      "days": 30
+    },
+    "de": {
+      "raw": "EVISA · VISA ON ARRIVAL 30",
+      "type": "visa-on-arrival",
+      "days": 30
+    }
+  },
+  {
+    "destination": "MALAYSIA",
+    "gr": {
+      "raw": "ARRIVAL CARD 90",
+      "type": "registration",
+      "days": 90
+    },
+    "al": {
+      "raw": "ARRIVAL CARD 90",
+      "type": "registration",
+      "days": 90
+    },
+    "us": {
+      "raw": "DIGITAL ARRIVAL CARD 90",
+      "type": "registration",
+      "days": 90
+    },
+    "de": {
+      "raw": "DIGITAL ARRIVAL CARD 90",
+      "type": "registration",
+      "days": 90
+    }
+  },
+  {
+    "destination": "MALDIVES",
+    "gr": {
+      "raw": "VISA ON ARRIVAL 30",
+      "type": "visa-on-arrival",
+      "days": 30
+    },
+    "al": {
+      "raw": "VISA ON ARRIVAL 30",
+      "type": "visa-on-arrival",
+      "days": 30
+    },
+    "us": {
+      "raw": "VISA ON ARRIVAL 30",
+      "type": "visa-on-arrival",
+      "days": 30
+    },
+    "de": {
+      "raw": "VISA ON ARRIVAL 30",
+      "type": "visa-on-arrival",
+      "days": 30
+    }
+  },
+  {
+    "destination": "MALI",
+    "gr": {
+      "raw": "VISA REQUIRED",
+      "type": "visa-required",
+      "days": null
+    },
+    "al": {
+      "raw": "VISA REQUIRED",
+      "type": "visa-required",
+      "days": null
+    },
+    "us": {
+      "raw": "VISA REQUIRED",
+      "type": "visa-required",
+      "days": null
+    },
+    "de": {
+      "raw": "VISA REQUIRED",
+      "type": "visa-required",
+      "days": null
+    }
+  },
+  {
+    "destination": "MALTA",
+    "gr": {
+      "raw": "VISA-FREE",
+      "type": "visa-free",
+      "days": null
+    },
+    "al": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "us": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "de": {
+      "raw": "VISA-FREE",
+      "type": "visa-free",
+      "days": null
+    }
+  },
+  {
+    "destination": "MARSHALL ISLANDS",
+    "gr": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "al": {
+      "raw": "VISA REQUIRED",
+      "type": "visa-required",
+      "days": null
+    },
+    "us": {
+      "raw": "VISA-FREE",
+      "type": "visa-free",
+      "days": null
+    },
+    "de": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    }
+  },
+  {
+    "destination": "MAURITANIA",
+    "gr": {
+      "raw": "EVISA 90",
+      "type": "evisa",
+      "days": 90
+    },
+    "al": {
+      "raw": "EVISA 90",
+      "type": "evisa",
+      "days": 90
+    },
+    "us": {
+      "raw": "EVISA 90",
+      "type": "evisa",
+      "days": 90
+    },
+    "de": {
+      "raw": "EVISA 90",
+      "type": "evisa",
+      "days": 90
+    }
+  },
+  {
+    "destination": "MAURITIUS",
+    "gr": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "al": {
+      "raw": "VISA ON ARRIVAL 60",
+      "type": "visa-on-arrival",
+      "days": 60
+    },
+    "us": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "de": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    }
+  },
+  {
+    "destination": "MEXICO",
+    "gr": {
+      "raw": "VISA-FREE 180",
+      "type": "visa-free",
+      "days": 180
+    },
+    "al": {
+      "raw": "VISA REQUIRED",
+      "type": "visa-required",
+      "days": null
+    },
+    "us": {
+      "raw": "VISA-FREE 180",
+      "type": "visa-free",
+      "days": 180
+    },
+    "de": {
+      "raw": "VISA-FREE 180",
+      "type": "visa-free",
+      "days": 180
+    }
+  },
+  {
+    "destination": "MICRONESIA",
+    "gr": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "al": {
+      "raw": "VISA-FREE 30",
+      "type": "visa-free",
+      "days": 30
+    },
+    "us": {
+      "raw": "VISA-FREE 30",
+      "type": "visa-free",
+      "days": 30
+    },
+    "de": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    }
+  },
+  {
+    "destination": "MOLDOVA",
+    "gr": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "al": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "us": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "de": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    }
+  },
+  {
+    "destination": "MONACO",
+    "gr": {
+      "raw": "VISA-FREE",
+      "type": "visa-free",
+      "days": null
+    },
+    "al": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "us": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "de": {
+      "raw": "VISA-FREE",
+      "type": "visa-free",
+      "days": null
+    }
+  },
+  {
+    "destination": "MONGOLIA",
+    "gr": {
+      "raw": "VISA-FREE 30",
+      "type": "visa-free",
+      "days": 30
+    },
+    "al": {
+      "raw": "EVISA",
+      "type": "evisa",
+      "days": null
+    },
+    "us": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "de": {
+      "raw": "VISA-FREE 30",
+      "type": "visa-free",
+      "days": 30
+    }
+  },
+  {
+    "destination": "MONTENEGRO",
+    "gr": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "al": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "us": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "de": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    }
+  },
+  {
+    "destination": "MOROCCO",
+    "gr": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "al": {
+      "raw": "VISA REQUIRED",
+      "type": "visa-required",
+      "days": null
+    },
+    "us": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "de": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    }
+  },
+  {
+    "destination": "MOZAMBIQUE",
+    "gr": {
+      "raw": "EVISA · VISA ON ARRIVAL 30",
+      "type": "visa-on-arrival",
+      "days": 30
+    },
+    "al": {
+      "raw": "EVISA · VISA ON ARRIVAL 30",
+      "type": "visa-on-arrival",
+      "days": 30
+    },
+    "us": {
+      "raw": "ETA 30",
+      "type": "eta",
+      "days": 30
+    },
+    "de": {
+      "raw": "ETA 30",
+      "type": "eta",
+      "days": 30
+    }
+  },
+  {
+    "destination": "MYANMAR",
+    "gr": {
+      "raw": "EVISA",
+      "type": "evisa",
+      "days": null
+    },
+    "al": {
+      "raw": "EVISA",
+      "type": "evisa",
+      "days": null
+    },
+    "us": {
+      "raw": "EVISA",
+      "type": "evisa",
+      "days": null
+    },
+    "de": {
+      "raw": "EVISA",
+      "type": "evisa",
+      "days": null
+    }
+  },
+  {
+    "destination": "NAMIBIA",
+    "gr": {
+      "raw": "EVISA · VISA ON ARRIVAL 90",
+      "type": "visa-on-arrival",
+      "days": 90
+    },
+    "al": {
+      "raw": "EVISA",
+      "type": "evisa",
+      "days": null
+    },
+    "us": {
+      "raw": "EVISA · VISA ON ARRIVAL 90",
+      "type": "visa-on-arrival",
+      "days": 90
+    },
+    "de": {
+      "raw": "EVISA · VISA ON ARRIVAL 90",
+      "type": "visa-on-arrival",
+      "days": 90
+    }
+  },
+  {
+    "destination": "NAURU",
+    "gr": {
+      "raw": "VISA REQUIRED",
+      "type": "visa-required",
+      "days": null
+    },
+    "al": {
+      "raw": "VISA REQUIRED",
+      "type": "visa-required",
+      "days": null
+    },
+    "us": {
+      "raw": "VISA REQUIRED",
+      "type": "visa-required",
+      "days": null
+    },
+    "de": {
+      "raw": "VISA REQUIRED",
+      "type": "visa-required",
+      "days": null
+    }
+  },
+  {
+    "destination": "NEPAL",
+    "gr": {
+      "raw": "EVISA · VISA ON ARRIVAL 150",
+      "type": "visa-on-arrival",
+      "days": 150
+    },
+    "al": {
+      "raw": "EVISA · VISA ON ARRIVAL 150",
+      "type": "visa-on-arrival",
+      "days": 150
+    },
+    "us": {
+      "raw": "EVISA · VISA ON ARRIVAL 150",
+      "type": "visa-on-arrival",
+      "days": 150
+    },
+    "de": {
+      "raw": "EVISA · VISA ON ARRIVAL 150",
+      "type": "visa-on-arrival",
+      "days": 150
+    }
+  },
+  {
+    "destination": "NETHERLANDS",
+    "gr": {
+      "raw": "VISA-FREE",
+      "type": "visa-free",
+      "days": null
+    },
+    "al": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "us": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "de": {
+      "raw": "VISA-FREE",
+      "type": "visa-free",
+      "days": null
+    }
+  },
+  {
+    "destination": "NEW ZEALAND",
+    "gr": {
+      "raw": "ETA 90",
+      "type": "eta",
+      "days": 90
+    },
+    "al": {
+      "raw": "VISA REQUIRED",
+      "type": "visa-required",
+      "days": null
+    },
+    "us": {
+      "raw": "ETA 90",
+      "type": "eta",
+      "days": 90
+    },
+    "de": {
+      "raw": "ETA 90",
+      "type": "eta",
+      "days": 90
+    }
+  },
+  {
+    "destination": "NICARAGUA",
+    "gr": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "al": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "us": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "de": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    }
+  },
+  {
+    "destination": "NIGER",
+    "gr": {
+      "raw": "VISA REQUIRED",
+      "type": "visa-required",
+      "days": null
+    },
+    "al": {
+      "raw": "VISA REQUIRED",
+      "type": "visa-required",
+      "days": null
+    },
+    "us": {
+      "raw": "VISA REQUIRED",
+      "type": "visa-required",
+      "days": null
+    },
+    "de": {
+      "raw": "VISA REQUIRED",
+      "type": "visa-required",
+      "days": null
+    }
+  },
+  {
+    "destination": "NIGERIA",
+    "gr": {
+      "raw": "EVISA 90",
+      "type": "evisa",
+      "days": 90
+    },
+    "al": {
+      "raw": "EVISA 90",
+      "type": "evisa",
+      "days": 90
+    },
+    "us": {
+      "raw": "EVISA 90",
+      "type": "evisa",
+      "days": 90
+    },
+    "de": {
+      "raw": "EVISA 90",
+      "type": "evisa",
+      "days": 90
+    }
+  },
+  {
+    "destination": "NORTH KOREA",
+    "gr": {
+      "raw": "VISA REQUIRED",
+      "type": "visa-required",
+      "days": null
+    },
+    "al": {
+      "raw": "VISA REQUIRED",
+      "type": "visa-required",
+      "days": null
+    },
+    "us": {
+      "raw": "VISA REQUIRED",
+      "type": "visa-required",
+      "days": null
+    },
+    "de": {
+      "raw": "VISA REQUIRED",
+      "type": "visa-required",
+      "days": null
+    }
+  },
+  {
+    "destination": "NORTH MACEDONIA",
+    "gr": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "al": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "us": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "de": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    }
+  },
+  {
+    "destination": "NORWAY",
+    "gr": {
+      "raw": "VISA-FREE",
+      "type": "visa-free",
+      "days": null
+    },
+    "al": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "us": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "de": {
+      "raw": "VISA-FREE",
+      "type": "visa-free",
+      "days": null
+    }
+  },
+  {
+    "destination": "OMAN",
+    "gr": {
+      "raw": "EVISA · VISA ON ARRIVAL 30",
+      "type": "visa-on-arrival",
+      "days": 30
+    },
+    "al": {
+      "raw": "EVISA",
+      "type": "evisa",
+      "days": null
+    },
+    "us": {
+      "raw": "EVISA · VISA ON ARRIVAL 30",
+      "type": "visa-on-arrival",
+      "days": 30
+    },
+    "de": {
+      "raw": "EVISA · VISA ON ARRIVAL 30",
+      "type": "visa-on-arrival",
+      "days": 30
+    }
+  },
+  {
+    "destination": "PAKISTAN",
+    "gr": {
+      "raw": "EVISA",
+      "type": "evisa",
+      "days": null
+    },
+    "al": {
+      "raw": "EVISA",
+      "type": "evisa",
+      "days": null
+    },
+    "us": {
+      "raw": "EVISA",
+      "type": "evisa",
+      "days": null
+    },
+    "de": {
+      "raw": "EVISA",
+      "type": "evisa",
+      "days": null
+    }
+  },
+  {
+    "destination": "PALAU",
+    "gr": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "al": {
+      "raw": "VISA ON ARRIVAL 30",
+      "type": "visa-on-arrival",
+      "days": 30
+    },
+    "us": {
+      "raw": "VISA-FREE 360",
+      "type": "visa-free",
+      "days": 360
+    },
+    "de": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    }
+  },
+  {
+    "destination": "PALESTINIAN TERRITORIES",
+    "gr": {
+      "raw": "VISA-FREE",
+      "type": "visa-free",
+      "days": null
+    },
+    "al": {
+      "raw": "VISA-FREE",
+      "type": "visa-free",
+      "days": null
+    },
+    "us": {
+      "raw": "VISA-FREE",
+      "type": "visa-free",
+      "days": null
+    },
+    "de": {
+      "raw": "VISA-FREE",
+      "type": "visa-free",
+      "days": null
+    }
+  },
+  {
+    "destination": "PANAMA",
+    "gr": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "al": {
+      "raw": "VISA REQUIRED",
+      "type": "visa-required",
+      "days": null
+    },
+    "us": {
+      "raw": "VISA-FREE 180",
+      "type": "visa-free",
+      "days": 180
+    },
+    "de": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    }
+  },
+  {
+    "destination": "PAPUA NEW GUINEA",
+    "gr": {
+      "raw": "EVISITORS 60",
+      "type": "eta",
+      "days": 60
+    },
+    "al": {
+      "raw": "EVISA",
+      "type": "evisa",
+      "days": null
+    },
+    "us": {
+      "raw": "EVISITORS 60",
+      "type": "eta",
+      "days": 60
+    },
+    "de": {
+      "raw": "EVISITORS 60",
+      "type": "eta",
+      "days": 60
+    }
+  },
+  {
+    "destination": "PARAGUAY",
+    "gr": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "al": {
+      "raw": "VISA REQUIRED",
+      "type": "visa-required",
+      "days": null
+    },
+    "us": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "de": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    }
+  },
+  {
+    "destination": "PERU",
+    "gr": {
+      "raw": "VISA-FREE 180",
+      "type": "visa-free",
+      "days": 180
+    },
+    "al": {
+      "raw": "VISA REQUIRED",
+      "type": "visa-required",
+      "days": null
+    },
+    "us": {
+      "raw": "VISA-FREE 180",
+      "type": "visa-free",
+      "days": 180
+    },
+    "de": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    }
+  },
+  {
+    "destination": "PHILIPPINES",
+    "gr": {
+      "raw": "VISA-FREE 30",
+      "type": "visa-free",
+      "days": 30
+    },
+    "al": {
+      "raw": "VISA REQUIRED",
+      "type": "visa-required",
+      "days": null
+    },
+    "us": {
+      "raw": "VISA-FREE 30",
+      "type": "visa-free",
+      "days": 30
+    },
+    "de": {
+      "raw": "VISA-FREE 30",
+      "type": "visa-free",
+      "days": 30
+    }
+  },
+  {
+    "destination": "POLAND",
+    "gr": {
+      "raw": "VISA-FREE",
+      "type": "visa-free",
+      "days": null
+    },
+    "al": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "us": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "de": {
+      "raw": "VISA-FREE",
+      "type": "visa-free",
+      "days": null
+    }
+  },
+  {
+    "destination": "PORTUGAL",
+    "gr": {
+      "raw": "VISA-FREE",
+      "type": "visa-free",
+      "days": null
+    },
+    "al": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "us": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "de": {
+      "raw": "VISA-FREE",
+      "type": "visa-free",
+      "days": null
+    }
+  },
+  {
+    "destination": "QATAR",
+    "gr": {
+      "raw": "EVISA · VISA ON ARRIVAL 30",
+      "type": "visa-on-arrival",
+      "days": 30
+    },
+    "al": {
+      "raw": "EVISA 30",
+      "type": "evisa",
+      "days": 30
+    },
+    "us": {
+      "raw": "EVISA · VISA ON ARRIVAL 30",
+      "type": "visa-on-arrival",
+      "days": 30
+    },
+    "de": {
+      "raw": "EVISA · VISA ON ARRIVAL 30",
+      "type": "visa-on-arrival",
+      "days": 30
+    }
+  },
+  {
+    "destination": "ROMANIA",
+    "gr": {
+      "raw": "VISA-FREE",
+      "type": "visa-free",
+      "days": null
+    },
+    "al": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "us": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "de": {
+      "raw": "VISA-FREE",
+      "type": "visa-free",
+      "days": null
+    }
+  },
+  {
+    "destination": "RUSSIAN FEDERATION",
+    "gr": {
+      "raw": "EVISA 30",
+      "type": "evisa",
+      "days": 30
+    },
+    "al": {
+      "raw": "VISA REQUIRED",
+      "type": "visa-required",
+      "days": null
+    },
+    "us": {
+      "raw": "VISA REQUIRED",
+      "type": "visa-required",
+      "days": null
+    },
+    "de": {
+      "raw": "EVISA 30",
+      "type": "evisa",
+      "days": 30
+    }
+  },
+  {
+    "destination": "RWANDA",
+    "gr": {
+      "raw": "VISA-FREE 30",
+      "type": "visa-free",
+      "days": 30
+    },
+    "al": {
+      "raw": "VISA-FREE 30",
+      "type": "visa-free",
+      "days": 30
+    },
+    "us": {
+      "raw": "EVISA · VISA ON ARRIVAL 30",
+      "type": "visa-on-arrival",
+      "days": 30
+    },
+    "de": {
+      "raw": "EVISA · VISA ON ARRIVAL 30",
+      "type": "visa-on-arrival",
+      "days": 30
+    }
+  },
+  {
+    "destination": "SAINT KITTS AND NEVIS",
+    "gr": {
+      "raw": "ETA 90",
+      "type": "eta",
+      "days": 90
+    },
+    "al": {
+      "raw": "EVISA",
+      "type": "evisa",
+      "days": null
+    },
+    "us": {
+      "raw": "ETA 180",
+      "type": "eta",
+      "days": 180
+    },
+    "de": {
+      "raw": "ETA 90",
+      "type": "eta",
+      "days": 90
+    }
+  },
+  {
+    "destination": "SAINT LUCIA",
+    "gr": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "al": {
+      "raw": "VISA REQUIRED",
+      "type": "visa-required",
+      "days": null
+    },
+    "us": {
+      "raw": "VISA-FREE 42",
+      "type": "visa-free",
+      "days": 42
+    },
+    "de": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    }
+  },
+  {
+    "destination": "SAMOA",
+    "gr": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "al": {
+      "raw": "VISA ON ARRIVAL 90",
+      "type": "visa-on-arrival",
+      "days": 90
+    },
+    "us": {
+      "raw": "VISA ON ARRIVAL 90",
+      "type": "visa-on-arrival",
+      "days": 90
+    },
+    "de": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    }
+  },
+  {
+    "destination": "SAN MARINO",
+    "gr": {
+      "raw": "VISA-FREE",
+      "type": "visa-free",
+      "days": null
+    },
+    "al": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "us": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "de": {
+      "raw": "VISA-FREE",
+      "type": "visa-free",
+      "days": null
+    }
+  },
+  {
+    "destination": "SAO TOME AND PRINCIPE",
+    "gr": {
+      "raw": "VISA-FREE 15",
+      "type": "visa-free",
+      "days": 15
+    },
+    "al": {
+      "raw": "EVISA",
+      "type": "evisa",
+      "days": null
+    },
+    "us": {
+      "raw": "VISA-FREE 15",
+      "type": "visa-free",
+      "days": 15
+    },
+    "de": {
+      "raw": "VISA-FREE 15",
+      "type": "visa-free",
+      "days": 15
+    }
+  },
+  {
+    "destination": "SAUDI ARABIA",
+    "gr": {
+      "raw": "EVISA · VISA ON ARRIVAL 90",
+      "type": "visa-on-arrival",
+      "days": 90
+    },
+    "al": {
+      "raw": "EVISA · VISA ON ARRIVAL 90",
+      "type": "visa-on-arrival",
+      "days": 90
+    },
+    "us": {
+      "raw": "EVISA · VISA ON ARRIVAL 90",
+      "type": "visa-on-arrival",
+      "days": 90
+    },
+    "de": {
+      "raw": "EVISA · VISA ON ARRIVAL 90",
+      "type": "visa-on-arrival",
+      "days": 90
+    }
+  },
+  {
+    "destination": "SENEGAL",
+    "gr": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "al": {
+      "raw": "VISA REQUIRED",
+      "type": "visa-required",
+      "days": null
+    },
+    "us": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "de": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    }
+  },
+  {
+    "destination": "SERBIA",
+    "gr": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "al": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "us": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "de": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    }
+  },
+  {
+    "destination": "SEYCHELLES",
+    "gr": {
+      "raw": "TOURIST REGISTRATION 90",
+      "type": "registration",
+      "days": 90
+    },
+    "al": {
+      "raw": "TOURIST REGISTRATION 90",
+      "type": "registration",
+      "days": 90
+    },
+    "us": {
+      "raw": "TOURIST REGISTRATION 90",
+      "type": "registration",
+      "days": 90
+    },
+    "de": {
+      "raw": "TOURIST REGISTRATION 90",
+      "type": "registration",
+      "days": 90
+    }
+  },
+  {
+    "destination": "SIERRA LEONE",
+    "gr": {
+      "raw": "EVISA · VISA ON ARRIVAL 30",
+      "type": "visa-on-arrival",
+      "days": 30
+    },
+    "al": {
+      "raw": "EVISA",
+      "type": "evisa",
+      "days": null
+    },
+    "us": {
+      "raw": "EVISA · VISA ON ARRIVAL 30",
+      "type": "visa-on-arrival",
+      "days": 30
+    },
+    "de": {
+      "raw": "EVISA · VISA ON ARRIVAL 30",
+      "type": "visa-on-arrival",
+      "days": 30
+    }
+  },
+  {
+    "destination": "SINGAPORE",
+    "gr": {
+      "raw": "ARRIVAL CARD 90",
+      "type": "registration",
+      "days": 90
+    },
+    "al": {
+      "raw": "ARRIVAL CARD 30",
+      "type": "registration",
+      "days": 30
+    },
+    "us": {
+      "raw": "ARRIVAL CARD 30",
+      "type": "registration",
+      "days": 30
+    },
+    "de": {
+      "raw": "ARRIVAL CARD 90",
+      "type": "registration",
+      "days": 90
+    }
+  },
+  {
+    "destination": "SLOVAKIA",
+    "gr": {
+      "raw": "VISA-FREE",
+      "type": "visa-free",
+      "days": null
+    },
+    "al": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "us": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "de": {
+      "raw": "VISA-FREE",
+      "type": "visa-free",
+      "days": null
+    }
+  },
+  {
+    "destination": "SLOVENIA",
+    "gr": {
+      "raw": "VISA-FREE",
+      "type": "visa-free",
+      "days": null
+    },
+    "al": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "us": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "de": {
+      "raw": "VISA-FREE",
+      "type": "visa-free",
+      "days": null
+    }
+  },
+  {
+    "destination": "SOLOMON ISLANDS",
+    "gr": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "al": {
+      "raw": "VISA REQUIRED",
+      "type": "visa-required",
+      "days": null
+    },
+    "us": {
+      "raw": "VISA ON ARRIVAL 45",
+      "type": "visa-on-arrival",
+      "days": 45
+    },
+    "de": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    }
+  },
+  {
+    "destination": "SOMALIA",
+    "gr": {
+      "raw": "EVISA",
+      "type": "evisa",
+      "days": null
+    },
+    "al": {
+      "raw": "EVISA",
+      "type": "evisa",
+      "days": null
+    },
+    "us": {
+      "raw": "EVISA",
+      "type": "evisa",
+      "days": null
+    },
+    "de": {
+      "raw": "EVISA",
+      "type": "evisa",
+      "days": null
+    }
+  },
+  {
+    "destination": "SOUTH AFRICA",
+    "gr": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "al": {
+      "raw": "EVISA",
+      "type": "evisa",
+      "days": null
+    },
+    "us": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "de": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    }
+  },
+  {
+    "destination": "SOUTH KOREA",
+    "gr": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "al": {
+      "raw": "ETA 30",
+      "type": "eta",
+      "days": 30
+    },
+    "us": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "de": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    }
+  },
+  {
+    "destination": "SOUTH SUDAN",
+    "gr": {
+      "raw": "EVISA 90",
+      "type": "evisa",
+      "days": 90
+    },
+    "al": {
+      "raw": "EVISA 90",
+      "type": "evisa",
+      "days": 90
+    },
+    "us": {
+      "raw": "EVISA 90",
+      "type": "evisa",
+      "days": 90
+    },
+    "de": {
+      "raw": "EVISA 90",
+      "type": "evisa",
+      "days": 90
+    }
+  },
+  {
+    "destination": "SPAIN",
+    "gr": {
+      "raw": "VISA-FREE",
+      "type": "visa-free",
+      "days": null
+    },
+    "al": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "us": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "de": {
+      "raw": "VISA-FREE",
+      "type": "visa-free",
+      "days": null
+    }
+  },
+  {
+    "destination": "SRI LANKA",
+    "gr": {
+      "raw": "ETA · VISA ON ARRIVAL 30",
+      "type": "visa-on-arrival",
+      "days": 30
+    },
+    "al": {
+      "raw": "ETA · VISA ON ARRIVAL 30",
+      "type": "visa-on-arrival",
+      "days": 30
+    },
+    "us": {
+      "raw": "ETA · VISA ON ARRIVAL 30",
+      "type": "visa-on-arrival",
+      "days": 30
+    },
+    "de": {
+      "raw": "ETA · VISA ON ARRIVAL 30",
+      "type": "visa-on-arrival",
+      "days": 30
+    }
+  },
+  {
+    "destination": "ST. VINCENT AND THE GRENADINES",
+    "gr": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "al": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "us": {
+      "raw": "VISA-FREE 180",
+      "type": "visa-free",
+      "days": 180
+    },
+    "de": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    }
+  },
+  {
+    "destination": "SUDAN",
+    "gr": {
+      "raw": "VISA REQUIRED",
+      "type": "visa-required",
+      "days": null
+    },
+    "al": {
+      "raw": "VISA REQUIRED",
+      "type": "visa-required",
+      "days": null
+    },
+    "us": {
+      "raw": "VISA REQUIRED",
+      "type": "visa-required",
+      "days": null
+    },
+    "de": {
+      "raw": "VISA REQUIRED",
+      "type": "visa-required",
+      "days": null
+    }
+  },
+  {
+    "destination": "SURINAME",
+    "gr": {
+      "raw": "TOURIST CARD 90",
+      "type": "registration",
+      "days": 90
+    },
+    "al": {
+      "raw": "TOURIST CARD 90",
+      "type": "registration",
+      "days": 90
+    },
+    "us": {
+      "raw": "TOURIST CARD 90",
+      "type": "registration",
+      "days": 90
+    },
+    "de": {
+      "raw": "TOURIST CARD 90",
+      "type": "registration",
+      "days": 90
+    }
+  },
+  {
+    "destination": "SWEDEN",
+    "gr": {
+      "raw": "VISA-FREE",
+      "type": "visa-free",
+      "days": null
+    },
+    "al": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "us": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "de": {
+      "raw": "VISA-FREE",
+      "type": "visa-free",
+      "days": null
+    }
+  },
+  {
+    "destination": "SWITZERLAND",
+    "gr": {
+      "raw": "VISA-FREE",
+      "type": "visa-free",
+      "days": null
+    },
+    "al": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "us": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "de": {
+      "raw": "VISA-FREE",
+      "type": "visa-free",
+      "days": null
+    }
+  },
+  {
+    "destination": "SYRIA",
+    "gr": {
+      "raw": "EVISA · VISA ON ARRIVAL 30",
+      "type": "visa-on-arrival",
+      "days": 30
+    },
+    "al": {
+      "raw": "EVISA",
+      "type": "evisa",
+      "days": null
+    },
+    "us": {
+      "raw": "EVISA · VISA ON ARRIVAL 30",
+      "type": "visa-on-arrival",
+      "days": 30
+    },
+    "de": {
+      "raw": "EVISA · VISA ON ARRIVAL 30",
+      "type": "visa-on-arrival",
+      "days": 30
+    }
+  },
+  {
+    "destination": "TAIWAN",
+    "gr": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "al": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "us": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "de": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    }
+  },
+  {
+    "destination": "TAJIKISTAN",
+    "gr": {
+      "raw": "VISA-FREE 30",
+      "type": "visa-free",
+      "days": 30
+    },
+    "al": {
+      "raw": "EVISA",
+      "type": "evisa",
+      "days": null
+    },
+    "us": {
+      "raw": "VISA-FREE 30",
+      "type": "visa-free",
+      "days": 30
+    },
+    "de": {
+      "raw": "VISA-FREE 30",
+      "type": "visa-free",
+      "days": 30
+    }
+  },
+  {
+    "destination": "TANZANIA",
+    "gr": {
+      "raw": "EVISA · VISA ON ARRIVAL",
+      "type": "visa-on-arrival",
+      "days": null
+    },
+    "al": {
+      "raw": "EVISA · VISA ON ARRIVAL",
+      "type": "visa-on-arrival",
+      "days": null
+    },
+    "us": {
+      "raw": "EVISA · VISA ON ARRIVAL",
+      "type": "visa-on-arrival",
+      "days": null
+    },
+    "de": {
+      "raw": "EVISA · VISA ON ARRIVAL",
+      "type": "visa-on-arrival",
+      "days": null
+    }
+  },
+  {
+    "destination": "THAILAND",
+    "gr": {
+      "raw": "ARRIVAL CARD 60",
+      "type": "registration",
+      "days": 60
+    },
+    "al": {
+      "raw": "ARRIVAL CARD 60",
+      "type": "registration",
+      "days": 60
+    },
+    "us": {
+      "raw": "ARRIVAL CARD 60",
+      "type": "registration",
+      "days": 60
+    },
+    "de": {
+      "raw": "ARRIVAL CARD 60",
+      "type": "registration",
+      "days": 60
+    }
+  },
+  {
+    "destination": "TIMOR-LESTE",
+    "gr": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "al": {
+      "raw": "VISA ON ARRIVAL 30",
+      "type": "visa-on-arrival",
+      "days": 30
+    },
+    "us": {
+      "raw": "VISA ON ARRIVAL 30",
+      "type": "visa-on-arrival",
+      "days": 30
+    },
+    "de": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    }
+  },
+  {
+    "destination": "TOGO",
+    "gr": {
+      "raw": "EVISA 15",
+      "type": "evisa",
+      "days": 15
+    },
+    "al": {
+      "raw": "EVISA 15",
+      "type": "evisa",
+      "days": 15
+    },
+    "us": {
+      "raw": "EVISA 15",
+      "type": "evisa",
+      "days": 15
+    },
+    "de": {
+      "raw": "EVISA 15",
+      "type": "evisa",
+      "days": 15
+    }
+  },
+  {
+    "destination": "TONGA",
+    "gr": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "al": {
+      "raw": "VISA REQUIRED",
+      "type": "visa-required",
+      "days": null
+    },
+    "us": {
+      "raw": "VISA ON ARRIVAL 31",
+      "type": "visa-on-arrival",
+      "days": 31
+    },
+    "de": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    }
+  },
+  {
+    "destination": "TRINIDAD AND TOBAGO",
+    "gr": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "al": {
+      "raw": "VISA-FREE 30",
+      "type": "visa-free",
+      "days": 30
+    },
+    "us": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "de": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    }
+  },
+  {
+    "destination": "TUNISIA",
+    "gr": {
+      "raw": "VISA-FREE 30",
+      "type": "visa-free",
+      "days": 30
+    },
+    "al": {
+      "raw": "VISA REQUIRED",
+      "type": "visa-required",
+      "days": null
+    },
+    "us": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "de": {
+      "raw": "VISA-FREE 120",
+      "type": "visa-free",
+      "days": 120
+    }
+  },
+  {
+    "destination": "TÜRKIYE",
+    "gr": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "al": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "us": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "de": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    }
+  },
+  {
+    "destination": "TURKMENISTAN",
+    "gr": {
+      "raw": "VISA REQUIRED",
+      "type": "visa-required",
+      "days": null
+    },
+    "al": {
+      "raw": "VISA REQUIRED",
+      "type": "visa-required",
+      "days": null
+    },
+    "us": {
+      "raw": "VISA REQUIRED",
+      "type": "visa-required",
+      "days": null
+    },
+    "de": {
+      "raw": "VISA REQUIRED",
+      "type": "visa-required",
+      "days": null
+    }
+  },
+  {
+    "destination": "TUVALU",
+    "gr": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "al": {
+      "raw": "VISA ON ARRIVAL 30",
+      "type": "visa-on-arrival",
+      "days": 30
+    },
+    "us": {
+      "raw": "VISA ON ARRIVAL 30",
+      "type": "visa-on-arrival",
+      "days": 30
+    },
+    "de": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    }
+  },
+  {
+    "destination": "UGANDA",
+    "gr": {
+      "raw": "EVISA",
+      "type": "evisa",
+      "days": null
+    },
+    "al": {
+      "raw": "EVISA",
+      "type": "evisa",
+      "days": null
+    },
+    "us": {
+      "raw": "EVISA",
+      "type": "evisa",
+      "days": null
+    },
+    "de": {
+      "raw": "EVISA",
+      "type": "evisa",
+      "days": null
+    }
+  },
+  {
+    "destination": "UKRAINE",
+    "gr": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "al": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "us": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "de": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    }
+  },
+  {
+    "destination": "UNITED ARAB EMIRATES",
+    "gr": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "al": {
+      "raw": "VISA-FREE 180",
+      "type": "visa-free",
+      "days": 180
+    },
+    "us": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "de": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    }
+  },
+  {
+    "destination": "UNITED KINGDOM",
+    "gr": {
+      "raw": "ETA 180",
+      "type": "eta",
+      "days": 180
+    },
+    "al": {
+      "raw": "VISA REQUIRED",
+      "type": "visa-required",
+      "days": null
+    },
+    "us": {
+      "raw": "ETA 180",
+      "type": "eta",
+      "days": 180
+    },
+    "de": {
+      "raw": "ETA 180",
+      "type": "eta",
+      "days": 180
+    }
+  },
+  {
+    "destination": "UNITED STATES OF AMERICA",
+    "gr": {
+      "raw": "ETA 90",
+      "type": "eta",
+      "days": 90
+    },
+    "al": {
+      "raw": "VISA REQUIRED",
+      "type": "visa-required",
+      "days": null
+    },
+    "us": {
+      "raw": "HOME COUNTRY",
+      "type": "home",
+      "days": null
+    },
+    "de": {
+      "raw": "ETA 90",
+      "type": "eta",
+      "days": 90
+    }
+  },
+  {
+    "destination": "URUGUAY",
+    "gr": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "al": {
+      "raw": "VISA REQUIRED",
+      "type": "visa-required",
+      "days": null
+    },
+    "us": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "de": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    }
+  },
+  {
+    "destination": "UZBEKISTAN",
+    "gr": {
+      "raw": "VISA-FREE 30",
+      "type": "visa-free",
+      "days": 30
+    },
+    "al": {
+      "raw": "EVISA 30",
+      "type": "evisa",
+      "days": 30
+    },
+    "us": {
+      "raw": "VISA-FREE 30",
+      "type": "visa-free",
+      "days": 30
+    },
+    "de": {
+      "raw": "VISA-FREE 30",
+      "type": "visa-free",
+      "days": 30
+    }
+  },
+  {
+    "destination": "VANUATU",
+    "gr": {
+      "raw": "VISA-FREE 120",
+      "type": "visa-free",
+      "days": 120
+    },
+    "al": {
+      "raw": "EVISA",
+      "type": "evisa",
+      "days": null
+    },
+    "us": {
+      "raw": "VISA-FREE 120",
+      "type": "visa-free",
+      "days": 120
+    },
+    "de": {
+      "raw": "VISA-FREE 120",
+      "type": "visa-free",
+      "days": 120
+    }
+  },
+  {
+    "destination": "VATICAN CITY",
+    "gr": {
+      "raw": "VISA-FREE",
+      "type": "visa-free",
+      "days": null
+    },
+    "al": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "us": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "de": {
+      "raw": "VISA-FREE",
+      "type": "visa-free",
+      "days": null
+    }
+  },
+  {
+    "destination": "VENEZUELA",
+    "gr": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "al": {
+      "raw": "EVISA",
+      "type": "evisa",
+      "days": null
+    },
+    "us": {
+      "raw": "EVISA",
+      "type": "evisa",
+      "days": null
+    },
+    "de": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    }
+  },
+  {
+    "destination": "VIET NAM",
+    "gr": {
+      "raw": "EVISA 90",
+      "type": "evisa",
+      "days": 90
+    },
+    "al": {
+      "raw": "EVISA 90",
+      "type": "evisa",
+      "days": 90
+    },
+    "us": {
+      "raw": "EVISA 90",
+      "type": "evisa",
+      "days": 90
+    },
+    "de": {
+      "raw": "VISA-FREE 45",
+      "type": "visa-free",
+      "days": 45
+    }
+  },
+  {
+    "destination": "YEMEN",
+    "gr": {
+      "raw": "VISA REQUIRED",
+      "type": "visa-required",
+      "days": null
+    },
+    "al": {
+      "raw": "VISA REQUIRED",
+      "type": "visa-required",
+      "days": null
+    },
+    "us": {
+      "raw": "VISA REQUIRED",
+      "type": "visa-required",
+      "days": null
+    },
+    "de": {
+      "raw": "VISA REQUIRED",
+      "type": "visa-required",
+      "days": null
+    }
+  },
+  {
+    "destination": "ZAMBIA",
+    "gr": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "al": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "us": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    },
+    "de": {
+      "raw": "VISA-FREE 90",
+      "type": "visa-free",
+      "days": 90
+    }
+  },
+  {
+    "destination": "ZIMBABWE",
+    "gr": {
+      "raw": "EVISA · VISA ON ARRIVAL 90",
+      "type": "visa-on-arrival",
+      "days": 90
+    },
+    "al": {
+      "raw": "EVISA · VISA ON ARRIVAL 90",
+      "type": "visa-on-arrival",
+      "days": 90
+    },
+    "us": {
+      "raw": "EVISA · VISA ON ARRIVAL 90",
+      "type": "visa-on-arrival",
+      "days": 90
+    },
+    "de": {
+      "raw": "EVISA · VISA ON ARRIVAL 90",
+      "type": "visa-on-arrival",
+      "days": 90
+    }
+  }
+];
+
+    function classifyEntry(rawValue) {
+      const raw = String(rawValue || 'NOT STATED').replace(/\s+/g, ' ').trim();
+      const upper = raw.toUpperCase();
+      let type = 'unknown';
+
+      if (upper.includes('HOME COUNTRY')) type = 'home';
+      else if (upper.includes('VISA-FREE') || upper.includes('VISA FREE')) type = 'visa-free';
+      else if (upper.includes('VISA ON ARRIVAL')) type = 'visa-on-arrival';
+      else if (upper.includes('EVISITOR') || /\bETA\b/.test(upper)) type = 'eta';
+      else if (/ARRIVAL CARD|PRE-ENROLLMENT|E-TICKET|TOURIST (?:CARD|REGISTRATION)/.test(upper)) type = 'registration';
+      else if (upper.includes('EVISA') || upper.includes('E-VISA')) type = 'evisa';
+      else if (upper.includes('VISA REQUIRED')) type = 'visa-required';
+      else if (upper.includes('NOT ADMITTED')) type = 'not-admitted';
+
+      const dayMatch = upper.match(/(?:^|\s)(\d{1,3})(?:\s|$)/);
+      return { raw, type, days: dayMatch ? Number(dayMatch[1]) : null };
+    }
+
+    function compareEntries(a, b) {
+      const aRank = TYPE_RANK[a.type] ?? TYPE_RANK.unknown;
+      const bRank = TYPE_RANK[b.type] ?? TYPE_RANK.unknown;
+      if (aRank !== bRank) return aRank < bRank ? 1 : -1;
+
+      if (a.days != null && b.days != null && a.days !== b.days) {
+        return a.days > b.days ? 1 : -1;
+      }
+
+      return 0;
+    }
+
+    function rowOutcome(row) {
+      const codes = PASSPORTS.map((passport) => passport.code);
+      let bestCode = codes[0];
+
+      for (const code of codes.slice(1)) {
+        if (compareEntries(row[code], row[bestCode]) > 0) bestCode = code;
+      }
+
+      return {
+        winners: codes.filter((code) => compareEntries(row[code], row[bestCode]) === 0),
+        best: row[bestCode],
+      };
+    }
+
+    globalThis.PassportDashboard = {
+      PASSPORTS,
+      DESTINATIONS,
+      TYPE_RANK,
+      classifyEntry,
+      compareEntries,
+      rowOutcome,
+    };
+  })();
+  </script>
+</body>
+</html>

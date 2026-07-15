@@ -192,3 +192,8 @@ test('page is self-contained and includes source and travel warning', () => {
   assert.match(html, /verify (?:the )?rules with official sources before travel/i);
   assert.match(html, /@media \(prefers-reduced-motion: reduce\)/);
 });
+
+test('screen-reader context is visually hidden without removing it from accessibility', () => {
+  const { html } = loadPage();
+  assert.match(html, /\.sr-only\s*\{[^}]*position:\s*absolute[^}]*clip:/s);
+});

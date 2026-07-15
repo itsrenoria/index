@@ -4,11 +4,304 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Passport Advantage Atlas</title>
+  <meta name="description" content="A destination-by-destination comparison of Albanian, Greek, German, and United States passports using 2026 Passport Index data.">
+  <style>
+    :root {
+      --paper: #f2eadb;
+      --paper-deep: #e5d8c2;
+      --paper-light: #fbf7ef;
+      --ink: #18231f;
+      --muted: #68716b;
+      --rule: rgba(24, 35, 31, 0.18);
+      --green: #2f6a52;
+      --green-soft: #dce9de;
+      --amber: #ad6b2b;
+      --amber-soft: #f2e1c3;
+      --red: #98483c;
+      --red-soft: #efdad3;
+      --blue: #3f6076;
+      --blue-soft: #dce6eb;
+      --al: #a53135;
+      --gr: #32609a;
+      --de: #8b6a1f;
+      --us: #5f456d;
+      --shadow: 0 24px 60px rgba(37, 31, 23, 0.10);
+      --serif: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+      --sans: "Avenir Next", Avenir, "Gill Sans", "Trebuchet MS", sans-serif;
+      --mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 14% 9%, rgba(255,255,255,.88), transparent 24rem),
+        linear-gradient(115deg, transparent 0 49.7%, rgba(42,62,54,.035) 49.8% 50.1%, transparent 50.2%),
+        var(--paper);
+      font-family: var(--sans);
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: .33;
+      background-image:
+        repeating-linear-gradient(0deg, transparent 0 5px, rgba(40,38,31,.018) 6px),
+        radial-gradient(circle at 75% 25%, transparent 0 105px, rgba(80,82,67,.09) 106px 107px, transparent 108px),
+        radial-gradient(circle at 75% 25%, transparent 0 145px, rgba(80,82,67,.06) 146px 147px, transparent 148px);
+      mix-blend-mode: multiply;
+      z-index: -1;
+    }
+    button, input, select { font: inherit; }
+    button { color: inherit; }
+    a { color: inherit; text-underline-offset: .2em; }
+    :focus-visible { outline: 3px solid #c46d35; outline-offset: 3px; }
+    .skip-link {
+      position: fixed;
+      top: .75rem;
+      left: .75rem;
+      z-index: 100;
+      padding: .7rem 1rem;
+      background: var(--ink);
+      color: white;
+      transform: translateY(-160%);
+      transition: transform .2s ease;
+    }
+    .skip-link:focus { transform: translateY(0); }
+    .shell { width: min(1440px, calc(100% - 40px)); margin-inline: auto; }
+    .masthead {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      min-height: 76px;
+      border-bottom: 1px solid var(--rule);
+    }
+    .brand { display: flex; align-items: center; gap: .8rem; font-weight: 750; letter-spacing: .08em; text-transform: uppercase; font-size: .74rem; }
+    .brand-mark {
+      display: grid;
+      place-items: center;
+      width: 38px;
+      height: 46px;
+      border: 1.5px solid currentColor;
+      border-radius: 3px 7px 7px 3px;
+      font-family: var(--serif);
+      font-size: 1.1rem;
+    }
+    .dateline { color: var(--muted); font-family: var(--mono); font-size: .68rem; letter-spacing: .06em; text-align: right; }
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1.25fr) minmax(280px, .75fr);
+      gap: clamp(2rem, 7vw, 8rem);
+      padding: clamp(4.2rem, 9vw, 8.5rem) 0 clamp(4rem, 7vw, 6rem);
+      align-items: end;
+    }
+    .eyebrow { margin: 0 0 1.2rem; color: var(--red); font-size: .72rem; font-weight: 800; letter-spacing: .18em; text-transform: uppercase; }
+    h1, h2, h3, p { margin-top: 0; }
+    h1 {
+      margin-bottom: 1.6rem;
+      max-width: 12ch;
+      font-family: var(--serif);
+      font-weight: 500;
+      font-size: clamp(3.6rem, 7.4vw, 8.2rem);
+      line-height: .87;
+      letter-spacing: -.055em;
+    }
+    .hero-deck { max-width: 55ch; margin: 0; color: #46524c; font-family: var(--serif); font-size: clamp(1.14rem, 2vw, 1.55rem); line-height: 1.45; }
+    .method-note {
+      position: relative;
+      padding: 1.7rem 1.8rem 1.6rem 2.2rem;
+      border: 1px solid var(--rule);
+      background: rgba(251,247,239,.64);
+      box-shadow: 9px 9px 0 rgba(43,58,50,.055);
+      transform: rotate(-.65deg);
+    }
+    .method-note::before { content: "FIELD NOTE"; position: absolute; top: -11px; left: 21px; padding: .15rem .55rem; background: var(--paper); color: var(--red); border: 1px solid currentColor; font: 700 .64rem/1.4 var(--mono); letter-spacing: .1em; }
+    .method-note p { margin: 0; font-size: .92rem; }
+    .method-note ol { margin: 1rem 0 0; padding-left: 1.15rem; color: var(--muted); font-size: .77rem; }
+    .section { padding: clamp(4rem, 7vw, 7rem) 0; border-top: 1px solid var(--rule); }
+    .section-heading { display: grid; grid-template-columns: 1fr minmax(280px, 520px); gap: 2rem; align-items: end; margin-bottom: 2.4rem; }
+    .section-kicker { margin: 0 0 .4rem; font: 800 .67rem/1.2 var(--mono); color: var(--red); letter-spacing: .13em; text-transform: uppercase; }
+    h2 { margin-bottom: 0; font: 500 clamp(2.25rem, 4vw, 4.5rem)/.98 var(--serif); letter-spacing: -.035em; }
+    .section-intro { margin: 0; color: var(--muted); font-size: .98rem; }
+    .summary-grid { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 1px; background: var(--rule); border: 1px solid var(--rule); box-shadow: var(--shadow); }
+    .passport-card { --accent: var(--ink); position: relative; min-height: 420px; padding: 1.5rem; background: var(--paper-light); overflow: hidden; animation: rise .65s both; animation-delay: calc(var(--order) * 90ms); }
+    .passport-card::after { content: attr(data-code); position: absolute; right: -.1em; bottom: -.28em; color: color-mix(in srgb, var(--accent) 8%, transparent); font: 700 8rem/1 var(--serif); pointer-events: none; }
+    .passport-card[data-code="AL"] { --accent: var(--al); }
+    .passport-card[data-code="GR"] { --accent: var(--gr); }
+    .passport-card[data-code="DE"] { --accent: var(--de); }
+    .passport-card[data-code="US"] { --accent: var(--us); }
+    .card-head { display: flex; justify-content: space-between; gap: 1rem; align-items: flex-start; padding-bottom: 1.2rem; border-bottom: 3px solid var(--accent); }
+    .passport-seal { display: grid; place-items: center; width: 52px; height: 52px; border: 1px solid var(--accent); border-radius: 50%; color: var(--accent); font: 800 .76rem/1 var(--mono); box-shadow: inset 0 0 0 4px var(--paper-light), inset 0 0 0 5px currentColor; }
+    .passport-name { margin: 0; font: 600 1.65rem/1 var(--serif); }
+    .mobility { margin-top: .4rem; color: var(--muted); font: .68rem/1.3 var(--mono); text-transform: uppercase; letter-spacing: .08em; }
+    .card-stats { display: grid; grid-template-columns: repeat(3,1fr); gap: .6rem; margin: 1.45rem 0; }
+    .stat { padding-right: .4rem; border-right: 1px solid var(--rule); }
+    .stat:last-child { border-right: 0; }
+    .stat strong { display: block; font: 500 2.1rem/1 var(--serif); font-variant-numeric: tabular-nums; }
+    .stat span { display: block; margin-top: .3rem; color: var(--muted); font-size: .62rem; line-height: 1.25; text-transform: uppercase; letter-spacing: .07em; }
+    .card-list { position: relative; z-index: 1; margin-top: 1.25rem; }
+    .card-list h4 { margin: 0 0 .5rem; color: var(--accent); font-size: .65rem; letter-spacing: .1em; text-transform: uppercase; }
+    .card-list ul { margin: 0; padding: 0; list-style: none; font-size: .79rem; }
+    .card-list li { display: flex; gap: .45rem; padding: .3rem 0; border-bottom: 1px dotted var(--rule); }
+    .card-list li::before { content: "↗"; color: var(--accent); }
+    .card-list.gaps li::before { content: "↘"; color: var(--red); }
+    .overview-grid { display: grid; grid-template-columns: repeat(4,1fr) minmax(220px,.9fr); gap: 1px; margin-top: 1px; background: var(--rule); border: 1px solid var(--rule); }
+    .overview-cell { min-height: 190px; padding: 1.2rem; background: rgba(251,247,239,.74); }
+    .overview-cell h3 { margin: 0 0 .8rem; font: 600 1.1rem/1.2 var(--serif); }
+    .overview-cell strong { display: block; margin-bottom: .6rem; font: 500 2.8rem/1 var(--serif); }
+    .destination-sample { margin: 0; color: var(--muted); font-size: .73rem; line-height: 1.55; }
+    .legend-strip { display: flex; flex-wrap: wrap; gap: .45rem; margin-top: 1.5rem; align-items: center; }
+    .legend-strip > span:first-child { margin-right: .4rem; font: 800 .64rem/1 var(--mono); letter-spacing: .1em; text-transform: uppercase; }
+    .status { display: inline-flex; align-items: center; gap: .35rem; width: max-content; max-width: 100%; padding: .28rem .48rem; border: 1px solid transparent; border-radius: 999px; font: 750 .62rem/1.2 var(--mono); letter-spacing: .02em; text-transform: uppercase; white-space: normal; }
+    .status::before { content: "•"; font-size: 1rem; line-height: .4; }
+    .type-home, .type-visa-free { color: #25543e; background: var(--green-soft); border-color: #a7c4ad; }
+    .type-visa-on-arrival { color: #77501b; background: var(--amber-soft); border-color: #d6b57e; }
+    .type-eta, .type-registration { color: #345a6b; background: var(--blue-soft); border-color: #a9c1cc; }
+    .type-evisa { color: #6b5322; background: #eee5c9; border-color: #cfc08c; }
+    .type-visa-required, .type-not-admitted { color: #7c342d; background: var(--red-soft); border-color: #d2a39c; }
+    .type-unknown { color: #555; background: #e4e1dc; border-color: #c9c5be; }
+    .explorer-panel { border: 1px solid var(--rule); background: rgba(251,247,239,.82); box-shadow: var(--shadow); }
+    .controls { display: grid; grid-template-columns: minmax(220px,1.5fr) repeat(3,minmax(145px,.75fr)); gap: 1rem; padding: 1.2rem; border-bottom: 1px solid var(--rule); background: #ebe0ce; }
+    .field label { display: block; margin-bottom: .38rem; font: 800 .62rem/1.2 var(--mono); letter-spacing: .09em; text-transform: uppercase; }
+    .field input, .field select { width: 100%; min-height: 44px; padding: .65rem .7rem; border: 1px solid #988e7e; border-radius: 0; background: var(--paper-light); color: var(--ink); }
+    .control-row { display: flex; flex-wrap: wrap; gap: .65rem 1.1rem; align-items: center; padding: .9rem 1.2rem; border-bottom: 1px solid var(--rule); }
+    .check { display: inline-flex; gap: .5rem; align-items: center; font-size: .78rem; font-weight: 700; }
+    .check input { width: 18px; height: 18px; accent-color: var(--ink); }
+    .quick-button, .reset-button { min-height: 38px; padding: .48rem .75rem; border: 1px solid var(--ink); background: transparent; cursor: pointer; font-size: .72rem; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; transition: background .18s,color .18s,transform .18s; }
+    .quick-button:hover, .reset-button:hover { transform: translateY(-1px); }
+    .quick-button[aria-pressed="true"] { background: var(--al); color: white; border-color: var(--al); }
+    .result-count { margin-left: auto; color: var(--muted); font: .7rem/1.2 var(--mono); }
+    .table-wrap { max-height: 760px; overflow: auto; scrollbar-color: #857968 var(--paper-deep); }
+    table { width: 100%; min-width: 1040px; border-collapse: separate; border-spacing: 0; font-size: .77rem; }
+    caption { height: 1px; width: 1px; overflow: hidden; position: absolute; clip: rect(0,0,0,0); white-space: nowrap; }
+    th, td { padding: .72rem .75rem; border-right: 1px solid var(--rule); border-bottom: 1px solid var(--rule); text-align: left; vertical-align: middle; }
+    thead th { position: sticky; top: 0; z-index: 4; background: var(--ink); color: #f7f0e4; font: 750 .63rem/1.2 var(--mono); letter-spacing: .08em; text-transform: uppercase; }
+    thead th:first-child { left: 0; z-index: 6; }
+    tbody th { position: sticky; left: 0; z-index: 2; width: 190px; background: #f6efe3; font: 700 .76rem/1.25 var(--sans); }
+    tbody tr:nth-child(even) td, tbody tr:nth-child(even) th { background-color: rgba(229,216,194,.35); }
+    tbody tr:hover td, tbody tr:hover th { background: #fffaf0; }
+    td.is-best { box-shadow: inset 3px 0 0 var(--green); background-image: linear-gradient(90deg, rgba(47,106,82,.08), transparent 55%); }
+    .winner-cell { min-width: 150px; color: var(--muted); font-size: .7rem; }
+    .winner-cell strong { display: block; color: var(--ink); font-family: var(--serif); font-size: .9rem; }
+    .source-note { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; padding: 1.2rem; color: var(--muted); font-size: .72rem; border-top: 1px solid var(--rule); }
+    .source-note p { margin: 0; }
+    .warning { color: var(--red); font-weight: 700; }
+    .empty { padding: 4rem 2rem; color: var(--muted); text-align: center; font-family: var(--serif); font-size: 1.2rem; }
+    footer { padding: 2.3rem 0 3.5rem; border-top: 1px solid var(--rule); color: var(--muted); font: .68rem/1.6 var(--mono); }
+    @keyframes rise { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
+    @media (max-width: 1080px) {
+      .summary-grid { grid-template-columns: repeat(2,1fr); }
+      .overview-grid { grid-template-columns: repeat(2,1fr); }
+      .controls { grid-template-columns: repeat(2,1fr); }
+    }
+    @media (max-width: 760px) {
+      .shell { width: min(100% - 24px, 1440px); }
+      .dateline { display: none; }
+      .hero { grid-template-columns: 1fr; gap: 3rem; padding-top: 4.5rem; }
+      h1 { font-size: clamp(3.2rem, 18vw, 5.5rem); }
+      .section-heading { grid-template-columns: 1fr; }
+      .summary-grid, .overview-grid, .controls { grid-template-columns: 1fr; }
+      .passport-card { min-height: auto; }
+      .source-note { grid-template-columns: 1fr; }
+      .result-count { width: 100%; margin-left: 0; }
+      .table-wrap { max-height: 70vh; }
+      tbody th { width: 150px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; }
+    }
+  </style>
 </head>
 <body>
+  <a class="skip-link" href="#explorer">Skip to destination explorer</a>
+  <header class="shell masthead">
+    <div class="brand"><span class="brand-mark" aria-hidden="true">A</span><span>The Border Desk</span></div>
+    <div class="dateline">COMPARATIVE BRIEFING 07/2026<br>199 DESTINATIONS · 4 PASSPORTS</div>
+  </header>
+
   <main>
-    <h1>Passport Advantage Atlas</h1>
+    <section class="shell hero" aria-labelledby="page-title">
+      <div>
+        <p class="eyebrow">Passport advantage atlas · 2026 edition</p>
+        <h1 id="page-title">What does each passport actually add?</h1>
+        <p class="hero-deck">A practical, destination-by-destination reading of Albanian, Greek, German, and United States travel access—showing the wins, the overlaps, and the gaps at a glance.</p>
+      </div>
+      <aside class="method-note" aria-label="Comparison method">
+        <p><strong>“Better” means less entry friction first, then a longer stated stay.</strong> Source-specific labels remain visible so an ETA never disappears into a generic “accessible” bucket.</p>
+        <ol>
+          <li>Home / visa-free</li>
+          <li>Visa on arrival</li>
+          <li>ETA / registration</li>
+          <li>eVisa</li>
+          <li>Visa required / not admitted</li>
+        </ol>
+      </aside>
+    </section>
+
+    <section class="section" aria-labelledby="snapshot-title">
+      <div class="shell">
+        <div class="section-heading">
+          <div><p class="section-kicker">01 · Quick read</p><h2 id="snapshot-title">The passport snapshot</h2></div>
+          <p class="section-intro">Outright wins identify destinations where one passport offers the strongest result alone. “Tied best” includes shared top access, while “behind” marks a real gap against at least one of the others.</p>
+        </div>
+        <div class="summary-grid" id="summary-grid" aria-live="polite"></div>
+        <div class="overview-grid" id="winner-overview"></div>
+        <div class="legend-strip" aria-label="Entry type priority">
+          <span>Entry labels</span>
+          <span class="status type-visa-free">Visa-free</span>
+          <span class="status type-visa-on-arrival">Visa on arrival</span>
+          <span class="status type-eta">ETA</span>
+          <span class="status type-registration">Registration</span>
+          <span class="status type-evisa">eVisa</span>
+          <span class="status type-visa-required">Visa required</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="explorer" aria-labelledby="explorer-title">
+      <div class="shell">
+        <div class="section-heading">
+          <div><p class="section-kicker">02 · Full comparison</p><h2 id="explorer-title">Destination explorer</h2></div>
+          <p class="section-intro">Start with meaningful differences, or reset to scan all 199 destinations. A star and shaded edge identify the strongest passport result in each row; color is never the only cue.</p>
+        </div>
+
+        <div class="explorer-panel">
+          <div class="controls" aria-label="Destination filters">
+            <div class="field"><label for="search">Find destination</label><input id="search" type="search" placeholder="Try Azerbaijan or Japan" autocomplete="off"></div>
+            <div class="field"><label for="entry-type">Entry category</label><select id="entry-type"><option value="all">All categories</option><option value="visa-free">Visa-free</option><option value="visa-on-arrival">Visa on arrival</option><option value="eta">ETA / eVisitor</option><option value="registration">Registration / arrival card</option><option value="evisa">eVisa</option><option value="visa-required">Visa required</option><option value="not-admitted">Not admitted</option></select></div>
+            <div class="field"><label for="advantage">Passport at the top</label><select id="advantage"><option value="all">Any passport</option><option value="al">Albania</option><option value="gr">Greece</option><option value="de">Germany</option><option value="us">United States</option></select></div>
+            <div class="field"><label for="sort">Sort rows</label><select id="sort"><option value="destination">Destination A–Z</option><option value="difference">Strongest difference</option></select></div>
+          </div>
+          <div class="control-row">
+            <label class="check" for="differences-only"><input id="differences-only" type="checkbox" checked> Differences only</label>
+            <button class="quick-button" id="albania-quick" type="button" aria-pressed="false">Albania at the top</button>
+            <button class="reset-button" id="reset" type="button">Reset view</button>
+            <span class="result-count" id="result-count" aria-live="polite"></span>
+          </div>
+          <div class="table-wrap" tabindex="0" aria-label="Scrollable passport comparison table">
+            <table>
+              <caption>Entry requirements by destination for Albanian, Greek, German, and United States passport holders</caption>
+              <thead><tr><th scope="col">Destination</th><th scope="col">Albania</th><th scope="col">Greece</th><th scope="col">Germany</th><th scope="col">United States</th><th scope="col">Best result</th></tr></thead>
+              <tbody id="destination-body"></tbody>
+            </table>
+            <div class="empty" id="empty-state" hidden>No destinations match this combination of filters.</div>
+          </div>
+          <div class="source-note">
+            <p>Source: <a href="https://www.passportindex.org/comparebyPassport.php?p1=gr&amp;y1=2026&amp;p2=al&amp;y2=2026&amp;p3=us&amp;y3=2026&amp;p4=de&amp;y4=2026" target="_blank" rel="noreferrer">Passport Index 2026 comparison</a>, retrieved 15 July 2026. Mobility scores shown are the source's published figures.</p>
+            <p class="warning">Entry rules can change without notice. Verify rules with official sources before travel, especially permitted stay, registration, and eligibility conditions.</p>
+          </div>
+        </div>
+      </div>
+    </section>
   </main>
+
+  <footer><div class="shell">THE BORDER DESK · INDEPENDENT COMPARISON · DATA ATTRIBUTED TO PASSPORT INDEX · BUILT AS A SELF-CONTAINED OFFLINE BRIEFING</div></footer>
 
   <script id="app">
   (() => {
@@ -4657,6 +4950,216 @@
       };
     }
 
+    function summarize(data) {
+      const summary = Object.fromEntries(PASSPORTS.map(({ code }) => [code, {
+        wins: 0,
+        tiedBest: 0,
+        behind: 0,
+        advantages: [],
+        lacks: [],
+      }]));
+
+      for (const row of data) {
+        const outcome = rowOutcome(row);
+
+        for (const { code } of PASSPORTS) {
+          const metrics = summary[code];
+          if (outcome.winners.includes(code)) {
+            if (outcome.winners.length === 1) {
+              metrics.wins += 1;
+              metrics.advantages.push(row.destination);
+            } else {
+              metrics.tiedBest += 1;
+            }
+          } else {
+            metrics.behind += 1;
+            metrics.lacks.push({
+              destination: row.destination,
+              winners: outcome.winners,
+              own: row[code],
+              best: outcome.best,
+            });
+          }
+        }
+      }
+
+      return summary;
+    }
+
+    function differenceScore(row) {
+      const entries = PASSPORTS.map(({ code }) => row[code]);
+      const ranks = entries.map((entry) => TYPE_RANK[entry.type] ?? TYPE_RANK.unknown);
+      const statedDays = entries.map((entry) => entry.days).filter((days) => days != null);
+      const rankSpread = Math.max(...ranks) - Math.min(...ranks);
+      const daySpread = statedDays.length > 1
+        ? Math.max(...statedDays) - Math.min(...statedDays)
+        : 0;
+      return (rankSpread * 1000) + daySpread;
+    }
+
+    function filterRows(data, requestedState = {}) {
+      const state = {
+        search: '',
+        type: 'all',
+        advantage: 'all',
+        differencesOnly: false,
+        sort: 'destination',
+        ...requestedState,
+      };
+      const search = String(state.search).trim().toLocaleLowerCase();
+
+      const rows = data.filter((row) => {
+        const outcome = rowOutcome(row);
+        if (search && !row.destination.toLocaleLowerCase().includes(search)) return false;
+        if (state.type !== 'all' && !PASSPORTS.some(({ code }) => row[code].type === state.type)) return false;
+        if (
+          state.advantage !== 'all'
+          && (!outcome.winners.includes(state.advantage) || outcome.winners.length === PASSPORTS.length)
+        ) return false;
+        if (state.differencesOnly && outcome.winners.length === PASSPORTS.length) return false;
+        return true;
+      });
+
+      if (state.sort === 'difference') {
+        rows.sort((a, b) => differenceScore(b) - differenceScore(a)
+          || a.destination.localeCompare(b.destination));
+      } else {
+        rows.sort((a, b) => a.destination.localeCompare(b.destination));
+      }
+
+      return rows;
+    }
+
+    function escapeHtml(value) {
+      return String(value).replace(/[&<>"]/g, (character) => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;',
+      })[character]);
+    }
+
+    function passportName(code) {
+      return PASSPORTS.find((passport) => passport.code === code)?.name || code.toUpperCase();
+    }
+
+    function statusMarkup(entry, isBest = false) {
+      const star = isBest ? '<span aria-hidden="true">★</span>' : '';
+      const accessiblePrefix = isBest ? '<span class="sr-only">Best result: </span>' : '';
+      return `<span class="status type-${escapeHtml(entry.type)}">${star}${accessiblePrefix}${escapeHtml(entry.raw)}</span>`;
+    }
+
+    function renderSummary() {
+      const summary = summarize(DESTINATIONS);
+      const grid = document.querySelector('#summary-grid');
+
+      grid.innerHTML = PASSPORTS.map((passport, index) => {
+        const metrics = summary[passport.code];
+        const advantages = metrics.advantages.slice(0, 3);
+        const gaps = metrics.lacks.slice(0, 3);
+        const advantageItems = advantages.length
+          ? advantages.map((destination) => `<li>${escapeHtml(destination)}</li>`).join('')
+          : '<li>No sole wins; strength comes from shared top access</li>';
+        const gapItems = gaps.length
+          ? gaps.map((gap) => `<li><span>${escapeHtml(gap.destination)} — ${escapeHtml(gap.own.raw)} vs ${escapeHtml(gap.best.raw)}</span></li>`).join('')
+          : '<li>No gaps against this group</li>';
+
+        return `<article class="passport-card" data-code="${passport.code.toUpperCase()}" style="--order:${index}">
+          <div class="card-head"><div><h3 class="passport-name">${escapeHtml(passport.name)}</h3><div class="mobility">Mobility score · ${passport.mobility}</div></div><div class="passport-seal" aria-hidden="true">${passport.code.toUpperCase()}</div></div>
+          <div class="card-stats"><div class="stat"><strong>${metrics.wins}</strong><span>Outright wins</span></div><div class="stat"><strong>${metrics.tiedBest}</strong><span>Tied best</span></div><div class="stat"><strong>${metrics.behind}</strong><span>Behind</span></div></div>
+          <div class="card-list"><h4>What it adds alone</h4><ul>${advantageItems}</ul></div>
+          <div class="card-list gaps"><h4>First visible gaps</h4><ul>${gapItems}</ul></div>
+        </article>`;
+      }).join('');
+    }
+
+    function renderOverview() {
+      const host = document.querySelector('#winner-overview');
+      const uniqueWins = Object.fromEntries(PASSPORTS.map(({ code }) => [code, []]));
+      let sharedTop = 0;
+
+      for (const row of DESTINATIONS) {
+        const winners = rowOutcome(row).winners;
+        if (winners.length === 1) uniqueWins[winners[0]].push(row.destination);
+        else sharedTop += 1;
+      }
+
+      host.innerHTML = PASSPORTS.map(({ code, name }) => `<article class="overview-cell">
+        <h3>${escapeHtml(name)} alone</h3>
+        <strong>${uniqueWins[code].length}</strong>
+        <p class="destination-sample">${uniqueWins[code].slice(0, 6).map(escapeHtml).join(' · ') || 'No exclusive destination lead'}</p>
+      </article>`).join('') + `<article class="overview-cell"><h3>Shared top access</h3><strong>${sharedTop}</strong><p class="destination-sample">Destinations where two or more passports produce an equal strongest result.</p></article>`;
+    }
+
+    function renderTable(rows) {
+      const body = document.querySelector('#destination-body');
+      const empty = document.querySelector('#empty-state');
+      const displayOrder = ['al', 'gr', 'de', 'us'];
+
+      empty.hidden = rows.length !== 0;
+      body.innerHTML = rows.map((row) => {
+        const outcome = rowOutcome(row);
+        const isUniversalTie = outcome.winners.length === PASSPORTS.length;
+        const cells = displayOrder.map((code) => {
+          const isBest = !isUniversalTie && outcome.winners.includes(code);
+          return `<td class="${isBest ? 'is-best' : ''}">${statusMarkup(row[code], isBest)}</td>`;
+        }).join('');
+        const winnerCopy = isUniversalTie
+          ? '<strong>All equal</strong>No practical difference'
+          : `<strong>${outcome.winners.map(passportName).map(escapeHtml).join(' + ')}</strong>${outcome.winners.length === 1 ? 'Outright lead' : 'Shared lead'}`;
+        return `<tr><th scope="row">${escapeHtml(row.destination)}</th>${cells}<td class="winner-cell">${winnerCopy}</td></tr>`;
+      }).join('');
+    }
+
+    function init() {
+      const controls = {
+        search: document.querySelector('#search'),
+        type: document.querySelector('#entry-type'),
+        advantage: document.querySelector('#advantage'),
+        sort: document.querySelector('#sort'),
+        differencesOnly: document.querySelector('#differences-only'),
+        albaniaQuick: document.querySelector('#albania-quick'),
+        reset: document.querySelector('#reset'),
+        resultCount: document.querySelector('#result-count'),
+      };
+      const state = {
+        search: '',
+        type: 'all',
+        advantage: 'all',
+        differencesOnly: true,
+        sort: 'destination',
+      };
+
+      function render() {
+        const rows = filterRows(DESTINATIONS, state);
+        renderTable(rows);
+        controls.resultCount.textContent = `Showing ${rows.length} of ${DESTINATIONS.length} destinations`;
+        controls.albaniaQuick.setAttribute('aria-pressed', String(state.advantage === 'al'));
+      }
+
+      controls.search.addEventListener('input', () => { state.search = controls.search.value; render(); });
+      controls.type.addEventListener('change', () => { state.type = controls.type.value; render(); });
+      controls.advantage.addEventListener('change', () => { state.advantage = controls.advantage.value; render(); });
+      controls.sort.addEventListener('change', () => { state.sort = controls.sort.value; render(); });
+      controls.differencesOnly.addEventListener('change', () => { state.differencesOnly = controls.differencesOnly.checked; render(); });
+      controls.albaniaQuick.addEventListener('click', () => {
+        state.advantage = state.advantage === 'al' ? 'all' : 'al';
+        controls.advantage.value = state.advantage;
+        render();
+      });
+      controls.reset.addEventListener('click', () => {
+        Object.assign(state, { search: '', type: 'all', advantage: 'all', differencesOnly: false, sort: 'destination' });
+        controls.search.value = '';
+        controls.type.value = 'all';
+        controls.advantage.value = 'all';
+        controls.sort.value = 'destination';
+        controls.differencesOnly.checked = false;
+        render();
+        controls.search.focus();
+      });
+
+      renderSummary();
+      renderOverview();
+      render();
+    }
+
     globalThis.PassportDashboard = {
       PASSPORTS,
       DESTINATIONS,
@@ -4664,7 +5167,14 @@
       classifyEntry,
       compareEntries,
       rowOutcome,
+      summarize,
+      differenceScore,
+      filterRows,
     };
+
+    if (typeof document !== 'undefined') {
+      document.addEventListener('DOMContentLoaded', init);
+    }
   })();
   </script>
 </body>

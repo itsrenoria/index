@@ -245,7 +245,7 @@ test('direct comparison rows land in the correct positive and negative buckets',
   assert.ok(destinations(result.bothNegative).has('AFGHANISTAN'));
 });
 
-test('page contains destination-first search and all direct comparisons without bundle controls', () => {
+test('page contains destination-first search and direct comparisons without bundle controls', () => {
   const { html } = loadPage();
   assert.equal((html.match(/<h1\b/g) || []).length, 1);
   assert.match(html, /id="destination-search"/);
@@ -258,6 +258,26 @@ test('page contains destination-first search and all direct comparisons without 
   assert.doesNotMatch(html, /Bundle scenarios/);
   assert.doesNotMatch(html, /id="destination-explorer"/);
   assert.doesNotMatch(html, /const SCENARIOS|function bundleAccess|function compareBundles|function buildScenario|\.scenario-card|\.bundle-scoreboard|\.outcome-grid/);
+});
+
+test('Direct comparisons starts empty with two destination-style passport selectors', () => {
+  const { html } = loadPage();
+  assert.match(html, /id="comparison-left-selector"/);
+  assert.match(html, /id="comparison-right-selector"[^>]+disabled/);
+  assert.match(html, /id="comparison-status"[^>]+aria-live="polite"/);
+  assert.match(html, /id="direct-comparisons"[\s\S]*?Choose two passports to compare\./);
+  assert.doesNotMatch(html, /DIRECT_COMPARISONS\.map\(comparisonCardMarkup\)/);
+});
+
+test('Direct comparisons renders one card only for two distinct passports', () => {
+  const { html } = loadPage();
+  assert.match(html, /let selectedComparisonLeft = '';/);
+  assert.match(html, /let selectedComparisonRight = '';/);
+  assert.match(html, /function renderSelectedComparison\(\)[\s\S]*?!selectedComparisonLeft \|\| !selectedComparisonRight[\s\S]*?Choose two passports to compare\./);
+  assert.match(html, /comparisonCardMarkup\(\{[\s\S]*?left: selectedComparisonLeft,[\s\S]*?right: selectedComparisonRight/);
+  assert.match(html, /disabled: code === selectedComparisonLeft/);
+  assert.match(html, /comparisonRightSelector\.setDisabled\(!selectedComparisonLeft\)/);
+  assert.match(html, /selectedComparisonRight === selectedComparisonLeft[\s\S]*?setValue\(''\)/);
 });
 
 test('section content is concise and descriptive', () => {

@@ -125,6 +125,8 @@
     .access-pill.home, .access-pill.visa-free, .access-pill.eta, .access-pill.evisitor, .access-pill.entry-form { color: var(--v2-green); background: var(--v2-soft-green); }
     .access-pill.on-arrival { color: #75520d; background: #f0e1b7; }
     .access-pill.evisa, .access-pill.visa-needed, .access-pill.not-admitted { color: var(--v2-red); background: var(--v2-soft-red); }
+    .selector-grid { display: grid; gap: .8rem; margin-bottom: 1rem; }
+    .section-empty { margin: 0; padding: 1.2rem; border: 1px solid var(--v2-rule); background: var(--v2-card); color: var(--v2-muted); font-size: .8rem; }
     .comparison-grid { display: grid; gap: 1rem; }
     .comparison-card { min-width: 0; border: 1px solid var(--v2-rule); background: var(--v2-card); box-shadow: 6px 7px 0 rgba(23,33,29,.04); }
     .comparison-head { display: grid; grid-template-columns: 1fr 34px 1fr; align-items: center; padding: 1rem; border-bottom: 2px solid var(--v2-ink); }
@@ -194,6 +196,7 @@
       .search-panel { display: grid; grid-template-columns: minmax(0, .8fr) minmax(0, 1.2fr); gap: 1.5rem 2rem; align-items: end; padding: 1.5rem; }
       .search-intro > p:last-child { margin-bottom: 0; }
       .destination-results { grid-column: 1 / -1; }
+      .comparison-selector-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .unique-columns { grid-template-columns: 1fr 1fr; }
       .unique-side + .unique-side { border-top: 0; border-left: 1px solid var(--v2-rule); }
       .passport-browser-controls { grid-template-columns: minmax(0, 1fr) auto; align-items: center; }
@@ -254,7 +257,20 @@
     <section class="bundle-section" id="comparisons" aria-labelledby="comparisons-title">
       <div class="bundle-shell">
         <div class="bundle-section-head"><h2 id="comparisons-title">Direct comparisons</h2><p>Destinations available to only one of the two passports.</p></div>
-        <div class="comparison-grid" id="direct-comparisons"></div>
+        <div class="selector-grid comparison-selector-grid">
+          <div class="choice-selector" id="comparison-left-control" data-choice-selector>
+            <label for="comparison-left-selector">First passport</label>
+            <div class="choice-selector-shell"><button class="choice-selector-trigger" id="comparison-left-selector" type="button" role="combobox" aria-expanded="false" aria-controls="comparison-left-options">Choose passport</button><button class="choice-selector-clear" type="button" aria-label="Clear first passport" hidden>×</button><button class="choice-selector-arrow" type="button" aria-label="Browse first passport options" aria-expanded="false" aria-controls="comparison-left-options"></button></div>
+            <ul class="choice-selector-options" id="comparison-left-options" role="listbox" hidden></ul>
+          </div>
+          <div class="choice-selector" id="comparison-right-control" data-choice-selector>
+            <label for="comparison-right-selector">Second passport</label>
+            <div class="choice-selector-shell"><button class="choice-selector-trigger" id="comparison-right-selector" type="button" role="combobox" aria-expanded="false" aria-controls="comparison-right-options" disabled>Choose passport</button><button class="choice-selector-clear" type="button" aria-label="Clear second passport" hidden>×</button><button class="choice-selector-arrow" type="button" aria-label="Browse second passport options" aria-expanded="false" aria-controls="comparison-right-options" disabled></button></div>
+            <ul class="choice-selector-options" id="comparison-right-options" role="listbox" hidden></ul>
+          </div>
+        </div>
+        <p class="live-status" id="comparison-status" aria-live="polite" aria-atomic="true">Choose two passports to compare.</p>
+        <div class="comparison-grid" id="direct-comparisons"><p class="section-empty">Choose two passports to compare.</p></div>
       </div>
     </section>
 
@@ -5080,8 +5096,23 @@
       document.querySelector('#destination-results').innerHTML = destinationResultMarkup(row);
     }
 
-    function renderDirectComparisons() {
-      document.querySelector('#direct-comparisons').innerHTML = DIRECT_COMPARISONS.map(comparisonCardMarkup).join('');
+    let selectedComparisonLeft = '';
+    let selectedComparisonRight = '';
+
+    function renderSelectedComparison() {
+      const host = document.querySelector('#direct-comparisons');
+      const status = document.querySelector('#comparison-status');
+      if (!selectedComparisonLeft || !selectedComparisonRight) {
+        host.innerHTML = '<p class="section-empty">Choose two passports to compare.</p>';
+        status.textContent = 'Choose two passports to compare.';
+        return;
+      }
+      host.innerHTML = comparisonCardMarkup({
+        id: `${selectedComparisonLeft}-${selectedComparisonRight}`,
+        left: selectedComparisonLeft,
+        right: selectedComparisonRight,
+      });
+      status.textContent = `Comparing ${passportName(selectedComparisonLeft)} and ${passportName(selectedComparisonRight)}.`;
     }
 
     let selectedPassportCode = 'al';
@@ -5228,9 +5259,38 @@
       });
 
       renderPassportCards();
-      renderDirectComparisons();
       renderDestination(findDestination(DESTINATIONS, destinationSelect.value));
       renderPassportBrowser();
+
+      const passportSelectorOptions = () => PASSPORTS.map(({ code, name }) => ({ value: code, label: name }));
+      let comparisonRightSelector;
+      const comparisonLeftSelector = initChoiceSelector(document.querySelector('#comparison-left-control'), {
+        options: passportSelectorOptions,
+        placeholder: 'Choose passport',
+        onChange: (value) => {
+          selectedComparisonLeft = value;
+          if (!selectedComparisonLeft || selectedComparisonRight === selectedComparisonLeft) {
+            selectedComparisonRight = '';
+            comparisonRightSelector.setValue('');
+          }
+          comparisonRightSelector.setDisabled(!selectedComparisonLeft);
+          comparisonRightSelector.refresh();
+          renderSelectedComparison();
+        },
+      });
+      comparisonRightSelector = initChoiceSelector(document.querySelector('#comparison-right-control'), {
+        options: () => PASSPORTS.map(({ code, name }) => ({
+          value: code,
+          label: name,
+          disabled: code === selectedComparisonLeft,
+        })),
+        placeholder: 'Choose passport',
+        onChange: (value) => {
+          selectedComparisonRight = value;
+          renderSelectedComparison();
+        },
+      });
+      comparisonRightSelector.setDisabled(true);
 
       const closeDestinationOptions = () => {
         destinationOptions.hidden = true;

@@ -199,3 +199,9 @@ test('screen-reader context is visually hidden without removing it from accessib
   const { html } = loadPage();
   assert.match(html, /\.sr-only\s*\{[^}]*position:\s*absolute[^}]*clip:/s);
 });
+
+test('skip link stays hidden until keyboard focus', () => {
+  const { html } = loadPage();
+  assert.match(html, /\.skip-link\s*\{[^}]*position:\s*fixed[^}]*transform:\s*translateY\(-200%\)/s);
+  assert.match(html, /\.skip-link:focus\s*\{[^}]*transform:\s*translateY\(0\)/s);
+});

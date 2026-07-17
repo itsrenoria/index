@@ -23,6 +23,8 @@
     body { background: var(--v2-paper); color: var(--v2-ink); font-family: var(--v2-sans); }
     body::before { opacity: .18; }
     .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; }
+    .skip-link { position: fixed; z-index: 10; top: .75rem; left: .75rem; padding: .7rem .9rem; transform: translateY(-200%); border: 2px solid var(--v2-ink); background: var(--v2-card); color: var(--v2-ink); font-weight: 800; }
+    .skip-link:focus { transform: translateY(0); }
     .bundle-shell { width: min(calc(100% - 32px), 1040px); margin-inline: auto; }
     .bundle-masthead { display: flex; align-items: center; justify-content: space-between; min-height: 64px; border-bottom: 1px solid var(--v2-rule); }
     .bundle-brand { display: flex; align-items: center; gap: .65rem; font: 800 .68rem/1 var(--v2-mono); letter-spacing: .08em; text-transform: uppercase; }

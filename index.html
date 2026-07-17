@@ -93,9 +93,9 @@
     .rank-pill { font: 800 .52rem/1.2 var(--v2-mono); letter-spacing: .04em; text-transform: uppercase; }
     .rank-pill.positive { color: var(--v2-green); }
     .rank-pill.negative { color: var(--v2-red); }
-    .access-pill.free-precleared { color: var(--v2-green); background: var(--v2-soft-green); }
+    .access-pill.home, .access-pill.visa-free, .access-pill.eta, .access-pill.evisitor, .access-pill.entry-form { color: var(--v2-green); background: var(--v2-soft-green); }
     .access-pill.on-arrival { color: #75520d; background: #f0e1b7; }
-    .access-pill.visa-needed { color: var(--v2-red); background: var(--v2-soft-red); }
+    .access-pill.evisa, .access-pill.visa-needed, .access-pill.not-admitted { color: var(--v2-red); background: var(--v2-soft-red); }
     .comparison-grid { display: grid; gap: 1rem; }
     .comparison-card { min-width: 0; border: 1px solid var(--v2-rule); background: var(--v2-card); box-shadow: 6px 7px 0 rgba(23,33,29,.04); }
     .comparison-head { display: grid; grid-template-columns: 1fr 34px 1fr; align-items: center; padding: 1rem; border-bottom: 2px solid var(--v2-ink); }
@@ -138,6 +138,11 @@
     .passport-browser-status { display: flex; align-items: flex-start; justify-content: space-between; gap: .75rem; min-width: 0; }
     .passport-browser-raw { min-width: 0; color: var(--v2-muted); font: .62rem/1.4 var(--v2-mono); overflow-wrap: anywhere; }
     .passport-browser-badges { display: flex; flex: 0 0 auto; flex-wrap: wrap; justify-content: flex-end; gap: .3rem; }
+    @media (max-width: 480px) {
+      .section-nav-list { justify-content: space-between; gap: 0; overflow-x: visible; }
+      .section-nav li { flex: 1 1 25%; }
+      .section-nav a { justify-content: center; padding-inline: .35rem; }
+    }
     @media (min-width: 760px) {
       .bundle-hero { padding: clamp(4rem, 7vw, 5.2rem) 0 var(--section-space); }
       .weight-note { grid-column: 1 / -1; grid-template-columns: repeat(2, minmax(0, 1fr)); margin: .25rem 0 0; }
@@ -171,10 +176,10 @@
   </header>
   <nav class="section-nav" aria-label="Page sections">
     <ul class="bundle-shell section-nav-list">
-      <li><a href="#destination-search">Check destination</a></li>
-      <li><a href="#passport-reach">Passport reach</a></li>
-      <li><a href="#comparisons">Comparisons</a></li>
-      <li><a href="#passport-browser">Browse one passport</a></li>
+      <li><a href="#destination-search">Check</a></li>
+      <li><a href="#passport-reach">Reach</a></li>
+      <li><a href="#comparisons">Compare</a></li>
+      <li><a href="#passport-browser">Browse</a></li>
     </ul>
   </nav>
 
@@ -191,8 +196,8 @@
       <div class="destination-control"><label for="destination-select">Destination</label><div class="destination-control-shell"><input id="destination-select" type="search" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="destination-options" autocomplete="off" placeholder="Try Viet Nam"><button class="destination-dropdown-trigger" id="destination-dropdown" type="button" aria-label="Browse destinations" aria-expanded="false" aria-controls="destination-options"></button></div><ul class="destination-options" id="destination-options" role="listbox" hidden></ul></div>
       <div class="destination-results" id="destination-results" aria-live="polite"></div>
       <aside class="weight-note" aria-label="Access legend">
-        <div class="weight-row"><span class="weight-badge free">Free entry</span><span>Visa-free and ETA/eVisitor access is normally free or pre-cleared.</span></div>
-        <div class="weight-row"><span class="weight-badge arrival">On arrival</span><span>Visa on arrival may include a border fee.</span></div>
+        <div class="weight-row"><span class="weight-badge free">Free entry</span><span>Visa-free, ETA or eVisitor.</span></div>
+        <div class="weight-row"><span class="weight-badge arrival">On arrival</span><span>May include a border fee.</span></div>
       </aside>
     </section>
 
@@ -4844,10 +4849,17 @@
       return POSITIVE_TYPES.has(entry?.type) ? 'positive' : 'negative';
     }
 
-    function accessMode(entry) {
-      if (entry?.type === 'visa-on-arrival') return 'on-arrival';
-      if (accessWeight(entry) === 'positive') return 'free-precleared';
-      return 'visa-needed';
+    function accessStatus(entry) {
+      if (entry?.type === 'eta') return /^EVISITORS\b/.test(entry.raw || '') ? 'evisitor' : 'eta';
+      return {
+        home: 'home',
+        'visa-free': 'visa-free',
+        registration: 'entry-form',
+        'visa-on-arrival': 'on-arrival',
+        evisa: 'evisa',
+        'visa-required': 'visa-needed',
+        'not-admitted': 'not-admitted',
+      }[entry?.type] || 'visa-needed';
     }
 
     function summarizePassport(data, passportCode) {
@@ -4857,9 +4869,9 @@
 
     function summarizePassportModes(data, passportCode) {
       const summary = summarizePassport(data, passportCode);
-      const freePrecleared = data.filter((row) => accessMode(row[passportCode]) === 'free-precleared').length;
-      const onArrival = data.filter((row) => accessMode(row[passportCode]) === 'on-arrival').length;
-      return { ...summary, freePrecleared, onArrival };
+      const visaFree = data.filter((row) => row[passportCode].type === 'visa-free').length;
+      const onArrival = data.filter((row) => row[passportCode].type === 'visa-on-arrival').length;
+      return { ...summary, visaFree, onArrival };
     }
 
     function normalizeDestinationQuery(value) {
@@ -4917,7 +4929,7 @@
       return `<article class="bundle-passport-card">
           <div class="bundle-passport-head"><h3>${escapeHtml(passport.name)}</h3><span class="bundle-seal" aria-hidden="true">${escapeHtml(passport.flag)}</span></div>
           <div class="access-number"><strong>${metrics.positive}</strong><span>positive destinations</span></div>
-          <div class="passport-meta"><span><strong>${metrics.freePrecleared}</strong>Free / pre-cleared</span><span><strong>${metrics.onArrival}</strong>On arrival</span><span><strong>${metrics.negative}</strong>Negative</span><span><strong>${passport.mobility}</strong>Passport Index score</span></div>
+          <div class="passport-meta"><span><strong>${metrics.visaFree}</strong>Visa free</span><span><strong>${metrics.onArrival}</strong>On arrival</span><span><strong>${metrics.negative}</strong>Negative</span><span><strong>${passport.mobility}</strong>Passport Index score</span></div>
         </article>`;
     }
 
@@ -4926,20 +4938,26 @@
       host.innerHTML = PASSPORTS.map((passport) => passportCardMarkup(passport, DESTINATIONS)).join('');
     }
 
-    function modeLabel(mode) {
+    function statusLabel(status) {
       return {
-        'free-precleared': 'Free / pre-cleared',
+        home: 'Home country',
+        'visa-free': 'Visa free',
+        eta: 'ETA',
+        evisitor: 'eVisitor',
+        'entry-form': 'Entry form',
         'on-arrival': 'On arrival',
-        'visa-needed': 'Visa needed / restricted',
-      }[mode];
+        evisa: 'eVisa',
+        'visa-needed': 'Visa needed',
+        'not-admitted': 'Not admitted',
+      }[status];
     }
 
     function destinationResultMarkup(row) {
       return PASSPORTS.map((passport) => {
-        const mode = accessMode(row[passport.code]);
+        const status = accessStatus(row[passport.code]);
         const rank = accessWeight(row[passport.code]);
         const rankLabel = rank === 'positive' ? 'Positive' : 'Negative';
-        return `<article class="destination-result"><div class="destination-result-copy"><strong>${escapeHtml(passport.name)}</strong><div class="source-labels">${escapeHtml(row[passport.code].raw)}</div></div><span class="status-stack"><span class="rank-pill ${rank}">${rankLabel}</span><span class="access-pill ${mode}">${modeLabel(mode)}</span></span></article>`;
+        return `<article class="destination-result"><div class="destination-result-copy"><strong>${escapeHtml(passport.name)}</strong><div class="source-labels">${escapeHtml(row[passport.code].raw)}</div></div><span class="status-stack"><span class="rank-pill ${rank}">${rankLabel}</span><span class="access-pill ${status}">${statusLabel(status)}</span></span></article>`;
       }).join('');
     }
 
@@ -4968,9 +4986,9 @@
       const rows = data.map((row) => {
         const entry = row[passportCode];
         const rank = accessWeight(entry);
-        const mode = accessMode(entry);
+        const status = accessStatus(entry);
         const rankLabel = rank === 'positive' ? 'Positive' : 'Negative';
-        return `<li class="passport-browser-row"><span class="destination-name">${escapeHtml(row.destination)}</span><span class="passport-browser-status"><span class="passport-browser-raw">${escapeHtml(entry.raw)}</span><span class="passport-browser-badges"><span class="rank-pill ${rank}">${rankLabel}</span><span class="access-pill ${mode}">${modeLabel(mode)}</span></span></span></li>`;
+        return `<li class="passport-browser-row"><span class="destination-name">${escapeHtml(row.destination)}</span><span class="passport-browser-status"><span class="passport-browser-raw">${escapeHtml(entry.raw)}</span><span class="passport-browser-badges"><span class="rank-pill ${rank}">${rankLabel}</span><span class="access-pill ${status}">${statusLabel(status)}</span></span></span></li>`;
       }).join('');
       return `<div class="passport-browser-summary"><strong>${escapeHtml(passport.name)}</strong><span>${data.length} destinations</span></div><ol class="passport-browser-list">${rows}</ol>`;
     }
@@ -5105,7 +5123,8 @@
       DESTINATIONS,
       POSITIVE_TYPES,
       accessWeight,
-      accessMode,
+      accessStatus,
+      statusLabel,
       summarizePassport,
       summarizePassportModes,
       findDestination,

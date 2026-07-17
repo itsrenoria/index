@@ -29,13 +29,24 @@ test('access weights group convenient and visa-needed entries', () => {
   assert.equal(api.accessWeight({ type: 'not-admitted' }), 'negative');
 });
 
-test('access annotation separates free or pre-cleared entry from arrival entry', () => {
+test('access status uses direct entry labels', () => {
   const { api } = loadPage();
-  assert.equal(api.accessMode({ type: 'visa-free' }), 'free-precleared');
-  assert.equal(api.accessMode({ type: 'eta' }), 'free-precleared');
-  assert.equal(api.accessMode({ type: 'registration' }), 'free-precleared');
-  assert.equal(api.accessMode({ type: 'visa-on-arrival' }), 'on-arrival');
-  assert.equal(api.accessMode({ type: 'evisa' }), 'visa-needed');
+  const cases = [
+    [{ type: 'home', raw: 'HOME COUNTRY' }, 'home', 'Home country'],
+    [{ type: 'visa-free', raw: 'VISA-FREE 90' }, 'visa-free', 'Visa free'],
+    [{ type: 'eta', raw: 'ETA 90' }, 'eta', 'ETA'],
+    [{ type: 'eta', raw: 'EVISITORS 90' }, 'evisitor', 'eVisitor'],
+    [{ type: 'registration', raw: 'ARRIVAL CARD 90' }, 'entry-form', 'Entry form'],
+    [{ type: 'visa-on-arrival', raw: 'VISA ON ARRIVAL 30' }, 'on-arrival', 'On arrival'],
+    [{ type: 'evisa', raw: 'EVISA 30' }, 'evisa', 'eVisa'],
+    [{ type: 'visa-required', raw: 'VISA REQUIRED' }, 'visa-needed', 'Visa needed'],
+    [{ type: 'not-admitted', raw: 'NOT ADMITTED' }, 'not-admitted', 'Not admitted'],
+  ];
+  for (const [entry, status, label] of cases) {
+    assert.equal(api.accessStatus(entry), status);
+    assert.equal(api.statusLabel(status), label);
+  }
+  assert.equal(api.accessMode, undefined);
 });
 
 test('superseded helpers and unused styles are absent', () => {
@@ -98,7 +109,7 @@ test('typing and browsing share one integrated destination listbox', () => {
   assert.doesNotMatch(html, /<select[^>]+id="destination-dropdown"|<datalist/);
 });
 
-test('destination and comparison markup preserve exact source labels and access modes', () => {
+test('destination and comparison markup preserve exact source labels and direct statuses', () => {
   const { api } = loadPage();
   const vietNam = api.findDestination(api.DESTINATIONS, 'viet nam');
   const searchMarkup = api.destinationResultMarkup(vietNam);
@@ -108,8 +119,8 @@ test('destination and comparison markup preserve exact source labels and access 
   assert.match(searchMarkup, /EVISA 90/);
   assert.match(searchMarkup, /rank-pill positive[^>]*>Positive/);
   assert.match(searchMarkup, /rank-pill negative[^>]*>Negative/);
-  assert.match(searchMarkup, /Free \/ pre-cleared/);
-  assert.match(searchMarkup, /Visa needed/);
+  assert.match(searchMarkup, /access-pill visa-free[^>]*>Visa free/);
+  assert.match(searchMarkup, /access-pill evisa[^>]*>eVisa/);
   assert.match(comparisonMarkup, /VIET NAM/);
   assert.match(comparisonMarkup, /Germany:<\/b> VISA-FREE 45/);
   assert.match(comparisonMarkup, /United States:<\/b> EVISA 90/);
@@ -146,12 +157,26 @@ test('passport reach cards use circular country flags', () => {
   assert.match(html, /\.bundle-seal\s*\{[^}]*border-radius:\s*50%/s);
 });
 
-test('passport mode summaries split positive access into free-precleared and on-arrival', () => {
+test('passport reach reports exact visa-free and on-arrival counts', () => {
   const { api } = loadPage();
   for (const passport of api.PASSPORTS) {
     const summary = api.summarizePassportModes(api.DESTINATIONS, passport.code);
-    assert.equal(summary.freePrecleared + summary.onArrival, summary.positive, passport.code);
+    const exactVisaFree = api.DESTINATIONS.filter((row) => row[passport.code].type === 'visa-free').length;
+    assert.equal(summary.visaFree, exactVisaFree, passport.code);
     assert.equal(summary.positive + summary.negative, 199, passport.code);
+    const card = api.passportCardMarkup(passport, api.DESTINATIONS);
+    assert.match(card, new RegExp(`<strong>${exactVisaFree}<\\/strong>Visa free`));
+    assert.doesNotMatch(card, /Free \/ pre-cleared/);
+  }
+});
+
+test('search and passport browsing show home country as its own status', () => {
+  const { api } = loadPage();
+  for (const passport of api.PASSPORTS) {
+    const homeRow = api.DESTINATIONS.find((row) => row[passport.code].type === 'home');
+    assert.ok(homeRow, passport.code);
+    assert.match(api.destinationResultMarkup(homeRow), /access-pill home">Home country/);
+    assert.match(api.passportBrowserMarkup(api.DESTINATIONS, passport.code), /access-pill home">Home country/);
   }
 });
 
@@ -202,7 +227,7 @@ test('page contains destination-first search and all direct comparisons without 
   assert.doesNotMatch(html, /Bundle scenarios/);
   assert.doesNotMatch(html, /id="destination-explorer"/);
   assert.doesNotMatch(html, /const SCENARIOS|function bundleAccess|function compareBundles|function buildScenario|\.scenario-card|\.bundle-scoreboard|\.outcome-grid/);
-  assert.match(html, /Visa on arrival may (?:carry|include|involve) a (?:border )?fee/i);
+  assert.match(html, /May include a border fee\./);
 });
 
 test('section content is concise and descriptive', () => {
@@ -211,7 +236,7 @@ test('section content is concise and descriptive', () => {
   assert.match(html, /See the entry status for every passport\./);
   assert.match(html, /Access totals for each passport\./);
   assert.match(html, /Destinations available to only one of the two passports\./);
-  assert.match(html, /Visa on arrival may include a border fee\./);
+  assert.match(html, /May include a border fee\./);
   assert.match(html, /View every destination for one passport\./);
   assert.doesNotMatch(html, /recalculated|simplified model|shared access stays condensed|switching views/i);
 });
@@ -223,13 +248,16 @@ test('masthead navigation links to every primary section and the search legend f
   assert.doesNotMatch(html, /Passport comparisons|Four passports · six comparisons/i);
   assert.match(html, /<nav[^>]+class="section-nav"[^>]+aria-label="Page sections"/);
   for (const [target, label] of [
-    ['destination-search', 'Check destination'],
-    ['passport-reach', 'Passport reach'],
-    ['comparisons', 'Comparisons'],
-    ['passport-browser', 'Browse one passport'],
+    ['destination-search', 'Check'],
+    ['passport-reach', 'Reach'],
+    ['comparisons', 'Compare'],
+    ['passport-browser', 'Browse'],
   ]) {
     assert.match(html, new RegExp(`<a href="#${target}">${label}<\\/a>`));
   }
+  assert.match(html, /Visa-free, ETA or eVisitor\./);
+  assert.match(html, /May include a border fee\./);
+  assert.doesNotMatch(html, /normally free or pre-cleared|Visa on arrival may include/);
   const resultsIndex = html.indexOf('id="destination-results"');
   const legendIndex = html.indexOf('class="weight-note"');
   const reachIndex = html.indexOf('id="passport-reach"');
@@ -270,6 +298,7 @@ test('page styles are mobile-first with intentional card scrolling and touch tar
   assert.match(html, /scroll-snap-type:\s*x mandatory/);
   assert.match(html, /min-height:\s*44px/);
   assert.match(html, /@media \(min-width:\s*760px\)/);
+  assert.match(html, /@media \(max-width:\s*480px\)[\s\S]*?\.section-nav-list\s*\{[^}]*overflow-x:\s*visible/s);
   assert.match(html, /grid-template-columns:\s*repeat\(2,\s*minmax\(0,\s*1fr\)\)/);
   assert.ok(html.indexOf('.unique-list { max-height: 25rem') > html.indexOf('@media (min-width: 960px)'));
 });

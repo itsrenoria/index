@@ -246,8 +246,17 @@ test('section content is concise and descriptive', () => {
   assert.match(html, /See the entry status for every passport\./);
   assert.match(html, /Access totals for each passport\./);
   assert.match(html, /Destinations available to only one of the two passports\./);
-  assert.match(html, /View every destination for one passport\./);
+  assert.match(html, /Browse destinations by access status\./);
   assert.doesNotMatch(html, /recalculated|simplified model|shared access stays condensed|switching views/i);
+});
+
+test('destination result grid auto-fits home searches without a blank track', () => {
+  const { html } = loadPage();
+  assert.match(
+    html,
+    /\.destination-results\s*\{[^}]*grid-template-columns:\s*repeat\(auto-fit,\s*minmax\(min\(100%,\s*12rem\),\s*1fr\)\)/s,
+  );
+  assert.doesNotMatch(html, /\.destination-results\s*\{[^}]*grid-template-columns:\s*(?:1fr\s+1fr|repeat\(4,)/s);
 });
 
 test('unified masthead links to every primary section without the former legend', () => {

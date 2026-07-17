@@ -127,6 +127,10 @@ test('shared choice selectors match the Destination control', () => {
   assert.match(html, /\.choice-selector-options\s*\{[^}]*position:\s*absolute[^}]*top:\s*calc\(100% \+ 4px\)/s);
   assert.match(html, /function initChoiceSelector\(control, config\)/);
   assert.match(html, /event\.key === 'ArrowDown'[\s\S]*?event\.key === 'ArrowUp'[\s\S]*?event\.key === 'Enter'[\s\S]*?event\.key === 'Escape'/);
+  assert.match(html, /\.choice-selector-option\s*\{[^}]*min-height:\s*44px/s);
+  assert.match(html, /\.choice-selector-options\.opens-above\s*\{[^}]*top:\s*auto[^}]*bottom:\s*calc\(100% \+ 4px\)/s);
+  assert.match(html, /const spaceBelow = window\.innerHeight - bounds\.bottom - 8;[\s\S]*?const spaceAbove = bounds\.top - 8;[\s\S]*?classList\.toggle\('opens-above'/);
+  assert.match(html, /clear\.addEventListener\('click',[\s\S]*?choose\(config\.clearValue \|\| ''\);[\s\S]*?trigger\.focus\(\)/);
 });
 
 test('destination and comparison markup preserve exact source labels and direct statuses', () => {
@@ -352,7 +356,7 @@ test('Browse access filter includes ALL and groups exact statuses into three cho
   assert.deepEqual(
     Array.from(api.BROWSER_ACCESS_GROUPS, (group) => Array.from(group)),
     [
-      ['all', 'All'],
+      ['all', 'ALL'],
       ['visa-free', 'Visa free'],
       ['on-arrival', 'On arrival'],
       ['visa-needed', 'Visa needed'],

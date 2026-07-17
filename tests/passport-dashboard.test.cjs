@@ -259,14 +259,16 @@ test('destination result grid auto-fits home searches without a blank track', ()
   assert.doesNotMatch(html, /\.destination-results\s*\{[^}]*grid-template-columns:\s*(?:1fr\s+1fr|repeat\(4,)/s);
 });
 
-test('unified masthead links to every primary section without the former legend', () => {
+test('masthead brand resets the page and menu links reach every primary section', () => {
   const { html } = loadPage();
   const header = html.match(/<header class="site-header">[\s\S]*?<\/header>/)?.[0];
   assert.match(html, /<title>Passport Index<\/title>/);
   assert.match(html, /<span>Passport Index<\/span>/);
   assert.doesNotMatch(html, /Passport comparisons|Four passports · six comparisons/i);
   assert.ok(header);
-  assert.match(header, /<nav class="section-nav"/);
+  assert.match(header, /<a class="bundle-brand-link" href="\.\/" aria-label="Passport Index home">/);
+  assert.match(header, /<button[^>]+class="site-menu-toggle"[^>]+id="site-menu-toggle"[^>]+aria-expanded="false"[^>]+aria-controls="site-menu"[^>]+aria-label="Open page menu"/);
+  assert.match(header, /<nav class="section-nav" id="site-menu" aria-label="Page sections" hidden>/);
   assert.match(html, /<img class="bundle-mark"[^>]+src="data:image\/png;base64,/);
   assert.doesNotMatch(html, /<span class="bundle-mark">P<\/span>/);
   assert.match(html, /Passport access · country by country/i);
@@ -275,7 +277,6 @@ test('unified masthead links to every primary section without the former legend'
   assert.doesNotMatch(header, /199 DESTINATIONS/i);
   assert.doesNotMatch(html, /bundle-date/);
   assert.match(html, /@media \(max-width:\s*480px\)[\s\S]*?\.site-header/);
-  assert.match(html, /<nav[^>]+class="section-nav"[^>]+aria-label="Page sections"/);
   for (const [target, label] of [
     ['destination-search', 'Check'],
     ['passport-reach', 'Reach'],
@@ -284,16 +285,19 @@ test('unified masthead links to every primary section without the former legend'
   ]) {
     assert.match(html, new RegExp(`<a href="#${target}">${label}<\\/a>`));
   }
-  assert.match(html, /\.section-nav-list\s*\{[^}]*margin-inline:\s*auto[^}]*overflow-x:\s*auto[^}]*white-space:\s*nowrap/s);
+  assert.match(html, /\.section-nav\s*\{[^}]*position:\s*absolute[^}]*right:\s*0/s);
 });
 
-test('mobile header is one full-width segmented menu bar', () => {
+test('hamburger menu is compact on mobile and supports expected dismissal behavior', () => {
   const { html } = loadPage();
   assert.match(html, /@media \(max-width:\s*480px\)[\s\S]*?\.site-header \.bundle-shell\s*\{[^}]*width:\s*100%/s);
-  assert.match(html, /@media \(max-width:\s*480px\)[\s\S]*?\.bundle-masthead\s*\{[^}]*gap:\s*0/s);
-  assert.match(html, /@media \(max-width:\s*480px\)[\s\S]*?\.bundle-brand\s*\{[^}]*padding-inline:\s*\.5rem[^}]*border-right:\s*1px solid var\(--v2-rule\)/s);
-  assert.match(html, /@media \(max-width:\s*480px\)[\s\S]*?\.section-nav li \+ li\s*\{[^}]*border-left:\s*1px solid var\(--v2-rule\)/s);
-  assert.match(html, /@media \(max-width:\s*480px\)[\s\S]*?\.section-nav a\s*\{[^}]*min-height:\s*44px/s);
+  assert.match(html, /\.site-menu-toggle\s*\{[^}]*min-width:\s*44px[^}]*min-height:\s*44px/s);
+  assert.match(html, /function setSiteMenuOpen\(open\)[\s\S]*?siteMenu\.hidden = !open;[\s\S]*?aria-expanded[\s\S]*?Close page menu[\s\S]*?Open page menu/);
+  assert.match(html, /siteMenuToggle\.addEventListener\('click',[\s\S]*?setSiteMenuOpen/);
+  assert.match(html, /siteMenu\.addEventListener\('click',[\s\S]*?closest\('a'\)[\s\S]*?setSiteMenuOpen\(false\)/);
+  assert.match(html, /siteHeader\.addEventListener\('keydown',[\s\S]*?event\.key === 'Escape'[\s\S]*?setSiteMenuOpen\(false\)[\s\S]*?siteMenuToggle\.focus\(\)/);
+  assert.match(html, /document\.addEventListener\('pointerdown',[\s\S]*?!siteHeader\.contains\(event\.target\)[\s\S]*?setSiteMenuOpen\(false\)/);
+  assert.doesNotMatch(html, /\.section-nav-list\s*\{[^}]*overflow-x:\s*auto|\.section-nav li \+ li\s*\{[^}]*border-left/s);
 });
 
 test('destination listbox closes when keyboard focus leaves the composite control', () => {
@@ -327,19 +331,36 @@ test('Browse access filter groups direct statuses into three persistent choices'
   }
 });
 
-test('Browse access filter control offers exactly the three grouped choices', () => {
+test('Browse access filter matches the destination control and adds a clear option', () => {
   const { html } = loadPage();
-  const filterControl = html.match(/<label[^>]+for="passport-status-filter"[\s\S]*?<select[^>]+id="passport-status-filter"[\s\S]*?<\/select>/);
+  const filterControl = html.match(/<div class="passport-status-control">[\s\S]*?<\/div>\s*<\/div>/);
   assert.ok(filterControl, 'the access filter should have a visible label and select');
+  assert.match(filterControl[0], /class="destination-control-shell passport-status-shell"/);
+  assert.match(filterControl[0], /<button[^>]+id="passport-status-clear"[^>]+aria-label="Clear access status"/);
   assert.deepEqual(
-    Array.from(filterControl[0].matchAll(/<option value="([^"]+)">([^<]+)<\/option>/g), (match) => [match[1], match[2]]),
+    Array.from(filterControl[0].matchAll(/<option value="([^"]*)">([^<]+)<\/option>/g), (match) => [match[1], match[2]]),
     [
+      ['', 'Choose status'],
       ['visa-free', 'Visa free'],
       ['on-arrival', 'On arrival'],
       ['visa-needed', 'Visa needed'],
     ],
   );
   assert.doesNotMatch(filterControl[0], /All statuses|Home country|Not admitted/i);
+  assert.match(html, /\.passport-status-shell\s*\{[^}]*border:\s*1px solid #8d877c[^}]*background:\s*var\(--v2-card\)/s);
+  assert.match(html, /\.passport-status-clear\s*\{[^}]*min-width:\s*44px[^}]*min-height:\s*44px/s);
+});
+
+test('clearing Browse access status preserves the passport and prompts for a selection', () => {
+  const { html, api } = loadPage();
+  const markup = api.passportBrowserMarkup(api.DESTINATIONS, 'al', '');
+  assert.equal(api.filterPassportDestinations(api.DESTINATIONS, 'al', '').length, 0);
+  assert.match(markup, /Choose an access status to view destinations\./);
+  assert.doesNotMatch(markup, /passport-browser-row|destinations<\/span>/);
+  assert.match(html, /const passportStatusClear = document\.querySelector\('#passport-status-clear'\);/);
+  assert.match(html, /passportStatusClear\.addEventListener\('click',[\s\S]*?selectedPassportGroup = '';[\s\S]*?passportStatusFilter\.value = '';[\s\S]*?passportStatusClear\.hidden = true;[\s\S]*?renderPassportBrowser\(\);/);
+  assert.match(html, /passportStatusFilter\.addEventListener\('change',[\s\S]*?passportStatusClear\.hidden = !selectedPassportGroup;/);
+  assert.match(html, /selectedPassportGroup\s*\?\s*`Showing \$\{rows\.length\} destinations for \$\{passportName\(selectedPassportCode\)\}\.\s*`\s*:\s*`Choose an access status for \$\{passportName\(selectedPassportCode\)\}\.\s*`/);
 });
 
 test('passport browser filters counts while preserving direct status badges', () => {
@@ -383,7 +404,7 @@ test('page styles are mobile-first with intentional card scrolling and touch tar
   assert.match(html, /scroll-snap-type:\s*x mandatory/);
   assert.match(html, /min-height:\s*44px/);
   assert.match(html, /@media \(min-width:\s*760px\)/);
-  assert.match(html, /@media \(max-width:\s*480px\)[\s\S]*?\.section-nav-list\s*\{[^}]*overflow-x:\s*visible/s);
+  assert.match(html, /@media \(max-width:\s*480px\)[\s\S]*?\.section-nav\s*\{[^}]*right:\s*0[^}]*left:\s*0[^}]*width:\s*100%/s);
   assert.match(html, /grid-template-columns:\s*repeat\(2,\s*minmax\(0,\s*1fr\)\)/);
   assert.ok(html.indexOf('.unique-list { max-height: 25rem') > html.indexOf('@media (min-width: 960px)'));
 });

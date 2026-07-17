@@ -28,12 +28,25 @@
     .live-status { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; border: 0; }
     .bundle-shell { width: min(calc(100% - 32px), 1040px); margin-inline: auto; }
     .site-header { position: sticky; z-index: 8; top: 0; border-bottom: 1px solid var(--v2-ink); background: rgba(244,237,223,.97); backdrop-filter: blur(8px); }
-    .bundle-masthead { display: flex; align-items: center; min-height: 64px; }
+    .bundle-masthead { position: relative; display: flex; align-items: center; justify-content: space-between; min-height: 64px; }
+    .bundle-brand-link { color: inherit; text-decoration: none; }
+    .bundle-brand-link:focus-visible { outline: 3px solid #c9843b; outline-offset: 3px; }
     .bundle-brand { display: flex; flex: 0 0 auto; align-items: center; gap: .5rem; font: 800 .68rem/1 var(--v2-mono); letter-spacing: .08em; text-transform: uppercase; }
     .bundle-mark { display: block; width: 32px; height: 32px; object-fit: contain; }
-    .section-nav { min-width: 0; margin-left: auto; }
-    .section-nav-list { display: flex; gap: .25rem; margin-block: 0; margin-inline: auto; padding: .35rem 0; overflow-x: auto; white-space: nowrap; scrollbar-width: thin; list-style: none; }
-    .section-nav a { display: flex; align-items: center; min-height: 44px; padding: .55rem .75rem; color: var(--v2-ink); font: 800 .61rem/1.15 var(--v2-mono); letter-spacing: .04em; text-decoration: none; text-transform: uppercase; }
+    .site-menu-toggle { position: relative; display: grid; place-items: center; min-width: 44px; min-height: 44px; padding: 0; border: 1px solid var(--v2-ink); background: var(--v2-card); color: var(--v2-ink); cursor: pointer; }
+    .site-menu-toggle:focus-visible { outline: 3px solid #c9843b; outline-offset: 2px; }
+    .site-menu-icon, .site-menu-icon::before, .site-menu-icon::after { display: block; width: 18px; height: 2px; background: currentColor; content: ""; transition: transform .15s ease, opacity .15s ease; }
+    .site-menu-icon { position: relative; }
+    .site-menu-icon::before { position: absolute; top: -6px; }
+    .site-menu-icon::after { position: absolute; top: 6px; }
+    .site-menu-toggle[aria-expanded="true"] .site-menu-icon { background: transparent; }
+    .site-menu-toggle[aria-expanded="true"] .site-menu-icon::before { transform: translateY(6px) rotate(45deg); }
+    .site-menu-toggle[aria-expanded="true"] .site-menu-icon::after { transform: translateY(-6px) rotate(-45deg); }
+    .section-nav { position: absolute; z-index: 9; top: calc(100% + 1px); right: 0; width: min(18rem, calc(100vw - 32px)); border: 1px solid var(--v2-ink); background: var(--v2-card); box-shadow: 6px 7px 0 rgba(23,33,29,.12); }
+    .section-nav[hidden] { display: none; }
+    .section-nav-list { margin: 0; padding: .3rem; list-style: none; }
+    .section-nav li + li { border-top: 1px solid var(--v2-rule); }
+    .section-nav a { display: flex; align-items: center; min-height: 44px; padding: .7rem .75rem; color: var(--v2-ink); font: 800 .61rem/1.15 var(--v2-mono); letter-spacing: .04em; text-decoration: none; text-transform: uppercase; }
     .section-nav a:hover, .section-nav a:focus-visible { background: #eee3d2; outline: 2px solid var(--v2-green); outline-offset: -2px; }
     #destination-search, #passport-reach, #comparisons, #passport-browser { scroll-margin-block-start: 4rem; }
     .bundle-hero { padding: clamp(2.75rem, 8vw, 4rem) 0 clamp(2.25rem, 6vw, 3rem); }
@@ -124,10 +137,17 @@
     .passport-choice:hover { color: var(--v2-ink); background: rgba(255,250,241,.65); }
     .passport-choice[aria-pressed="true"] { border-color: var(--v2-ink); background: var(--v2-card); color: var(--v2-ink); box-shadow: 3px 3px 0 rgba(23,33,29,.08); }
     .passport-choice:focus-visible { outline: 3px solid #c9843b; outline-offset: 2px; }
-    .passport-status-control { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: .55rem; }
+    .passport-status-control { display: grid; gap: .4rem; }
     .passport-status-control label { color: var(--v2-muted); font: 800 .56rem/1.2 var(--v2-mono); letter-spacing: .06em; text-transform: uppercase; }
-    .passport-status-control select { min-height: 44px; padding: .55rem 2rem .55rem .65rem; border: 1px solid var(--v2-ink); border-radius: 0; background: var(--v2-card); color: var(--v2-ink); font: 800 .6rem/1.2 var(--v2-mono); text-transform: uppercase; }
-    .passport-status-control select:focus-visible { outline: 3px solid #c9843b; outline-offset: 2px; }
+    .passport-status-shell { position: relative; border: 1px solid #8d877c; background: var(--v2-card); }
+    .passport-status-shell::after { position: absolute; top: 50%; right: 18px; width: 8px; height: 8px; border-right: 2px solid currentColor; border-bottom: 2px solid currentColor; content: ""; pointer-events: none; transform: translateY(-65%) rotate(45deg); }
+    .passport-status-control select { flex: 1 1 auto; min-width: 0; min-height: 44px; padding: .65rem 5.4rem .65rem .75rem; border: 0; border-radius: 0; appearance: none; background: transparent; color: var(--v2-ink); font: 800 .6rem/1.2 var(--v2-mono); text-transform: uppercase; cursor: pointer; }
+    .passport-status-clear { position: relative; z-index: 1; flex: 0 0 44px; min-width: 44px; min-height: 44px; margin-right: 44px; padding: 0; border: 0; border-right: 1px solid var(--v2-rule); border-left: 1px solid var(--v2-rule); background: transparent; color: var(--v2-muted); font: 400 1.25rem/1 var(--v2-sans); cursor: pointer; }
+    .passport-status-clear:hover { background: #eee3d2; color: var(--v2-ink); }
+    .passport-status-clear[hidden] { display: none; }
+    .passport-status-shell:has(.passport-status-clear[hidden]) select { padding-right: 3rem; }
+    .passport-status-clear:focus-visible { outline: 3px solid #c9843b; outline-offset: -3px; }
+    .passport-browser-empty { margin: 0; padding: 1.5rem 1rem; color: var(--v2-muted); font: .82rem/1.5 var(--v2-sans); }
     .passport-browser-summary { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; padding: 1rem; border-bottom: 2px solid var(--v2-ink); }
     .passport-browser-summary strong { font: 600 1.35rem/1 var(--v2-serif); }
     .passport-browser-summary span { color: var(--v2-muted); font: 800 .56rem/1.2 var(--v2-mono); letter-spacing: .05em; text-transform: uppercase; }
@@ -140,14 +160,10 @@
     .passport-browser-badges { display: flex; flex: 0 0 auto; flex-wrap: wrap; justify-content: flex-end; gap: .3rem; }
     @media (max-width: 480px) {
       .site-header .bundle-shell { width: 100%; }
-      .bundle-masthead { min-height: 52px; gap: 0; }
-      .bundle-brand { align-self: stretch; gap: .25rem; padding-inline: .5rem; border-right: 1px solid var(--v2-rule); font-size: .5rem; letter-spacing: .02em; }
+      .bundle-masthead { min-height: 56px; padding-inline: .5rem; }
+      .bundle-brand { gap: .35rem; font-size: .58rem; letter-spacing: .04em; }
       .bundle-mark { width: 28px; height: 28px; }
-      .section-nav { flex: 1 1 auto; margin-left: 0; }
-      .section-nav-list { justify-content: space-between; gap: 0; overflow-x: visible; }
-      .section-nav li { flex: 1 1 25%; }
-      .section-nav li + li { border-left: 1px solid var(--v2-rule); }
-      .section-nav a { justify-content: center; min-height: 44px; padding-inline: .2rem; font-size: .5rem; letter-spacing: 0; }
+      .section-nav { right: 0; left: 0; width: 100%; }
     }
     @media (min-width: 760px) {
       .bundle-hero { padding: clamp(4rem, 7vw, 5.2rem) 0 var(--section-space); }
@@ -177,8 +193,11 @@
   <a class="skip-link" href="#destination-search">Skip to destination search</a>
   <header class="site-header">
     <div class="bundle-shell bundle-masthead">
+      <a class="bundle-brand-link" href="./" aria-label="Passport Index home">
       <div class="bundle-brand"><img class="bundle-mark" src="data:image/png;base64,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" alt=""><span>Passport Index</span></div>
-      <nav class="section-nav" aria-label="Page sections">
+      </a>
+      <button class="site-menu-toggle" id="site-menu-toggle" type="button" aria-expanded="false" aria-controls="site-menu" aria-label="Open page menu"><span class="site-menu-icon" aria-hidden="true"></span></button>
+      <nav class="section-nav" id="site-menu" aria-label="Page sections" hidden>
         <ul class="section-nav-list">
           <li><a href="#destination-search">Check</a></li>
           <li><a href="#passport-reach">Reach</a></li>
@@ -231,11 +250,15 @@
             </div>
             <div class="passport-status-control">
               <label for="passport-status-filter">Access status</label>
-              <select id="passport-status-filter">
-                <option value="visa-free">Visa free</option>
-                <option value="on-arrival">On arrival</option>
-                <option value="visa-needed">Visa needed</option>
-              </select>
+              <div class="destination-control-shell passport-status-shell">
+                <select id="passport-status-filter">
+                  <option value="">Choose status</option>
+                  <option value="visa-free">Visa free</option>
+                  <option value="on-arrival">On arrival</option>
+                  <option value="visa-needed">Visa needed</option>
+                </select>
+                <button class="passport-status-clear" id="passport-status-clear" type="button" aria-label="Clear access status">×</button>
+              </div>
             </div>
           </div>
           <p class="live-status" id="passport-browser-status" aria-live="polite" aria-atomic="true">Showing 80 destinations for Albania.</p>
@@ -5014,6 +5037,7 @@
     function passportBrowserMarkup(data, passportCode, group = 'visa-free') {
       const passport = PASSPORTS.find(({ code }) => code === passportCode);
       if (!passport) return '';
+      if (!group) return '<p class="passport-browser-empty">Choose an access status to view destinations.</p>';
       const filteredRows = filterPassportDestinations(data, passportCode, group);
       const rows = filteredRows.map((row) => {
         const entry = row[passportCode];
@@ -5041,17 +5065,46 @@
     function renderPassportBrowser() {
       const rows = filterPassportDestinations(DESTINATIONS, selectedPassportCode, selectedPassportGroup);
       document.querySelector('#passport-browser-results').innerHTML = passportBrowserMarkup(DESTINATIONS, selectedPassportCode, selectedPassportGroup);
-      document.querySelector('#passport-browser-status').textContent = `Showing ${rows.length} destinations for ${passportName(selectedPassportCode)}.`;
+      document.querySelector('#passport-browser-status').textContent = selectedPassportGroup
+        ? `Showing ${rows.length} destinations for ${passportName(selectedPassportCode)}.`
+        : `Choose an access status for ${passportName(selectedPassportCode)}.`;
     }
 
     function initDirectInterface() {
+      const siteHeader = document.querySelector('.site-header');
+      const siteMenuToggle = document.querySelector('#site-menu-toggle');
+      const siteMenu = document.querySelector('#site-menu');
       const destinationControl = document.querySelector('.destination-control');
       const destinationSelect = document.querySelector('#destination-select');
       const destinationDropdown = document.querySelector('#destination-dropdown');
       const destinationOptions = document.querySelector('#destination-options');
       const passportStatusFilter = document.querySelector('#passport-status-filter');
+      const passportStatusClear = document.querySelector('#passport-status-clear');
       destinationSelect.value = 'VIET NAM';
+      passportStatusFilter.value = selectedPassportGroup;
       let activeOptionIndex = -1;
+
+      function setSiteMenuOpen(open) {
+        siteMenu.hidden = !open;
+        siteMenuToggle.setAttribute('aria-expanded', String(open));
+        siteMenuToggle.setAttribute('aria-label', open ? 'Close page menu' : 'Open page menu');
+      }
+
+      siteMenuToggle.addEventListener('click', () => {
+        setSiteMenuOpen(siteMenu.hidden);
+      });
+      siteMenu.addEventListener('click', (event) => {
+        if (event.target.closest('a')) setSiteMenuOpen(false);
+      });
+      siteHeader.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && !siteMenu.hidden) {
+          setSiteMenuOpen(false);
+          siteMenuToggle.focus();
+        }
+      });
+      document.addEventListener('pointerdown', (event) => {
+        if (!siteHeader.contains(event.target)) setSiteMenuOpen(false);
+      });
 
       renderPassportCards();
       renderDirectComparisons();
@@ -5153,7 +5206,15 @@
       });
       passportStatusFilter.addEventListener('change', () => {
         selectedPassportGroup = passportStatusFilter.value;
+        passportStatusClear.hidden = !selectedPassportGroup;
         renderPassportBrowser();
+      });
+      passportStatusClear.addEventListener('click', () => {
+        selectedPassportGroup = '';
+        passportStatusFilter.value = '';
+        passportStatusClear.hidden = true;
+        renderPassportBrowser();
+        passportStatusFilter.focus();
       });
     }
 

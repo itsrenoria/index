@@ -11,6 +11,7 @@ Refine the Passport Index header, destination search, reach cards, and passport 
 - Save the final transparent PNG in the project and embed it as a data URI in `index.html` so the page remains self-contained.
 - Combine the brand and primary navigation into one sticky header row.
 - Keep the logo, `PASSPORT INDEX`, and all four navigation labels visible on mobile without wrapping or horizontal scrolling.
+- At mobile widths, render the header as one full-width segmented editorial bar: the brand is the first cell and each navigation link is an adjacent cell with subtle vertical dividers, a shared background, no loose gaps, and at least 44px touch height.
 - Remove the `2026 DATA / 199 DESTINATIONS` data stamp from the header at every viewport width.
 - Restore the red hero descriptor as `PASSPORT ACCESS · COUNTRY BY COUNTRY` above the main heading.
 
@@ -49,14 +50,19 @@ Refine the Passport Index header, destination search, reach cards, and passport 
 - Keep the direct entry-status badge such as `Visa free`, `ETA`, `eVisitor`, `Entry form`, `On arrival`, `eVisa`, `Visa needed`, `Home country`, or `Not admitted`.
 - Preserve the raw source label and full destination list.
 - Add one compact `Access status` dropdown beside the passport controls.
-- Offer `All statuses`, `Home country`, `Visa free`, `ETA`, `eVisitor`, `Entry form`, `On arrival`, `eVisa`, `Visa needed`, and `Not admitted` in that order.
-- Keep the selected status filter when switching passports so the same access type can be compared across passports.
-- Show the filtered count as `<visible> of 199 destinations`; show `199 destinations` for `All statuses`.
-- When a passport has no destinations for the selected status, show `No destinations match this status.` instead of an empty list.
+- Offer exactly `Visa free`, `On arrival`, and `Visa needed` in that order; default to `Visa free`.
+- `Visa free` includes direct statuses `visa-free`, `eta`, `evisitor`, and `entry-form`.
+- `On arrival` includes only direct status `on-arrival`.
+- `Visa needed` includes direct statuses `evisa` and `visa-needed`.
+- Do not offer `All statuses`, `Home country`, or `Not admitted`; home and not-admitted rows are outside these filtered Browse views.
+- Keep the selected grouped filter when switching passports so the same access group can be compared across passports.
+- Show the visible destination count for the selected group.
+- Continue showing each row's direct status badge, so grouped `Visa free` results still identify ETA, eVisitor, and Entry form, while grouped `Visa needed` results still identify eVisa and Visa needed.
 
 ## Responsive and Accessibility Requirements
 
 - The unified header must fit at 320px and 440px viewport widths without horizontal page or navigation scrolling.
+- The mobile brand and navigation must visually read as one segmented menu bar rather than disconnected labels.
 - Navigation links retain at least 44px touch height and visible keyboard focus.
 - The generated logo is decorative because the adjacent `PASSPORT INDEX` text names the brand; use empty alternative text or `aria-hidden="true"`.
 - Removing one home-passport result must not leave an unexplained blank grid cell.
@@ -64,7 +70,7 @@ Refine the Passport Index header, destination search, reach cards, and passport 
 ## Verification
 
 - Add failing tests before implementation for the restored descriptor, removed legend, home-passport omission, reconciled reach totals, and Browse badge simplification.
-- Add failing tests for the Browse filter options, filtering behavior, persistent filter state, filtered summary, and empty state.
+- Add failing tests for the three Browse groups, their exact options, grouped filtering behavior, persistent filter state, filtered counts, and preservation of direct row badges.
 - Verify the complete automated suite and `git diff --check`.
 - Inspect mobile and desktop layouts in Safari, including the 320px and 440px unified header.
 - Confirm the deployed GitHub Pages build matches the pushed commit and contains the revised copy and behavior.

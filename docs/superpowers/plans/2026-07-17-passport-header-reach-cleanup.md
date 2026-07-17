@@ -12,12 +12,13 @@
 
 - The page remains self-contained.
 - The unified header shows the logo, `PASSPORT INDEX`, and Check / Reach / Compare / Browse without wrapping or horizontal navigation scrolling at 320px and 440px.
+- At mobile widths, the brand and four navigation links form one full-width segmented bar with shared background, vertical dividers, no loose gaps, and at least 44px touch height.
 - The red hero descriptor is exactly `PASSPORT ACCESS · COUNTRY BY COUNTRY`.
 - The `2026 DATA / 199 DESTINATIONS` data stamp and its CSS are absent at every viewport width.
 - Reach `Visa free` combines `visa-free`, `eta`, and `registration`; Reach totals exclude `home`.
 - Destination search omits only the passport whose selected destination entry has type `home`.
 - Browse keeps direct status badges and removes Positive / Negative rank badges.
-- Browse provides one persistent direct-status dropdown with the exact options and empty-state copy from the spec.
+- Browse provides one persistent three-group dropdown and preserves direct status labels inside grouped results.
 - Preserve the root `.DS_Store` as an unrelated untracked file.
 
 ---
@@ -171,44 +172,37 @@ git commit -m "feat: unify passport header and navigation"
 
 **Interfaces:**
 - Consumes: `accessStatus(entry)`, `statusLabel(status)`, `PASSPORTS`, `DESTINATIONS`, and the existing passport-choice state.
-- Produces: `BROWSER_STATUS_OPTIONS`; `filterPassportDestinations(data, passportCode, status)`; `passportBrowserMarkup(data, passportCode, status = 'all')`; persistent `selectedPassportStatus`; one `#passport-status-filter` select control.
+- Produces: `BROWSER_ACCESS_GROUPS`; `filterPassportDestinations(data, passportCode, group)`; `passportBrowserMarkup(data, passportCode, group = 'visa-free')`; persistent `selectedPassportGroup`; one `#passport-status-filter` select control.
 
 - [ ] **Step 1: Write failing pure-filter tests**
 
-Assert that `BROWSER_STATUS_OPTIONS` equals:
+Assert that `BROWSER_ACCESS_GROUPS` equals:
 
 ```js
 [
-  ['all', 'All statuses'],
-  ['home', 'Home country'],
   ['visa-free', 'Visa free'],
-  ['eta', 'ETA'],
-  ['evisitor', 'eVisitor'],
-  ['entry-form', 'Entry form'],
   ['on-arrival', 'On arrival'],
-  ['evisa', 'eVisa'],
   ['visa-needed', 'Visa needed'],
-  ['not-admitted', 'Not admitted'],
 ]
 ```
 
-For every non-`all` option, assert that every returned row satisfies `accessStatus(row[passportCode]) === status`. Assert that `all` returns all 199 rows and that Albania filtered by `evisa` returns 47 rows.
+Assert that Albania `visa-free` returns 80 rows whose direct statuses are limited to `visa-free`, `eta`, `evisitor`, or `entry-form`; Albania `on-arrival` returns 27 direct `on-arrival` rows; and Albania `visa-needed` returns 91 rows whose direct statuses are `evisa` or `visa-needed`. Assert no group includes `home` or `not-admitted`.
 
 - [ ] **Step 2: Write failing markup and state tests**
 
-Assert that the HTML contains a labelled `#passport-status-filter` select with the exact options. Assert filtered markup reports `47 of 199 destinations`, contains only 47 list rows for Albania `evisa`, preserves `access-pill evisa`, and emits `No destinations match this status.` for Albania `not-admitted`. Assert both passport and status change listeners call one render function using the persistent selected values.
+Assert that the HTML contains a labelled `#passport-status-filter` select with exactly the three group options and no All/Home/Not admitted option. Assert Albania `visa-free` markup reports `80 destinations`, contains 80 list rows, and preserves direct `access-pill visa-free`, `access-pill eta`, and `access-pill entry-form` badges. Assert Albania `visa-needed` preserves both `access-pill evisa` and `access-pill visa-needed`. Assert both passport and group change listeners call one render function using the persistent selected values.
 
 - [ ] **Step 3: Run focused tests and verify RED**
 
 Run: `node --test --test-name-pattern="Browse access filter|passport browser" tests/passport-dashboard.test.cjs`
 
-Expected: FAIL because the filter constants, helper, control, state, and filtered rendering do not exist.
+Expected: FAIL because the group constants, helper, control, state, and grouped rendering do not exist.
 
 - [ ] **Step 4: Implement the minimal filter**
 
-Define the exact option list and pure filtering helper. Extend `passportBrowserMarkup` with a default `status = 'all'`, filter before row rendering, show `199 destinations` for all or `${rows.length} of ${data.length} destinations` for filtered results, and return the empty-state copy when no rows match.
+Define the exact three-group option list and a pure filtering helper that maps direct statuses to the selected group. Extend `passportBrowserMarkup` with a default `group = 'visa-free'`, filter before row rendering, and show `${rows.length} destinations` while leaving each row's direct badge unchanged.
 
-Add a compact labelled select beside the passport controls. Track `selectedPassportCode` and `selectedPassportStatus`; use one `renderPassportBrowser()` function from both change listeners without resetting the other selected value.
+Add a compact labelled select beside the passport controls. Track `selectedPassportCode` and `selectedPassportGroup`; use one `renderPassportBrowser()` function from both change listeners without resetting the other selected value.
 
 - [ ] **Step 5: Run focused and complete tests and verify GREEN**
 
@@ -231,7 +225,58 @@ git commit -m "feat: filter passport destinations by access status"
 
 ---
 
-### Task 4: Responsive Visual Verification and Publication
+### Task 4: Make the Mobile Header a Segmented Menu Bar
+
+**Files:**
+- Modify: `tests/passport-dashboard.test.cjs`
+- Modify: `index.html`
+
+**Interfaces:**
+- Consumes: `.site-header`, `.bundle-masthead`, `.bundle-brand`, `.section-nav`, and `.section-nav-list` from Task 2.
+- Produces: one full-width mobile segmented header with the brand as the first cell and four adjacent navigation cells.
+
+- [ ] **Step 1: Write failing mobile-menu and data-stamp regression tests**
+
+Assert the mobile media rule gives `.site-header .bundle-shell` full width, removes the nav gap, gives the brand a right divider, gives adjacent nav items dividers, and keeps link touch height at 44px. Replace the coupled data-stamp assertion with independent rejections:
+
+```js
+assert.doesNotMatch(html, /2026 DATA/i);
+assert.doesNotMatch(html, /199 DESTINATIONS/i);
+assert.doesNotMatch(html, /bundle-date/);
+```
+
+- [ ] **Step 2: Run focused tests and verify RED**
+
+Run: `node --test --test-name-pattern="mobile header|masthead" tests/passport-dashboard.test.cjs`
+
+Expected: FAIL because the mobile header has inset shell margins and no cell dividers, and because the former data-stamp test does not independently guard both labels.
+
+- [ ] **Step 3: Implement the smallest segmented-bar correction**
+
+Within the existing mobile media rule, make the header shell full width, add compact inline padding to the brand cell, add a right border between brand and nav, remove loose gaps, and add subtle dividers between navigation cells. Preserve the existing shared paper background, one-row layout, focus styling, and 44px link height.
+
+- [ ] **Step 4: Run focused and complete tests and verify GREEN**
+
+Run:
+
+```bash
+node --test --test-name-pattern="mobile header|masthead" tests/passport-dashboard.test.cjs
+node --test tests/passport-dashboard.test.cjs
+git diff --check
+```
+
+Expected: focused and complete suites pass; diff check is silent.
+
+- [ ] **Step 5: Commit Task 4**
+
+```bash
+git add index.html tests/passport-dashboard.test.cjs
+git commit -m "fix: unify mobile passport navigation"
+```
+
+---
+
+### Task 5: Responsive Visual Verification and Publication
 
 **Files:**
 - Modify if required by QA: `index.html`

@@ -54,7 +54,7 @@
     .passport-meta { display: grid; grid-template-columns: 1fr 1fr; gap: .6rem; color: var(--v2-muted); font-size: .68rem; }
     .passport-meta strong { display: block; color: var(--v2-ink); font-size: 1rem; }
     .scenario-control label, .destination-control label { display: block; margin-bottom: .45rem; font: 800 .62rem/1.2 var(--v2-mono); letter-spacing: .09em; text-transform: uppercase; }
-    .scenario-control select, .destination-control select { width: 100%; min-height: 44px; padding: .65rem 2.4rem .65rem .75rem; border: 1px solid #8d877c; border-radius: 0; background: var(--v2-card); color: var(--v2-ink); }
+    .scenario-control select, .destination-control input { width: 100%; min-height: 44px; padding: .65rem 2.4rem .65rem .75rem; border: 1px solid #8d877c; border-radius: 0; background: var(--v2-card); color: var(--v2-ink); }
     .scenario-card { margin-top: 1rem; border: 1px solid var(--v2-rule); background: var(--v2-card); box-shadow: 0 18px 45px rgba(35,29,21,.08); }
     .scenario-title { padding: 1.25rem; border-bottom: 1px solid var(--v2-rule); }
     .scenario-title p { margin: 0 0 .25rem; color: var(--v2-red); font: 800 .61rem/1.2 var(--v2-mono); letter-spacing: .1em; text-transform: uppercase; }
@@ -160,7 +160,7 @@
         <details id="destination-explorer">
           <summary>Inspect any destination</summary>
           <div class="destination-inspector">
-            <div class="destination-control"><label for="destination-select">Destination</label><select id="destination-select"></select></div>
+            <div class="destination-control"><label for="destination-select">Destination</label><input id="destination-select" type="search" list="destination-options" autocomplete="off" placeholder="Search destination"><datalist id="destination-options"></datalist></div>
             <div class="destination-results" id="destination-results" aria-live="polite"></div>
           </div>
         </details>
@@ -193,6 +193,15 @@
       { id: 'al-us-vs-al-de', group: 'comparison', title: 'US bundle vs German bundle', leftLabel: 'Albania + United States', rightLabel: 'Albania + Germany', left: ['al', 'us'], right: ['al', 'de'] },
       { id: 'al-gr-vs-al-de', group: 'comparison', title: 'Greek bundle vs German bundle', leftLabel: 'Albania + Greece', rightLabel: 'Albania + Germany', left: ['al', 'gr'], right: ['al', 'de'] },
       { id: 'three-vs-al-de', group: 'comparison', title: 'Three passports vs German bundle', leftLabel: 'Albania + Greece + United States', rightLabel: 'Albania + Germany', left: ['al', 'gr', 'us'], right: ['al', 'de'] },
+    ];
+
+    const DIRECT_COMPARISONS = [
+      { id: 'al-gr', left: 'al', right: 'gr' },
+      { id: 'al-de', left: 'al', right: 'de' },
+      { id: 'al-us', left: 'al', right: 'us' },
+      { id: 'gr-de', left: 'gr', right: 'de' },
+      { id: 'gr-us', left: 'gr', right: 'us' },
+      { id: 'de-us', left: 'de', right: 'us' },
     ];
 
     const POSITIVE_TYPES = new Set([
@@ -4805,6 +4814,12 @@
       return POSITIVE_TYPES.has(entry?.type) ? 'positive' : 'negative';
     }
 
+    function accessMode(entry) {
+      if (entry?.type === 'visa-on-arrival') return 'on-arrival';
+      if (accessWeight(entry) === 'positive') return 'free-precleared';
+      return 'visa-needed';
+    }
+
     function compareEntries(a, b) {
       const aWeight = accessWeight(a);
       const bWeight = accessWeight(b);
@@ -4827,6 +4842,20 @@
       return summarizeBundle(data, [passportCode]);
     }
 
+    function normalizeDestinationQuery(value) {
+      return String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim().toUpperCase();
+    }
+
+    function findDestination(data, query) {
+      const normalized = normalizeDestinationQuery(query);
+      if (!normalized) return null;
+      const names = data.map((row) => ({ row, name: normalizeDestinationQuery(row.destination) }));
+      return names.find(({ name }) => name === normalized)?.row
+        || names.find(({ name }) => name.startsWith(normalized))?.row
+        || names.find(({ name }) => name.includes(normalized))?.row
+        || null;
+    }
+
     function compareBundles(row, leftCodes, rightCodes) {
       const left = bundleAccess(row, leftCodes);
       const right = bundleAccess(row, rightCodes);
@@ -4834,6 +4863,23 @@
       if (left === 'positive' && right === 'negative') return 'leftKeeps';
       if (left === 'positive') return 'bothCover';
       return 'neitherCovers';
+    }
+
+    function comparePassports(data, leftCode, rightCode) {
+      const result = { leftOnly: [], rightOnly: [], bothPositive: [], bothNegative: [] };
+      const outcomeKeys = {
+        leftKeeps: 'leftOnly',
+        rightAdds: 'rightOnly',
+        bothCover: 'bothPositive',
+        neitherCovers: 'bothNegative',
+      };
+
+      for (const row of data) {
+        const outcome = compareBundles(row, [leftCode], [rightCode]);
+        result[outcomeKeys[outcome]].push(row);
+      }
+
+      return result;
     }
 
     function buildScenario(data, definition) {
@@ -4944,6 +4990,10 @@
     }
 
     function renderDestination(row) {
+      if (!row) {
+        document.querySelector('#destination-results').innerHTML = '<p class="destination-sample">No matching destination.</p>';
+        return;
+      }
       document.querySelector('#destination-results').innerHTML = PASSPORTS.map((passport) => {
         const weight = accessWeight(row[passport.code]);
         return `<article class="destination-result"><div><strong>${escapeHtml(passport.name)}</strong><div class="source-labels">${escapeHtml(row[passport.code].raw)}</div></div><span class="access-pill ${weight}">${weight}</span></article>`;
@@ -4953,31 +5003,39 @@
     function initBundleInterface() {
       const scenarioSelect = document.querySelector('#scenario-select');
       const destinationSelect = document.querySelector('#destination-select');
+      const destinationOptions = document.querySelector('#destination-options');
       const upgradeOptions = SCENARIOS.filter(({ group }) => group === 'upgrade').map(({ id, title }) => `<option value="${id}">${escapeHtml(title)}</option>`).join('');
       const comparisonOptions = SCENARIOS.filter(({ group }) => group === 'comparison').map(({ id, title }) => `<option value="${id}">${escapeHtml(title)}</option>`).join('');
       scenarioSelect.innerHTML = `<optgroup label="Upgrade paths">${upgradeOptions}</optgroup><optgroup label="Bundle comparisons">${comparisonOptions}</optgroup>`;
-      destinationSelect.innerHTML = DESTINATIONS.map((row) => `<option value="${escapeHtml(row.destination)}">${escapeHtml(row.destination)}</option>`).join('');
+      destinationOptions.innerHTML = DESTINATIONS.map((row) => `<option value="${escapeHtml(row.destination)}"></option>`).join('');
+      destinationSelect.value = DESTINATIONS[0].destination;
 
       renderPassportCards();
       renderScenario(SCENARIOS[0]);
       renderDestination(DESTINATIONS[0]);
 
       scenarioSelect.addEventListener('change', () => renderScenario(SCENARIOS.find(({ id }) => id === scenarioSelect.value)));
-      destinationSelect.addEventListener('change', () => renderDestination(DESTINATIONS.find(({ destination }) => destination === destinationSelect.value)));
+      const updateDestination = () => renderDestination(findDestination(DESTINATIONS, destinationSelect.value));
+      destinationSelect.addEventListener('input', updateDestination);
+      destinationSelect.addEventListener('change', updateDestination);
     }
 
     globalThis.PassportDashboard = {
       PASSPORTS,
       SCENARIOS,
+      DIRECT_COMPARISONS,
       DESTINATIONS,
       POSITIVE_TYPES,
       accessWeight,
+      accessMode,
       classifyEntry,
       compareEntries,
       bundleAccess,
       summarizeBundle,
       summarizePassport,
+      findDestination,
       compareBundles,
+      comparePassports,
       buildScenario,
       rowOutcome,
     };

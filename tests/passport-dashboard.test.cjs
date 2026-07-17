@@ -68,6 +68,15 @@ test('access weight classifies registration as positive and not-admitted as nega
   assert.equal(api.accessWeight({ type: 'not-admitted' }), 'negative');
 });
 
+test('access annotation separates free or pre-cleared entry from arrival entry', () => {
+  const { api } = loadPage();
+  assert.equal(api.accessMode({ type: 'visa-free' }), 'free-precleared');
+  assert.equal(api.accessMode({ type: 'eta' }), 'free-precleared');
+  assert.equal(api.accessMode({ type: 'registration' }), 'free-precleared');
+  assert.equal(api.accessMode({ type: 'visa-on-arrival' }), 'on-arrival');
+  assert.equal(api.accessMode({ type: 'evisa' }), 'visa-needed');
+});
+
 test('row outcome returns the strongest passport', () => {
   const { api } = loadPage();
   const sample = {
@@ -107,6 +116,13 @@ test('the embedded dataset contains every retrieved destination exactly once', (
   );
 });
 
+test('destination lookup supports case-insensitive names and useful partial queries', () => {
+  const { api } = loadPage();
+  assert.equal(api.findDestination(api.DESTINATIONS, 'viet nam').destination, 'VIET NAM');
+  assert.equal(api.findDestination(api.DESTINATIONS, 'azer').destination, 'AZERBAIJAN');
+  assert.equal(api.findDestination(api.DESTINATIONS, 'not a destination'), null);
+});
+
 test('bundle access uses the best available passport in the bundle', () => {
   const { api } = loadPage();
   const azerbaijan = api.DESTINATIONS.find((row) => row.destination === 'AZERBAIJAN');
@@ -139,17 +155,45 @@ test('passport summaries reconcile positive and negative access to 199', () => {
 
 test('scenario definitions cover the eight requested bundle comparisons', () => {
   const { api } = loadPage();
-  const definitions = Array.from(api.SCENARIOS, ({ left, right }) => [Array.from(left), Array.from(right)]);
+  const definitions = Array.from(api.SCENARIOS, ({ group, left, right, combined = null }) => ({
+    group,
+    left: Array.from(left),
+    right: Array.from(right),
+    combined: combined ? Array.from(combined) : null,
+  }));
   assert.deepEqual(definitions, [
-    [['al'], ['gr']],
-    [['al', 'gr'], ['us']],
-    [['al'], ['us']],
-    [['al', 'gr'], ['al', 'us']],
-    [['al', 'gr', 'us'], ['al', 'us']],
-    [['al', 'us'], ['al', 'de']],
-    [['al', 'gr'], ['al', 'de']],
-    [['al', 'gr', 'us'], ['al', 'de']],
+    { group: 'upgrade', left: ['al'], right: ['gr'], combined: ['al', 'gr'] },
+    { group: 'upgrade', left: ['al', 'gr'], right: ['us'], combined: ['al', 'gr', 'us'] },
+    { group: 'upgrade', left: ['al'], right: ['us'], combined: ['al', 'us'] },
+    { group: 'comparison', left: ['al', 'gr'], right: ['al', 'us'], combined: null },
+    { group: 'comparison', left: ['al', 'gr', 'us'], right: ['al', 'us'], combined: null },
+    { group: 'comparison', left: ['al', 'us'], right: ['al', 'de'], combined: null },
+    { group: 'comparison', left: ['al', 'gr'], right: ['al', 'de'], combined: null },
+    { group: 'comparison', left: ['al', 'gr', 'us'], right: ['al', 'de'], combined: null },
   ]);
+});
+
+test('six direct comparison definitions cover every passport pairing once', () => {
+  const { api } = loadPage();
+  assert.deepEqual(
+    Array.from(api.DIRECT_COMPARISONS, ({ left, right }) => [left, right]),
+    [['al', 'gr'], ['al', 'de'], ['al', 'us'], ['gr', 'de'], ['gr', 'us'], ['de', 'us']],
+  );
+});
+
+test('each direct comparison partitions all destinations exactly once', () => {
+  const { api } = loadPage();
+  for (const { id, left, right } of api.DIRECT_COMPARISONS) {
+    const result = api.comparePassports(api.DESTINATIONS, left, right);
+    const partition = [
+      ...result.leftOnly,
+      ...result.rightOnly,
+      ...result.bothPositive,
+      ...result.bothNegative,
+    ];
+    assert.equal(partition.length, 199, id);
+    assert.equal(new Set(partition.map((row) => row.destination)).size, 199, id);
+  }
 });
 
 test('every scenario partitions all destinations exactly once', () => {
@@ -177,6 +221,8 @@ test('page contains the focused scenario and destination lookup landmarks', () =
   assert.match(html, /id="left-keeps-list"/);
   assert.match(html, /<details[^>]*id="destination-explorer"/);
   assert.match(html, /<label for="destination-select">/);
+  assert.match(html, /<input[^>]+id="destination-select"[^>]+type="search"[^>]+list="destination-options"/);
+  assert.match(html, /<datalist id="destination-options"><\/datalist>/);
   assert.doesNotMatch(html, /id="destination-body"/);
 });
 

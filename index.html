@@ -32,7 +32,7 @@
     .bundle-mark { display: grid; place-items: center; width: 34px; height: 40px; border: 1.5px solid currentColor; border-radius: 3px 6px 6px 3px; font-family: var(--v2-serif); font-size: 1rem; }
     .bundle-date { color: var(--v2-muted); font: .61rem/1.4 var(--v2-mono); text-align: right; }
     .section-nav { position: sticky; z-index: 8; top: 0; border-bottom: 1px solid var(--v2-ink); background: rgba(244,237,223,.97); }
-    .section-nav-list { display: flex; gap: .25rem; margin: 0; padding: .35rem 0; overflow-x: auto; white-space: nowrap; scrollbar-width: thin; list-style: none; }
+    .section-nav-list { display: flex; gap: .25rem; margin-block: 0; margin-inline: auto; padding: .35rem 0; overflow-x: auto; white-space: nowrap; scrollbar-width: thin; list-style: none; }
     .section-nav a { display: flex; align-items: center; min-height: 44px; padding: .55rem .75rem; color: var(--v2-ink); font: 800 .61rem/1.15 var(--v2-mono); letter-spacing: .04em; text-decoration: none; text-transform: uppercase; }
     .section-nav a:hover, .section-nav a:focus-visible { background: #eee3d2; outline: 2px solid var(--v2-green); outline-offset: -2px; }
     #destination-search, #passport-reach, #comparisons, #passport-browser { scroll-margin-block-start: 4rem; }
@@ -5072,9 +5072,18 @@
           closeDestinationOptions();
         }
       });
+      destinationDropdown.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape') {
+          event.preventDefault();
+          closeDestinationOptions();
+        }
+      });
       destinationOptions.addEventListener('click', (event) => {
         const option = event.target.closest('[data-destination]');
         if (option) chooseDestination(option.dataset.destination);
+      });
+      destinationControl.addEventListener('focusout', (event) => {
+        if (!destinationControl.contains(event.relatedTarget)) closeDestinationOptions();
       });
       document.addEventListener('pointerdown', (event) => {
         if (!destinationControl.contains(event.target)) closeDestinationOptions();

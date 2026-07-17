@@ -41,7 +41,7 @@
 
 - [x] Run the complete Node test suite and `git diff --check`.
 - [x] Verify the combined mobile layout and shared listbox in Safari.
-- [ ] Request final read-only review and fix any Critical or Important findings test-first.
+- [x] Request final read-only review and fix any Critical or Important findings test-first.
 - [ ] Commit the source, tests, and aligned documentation.
 - [ ] Fast-forward the feature branch into local `master`.
 - [ ] Push local `master` to `origin/main` without force.

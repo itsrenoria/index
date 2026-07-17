@@ -234,7 +234,13 @@ test('masthead navigation links to every primary section and the search legend f
   const legendIndex = html.indexOf('class="weight-note"');
   const reachIndex = html.indexOf('id="passport-reach"');
   assert.ok(resultsIndex < legendIndex && legendIndex < reachIndex);
-  assert.match(html, /\.section-nav-list\s*\{[^}]*overflow-x:\s*auto[^}]*white-space:\s*nowrap/s);
+  assert.match(html, /\.section-nav-list\s*\{[^}]*margin-inline:\s*auto[^}]*overflow-x:\s*auto[^}]*white-space:\s*nowrap/s);
+});
+
+test('destination listbox closes when keyboard focus leaves the composite control', () => {
+  const { html } = loadPage();
+  assert.match(html, /destinationControl\.addEventListener\('focusout',[\s\S]*?relatedTarget[\s\S]*?closeDestinationOptions\(\)/);
+  assert.match(html, /destinationDropdown\.addEventListener\('keydown',[\s\S]*?event\.key === 'Escape'[\s\S]*?closeDestinationOptions\(\)/);
 });
 
 test('passport browser renders every destination for each selected passport', () => {

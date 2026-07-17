@@ -109,6 +109,26 @@ test('typing and browsing share one integrated destination listbox', () => {
   assert.doesNotMatch(html, /<select[^>]+id="destination-dropdown"|<datalist/);
 });
 
+test('choice selector markup exposes selected and disabled options', () => {
+  const { api } = loadPage();
+  const markup = api.choiceOptionsMarkup([
+    { value: 'al', label: 'Albania' },
+    { value: 'gr', label: 'Greece', disabled: true },
+  ], 'al');
+  assert.match(markup, /role="option"[^>]+data-value="al"[^>]+aria-selected="true"/);
+  assert.match(markup, /role="option"[^>]+data-value="gr"[^>]+aria-disabled="true"/);
+});
+
+test('shared choice selectors match the Destination control', () => {
+  const { html } = loadPage();
+  assert.match(html, /\.choice-selector\s*\{[^}]*position:\s*relative/s);
+  assert.match(html, /\.choice-selector-shell\s*\{[^}]*border:\s*1px solid #8d877c[^}]*background:\s*var\(--v2-card\)/s);
+  assert.match(html, /\.choice-selector-trigger\s*\{[^}]*min-height:\s*44px/s);
+  assert.match(html, /\.choice-selector-options\s*\{[^}]*position:\s*absolute[^}]*top:\s*calc\(100% \+ 4px\)/s);
+  assert.match(html, /function initChoiceSelector\(control, config\)/);
+  assert.match(html, /event\.key === 'ArrowDown'[\s\S]*?event\.key === 'ArrowUp'[\s\S]*?event\.key === 'Enter'[\s\S]*?event\.key === 'Escape'/);
+});
+
 test('destination and comparison markup preserve exact source labels and direct statuses', () => {
   const { api } = loadPage();
   const vietNam = api.findDestination(api.DESTINATIONS, 'viet nam');

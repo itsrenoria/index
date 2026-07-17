@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Passport Advantage Atlas</title>
+  <title>Direct Passport Comparison</title>
   <meta name="description" content="A destination-by-destination comparison of Albanian, Greek, German, and United States passports using 2026 Passport Index data.">
   <style id="bundle-ui">
     :root {
@@ -39,6 +39,7 @@
     .weight-badge { flex: 0 0 auto; padding: .2rem .45rem; border-radius: 999px; font: 800 .58rem/1.2 var(--v2-mono); letter-spacing: .05em; text-transform: uppercase; }
     .weight-badge.positive { color: var(--v2-green); background: var(--v2-soft-green); }
     .weight-badge.negative { color: var(--v2-red); background: var(--v2-soft-red); }
+    .weight-badge.fee { color: #75520d; background: #f0e1b7; }
     .bundle-section { padding: 3rem 0; border-top: 1px solid var(--v2-rule); }
     .bundle-section-head { margin-bottom: 1.4rem; }
     .bundle-section-head h2 { margin: 0; font: 500 2.25rem/1 var(--v2-serif); letter-spacing: -.03em; }
@@ -53,61 +54,64 @@
     .access-number span { max-width: 7rem; color: var(--v2-muted); font: 700 .6rem/1.25 var(--v2-mono); letter-spacing: .06em; text-transform: uppercase; }
     .passport-meta { display: grid; grid-template-columns: 1fr 1fr; gap: .6rem; color: var(--v2-muted); font-size: .68rem; }
     .passport-meta strong { display: block; color: var(--v2-ink); font-size: 1rem; }
-    .scenario-control label, .destination-control label { display: block; margin-bottom: .45rem; font: 800 .62rem/1.2 var(--v2-mono); letter-spacing: .09em; text-transform: uppercase; }
-    .scenario-control select, .destination-control input { width: 100%; min-height: 44px; padding: .65rem 2.4rem .65rem .75rem; border: 1px solid #8d877c; border-radius: 0; background: var(--v2-card); color: var(--v2-ink); }
-    .scenario-card { margin-top: 1rem; border: 1px solid var(--v2-rule); background: var(--v2-card); box-shadow: 0 18px 45px rgba(35,29,21,.08); }
-    .scenario-title { padding: 1.25rem; border-bottom: 1px solid var(--v2-rule); }
-    .scenario-title p { margin: 0 0 .25rem; color: var(--v2-red); font: 800 .61rem/1.2 var(--v2-mono); letter-spacing: .1em; text-transform: uppercase; }
-    .scenario-title h3 { margin: 0; font: 600 1.75rem/1.05 var(--v2-serif); }
-    .bundle-scoreboard { display: grid; grid-template-columns: 1fr 44px 1fr; align-items: stretch; border-bottom: 1px solid var(--v2-rule); }
-    .side-score { padding: 1rem; }
-    .side-score small { display: block; min-height: 2.7em; color: var(--v2-muted); font-size: .68rem; line-height: 1.3; }
-    .side-score strong { display: block; margin-top: .5rem; font: 500 2.7rem/1 var(--v2-serif); }
-    .side-score span { color: var(--v2-muted); font: .58rem/1.2 var(--v2-mono); text-transform: uppercase; }
-    .versus { display: grid; place-items: center; border-inline: 1px solid var(--v2-rule); color: var(--v2-red); font: 800 .62rem/1 var(--v2-mono); }
-    .combined-note { padding: .75rem 1rem; border-bottom: 1px solid var(--v2-rule); background: #eee3d2; font-size: .76rem; text-align: center; }
-    .combined-note strong { font-size: 1rem; }
-    .outcome-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--v2-rule); border-bottom: 1px solid var(--v2-rule); }
-    .outcome-stat { min-height: 105px; padding: .9rem; background: var(--v2-card); }
-    .outcome-stat strong { display: block; font: 500 2rem/1 var(--v2-serif); }
-    .outcome-stat span { display: block; margin-top: .35rem; font: 800 .59rem/1.3 var(--v2-mono); letter-spacing: .05em; text-transform: uppercase; }
-    .outcome-stat p { margin: .35rem 0 0; color: var(--v2-muted); font-size: .65rem; }
-    .contribution-grid { display: grid; }
-    .contribution { padding: 1.1rem; border-bottom: 1px solid var(--v2-rule); }
-    .contribution h4 { margin: 0 0 .65rem; font: 600 1.15rem/1.2 var(--v2-serif); }
-    .contribution h4 span { color: var(--v2-red); font-family: var(--v2-mono); font-size: .65rem; }
-    .preview-list, .full-list { margin: 0; padding: 0; list-style: none; }
-    .preview-list li { padding: .42rem 0; border-bottom: 1px dotted var(--v2-rule); font-size: .78rem; }
-    .preview-list li::before { content: "↗"; margin-right: .45rem; color: var(--v2-red); }
-    .outcome-details { padding: .35rem 1rem .9rem; }
-    .outcome-details details, #destination-explorer { border-bottom: 1px solid var(--v2-rule); }
-    .outcome-details summary, #destination-explorer > summary { min-height: 44px; padding: .8rem 0; cursor: pointer; font-weight: 750; font-size: .76rem; }
-    .full-list { padding-bottom: .8rem; }
-    .full-list li { padding: .65rem 0; border-top: 1px dotted var(--v2-rule); }
+    .destination-control label { display: block; margin-bottom: .45rem; font: 800 .62rem/1.2 var(--v2-mono); letter-spacing: .09em; text-transform: uppercase; }
+    .destination-control input { width: 100%; min-height: 44px; padding: .65rem 2.4rem .65rem .75rem; border: 1px solid #8d877c; border-radius: 0; background: var(--v2-card); color: var(--v2-ink); }
     .destination-name { display: block; font-family: var(--v2-serif); font-weight: 600; }
     .source-labels { display: grid; gap: .25rem; margin-top: .35rem; color: var(--v2-muted); font: .61rem/1.4 var(--v2-mono); }
     .source-labels b { color: var(--v2-ink); }
-    #destination-explorer { margin-top: 1.4rem; border: 1px solid var(--v2-rule); background: rgba(255,250,241,.72); }
-    #destination-explorer > summary { padding: 1rem; font-family: var(--v2-serif); font-size: 1rem; }
-    .destination-inspector { padding: 0 1rem 1rem; }
-    .destination-control { margin-bottom: 1rem; }
     .destination-results { display: grid; gap: .5rem; }
     .destination-result { display: flex; align-items: center; justify-content: space-between; gap: .8rem; padding: .75rem; border: 1px solid var(--v2-rule); background: var(--v2-card); }
     .destination-result strong { font-size: .78rem; }
     .access-pill { flex: 0 0 auto; padding: .24rem .45rem; border-radius: 999px; font: 800 .56rem/1.2 var(--v2-mono); text-transform: uppercase; }
-    .access-pill.positive { color: var(--v2-green); background: var(--v2-soft-green); }
-    .access-pill.negative { color: var(--v2-red); background: var(--v2-soft-red); }
     .bundle-source { padding: 1.2rem 0 2.5rem; color: var(--v2-muted); font-size: .68rem; }
     .bundle-source p { margin: 0 0 .65rem; }
     .bundle-source .warning { color: var(--v2-red); }
+    .search-panel { margin-bottom: 3rem; padding: 1.25rem; border: 1px solid var(--v2-ink); background: var(--v2-card); box-shadow: 8px 9px 0 rgba(23,33,29,.08); }
+    .search-intro h2 { margin: 0; font: 500 2rem/1 var(--v2-serif); letter-spacing: -.03em; }
+    .search-intro > p:last-child { margin: .55rem 0 1.2rem; color: var(--v2-muted); font-size: .8rem; }
+    .destination-control input { font: 600 1rem/1.2 var(--v2-serif); }
+    .destination-results { margin-top: 1rem; }
+    .destination-result { align-items: flex-start; }
+    .destination-result-copy { min-width: 0; }
+    .destination-result .source-labels { overflow-wrap: anywhere; }
+    .access-pill.free-precleared { color: var(--v2-green); background: var(--v2-soft-green); }
+    .access-pill.on-arrival { color: #75520d; background: #f0e1b7; }
+    .access-pill.visa-needed { color: var(--v2-red); background: var(--v2-soft-red); }
+    .comparison-grid { display: grid; gap: 1rem; }
+    .comparison-card { min-width: 0; border: 1px solid var(--v2-rule); background: var(--v2-card); box-shadow: 6px 7px 0 rgba(23,33,29,.04); }
+    .comparison-head { display: grid; grid-template-columns: 1fr 34px 1fr; align-items: center; padding: 1rem; border-bottom: 2px solid var(--v2-ink); }
+    .comparison-head h3 { margin: 0; font: 600 1.3rem/1 var(--v2-serif); }
+    .comparison-head h3:last-child { text-align: right; }
+    .comparison-vs { color: var(--v2-red); font: 800 .6rem/1 var(--v2-mono); text-align: center; }
+    .shared-counts { display: grid; grid-template-columns: 1fr 1fr; border-bottom: 1px solid var(--v2-rule); background: #eee3d2; }
+    .shared-count { padding: .75rem 1rem; }
+    .shared-count + .shared-count { border-left: 1px solid var(--v2-rule); }
+    .shared-count strong { font: 500 1.6rem/1 var(--v2-serif); }
+    .shared-count span { display: block; margin-top: .2rem; color: var(--v2-muted); font: 700 .56rem/1.2 var(--v2-mono); text-transform: uppercase; }
+    .unique-columns { display: grid; }
+    .unique-side { min-width: 0; padding: 1rem; }
+    .unique-side + .unique-side { border-top: 1px solid var(--v2-rule); }
+    .unique-side h4 { margin: 0 0 .2rem; font: 600 1rem/1.2 var(--v2-serif); }
+    .unique-side > p { margin: 0 0 .8rem; color: var(--v2-red); font: 800 .58rem/1.2 var(--v2-mono); letter-spacing: .05em; text-transform: uppercase; }
+    .unique-list { max-height: 25rem; margin: 0; padding: 0 .35rem 0 0; overflow: auto; list-style: none; scrollbar-width: thin; }
+    .unique-list li { padding: .7rem 0; border-top: 1px dotted var(--v2-rule); }
+    .unique-list .source-labels { gap: .18rem; }
+    .empty-unique { margin: .8rem 0 0; color: var(--v2-muted); font-size: .75rem; }
     @media (min-width: 760px) {
       .bundle-hero { display: grid; grid-template-columns: 1.2fr .8fr; gap: 4rem; align-items: end; padding: 5.2rem 0 4rem; }
       .weight-note { margin: 0; }
       .passport-strip { display: grid; grid-template-columns: repeat(4, 1fr); margin-inline: 0; padding-inline: 0; overflow: visible; }
       .bundle-passport-card { min-width: 0; }
-      .contribution-grid { grid-template-columns: 1fr 1fr; }
-      .contribution + .contribution { border-left: 1px solid var(--v2-rule); }
       .destination-results { grid-template-columns: 1fr 1fr; }
+      .search-panel { display: grid; grid-template-columns: minmax(0, .8fr) minmax(0, 1.2fr); gap: 1.5rem 2rem; align-items: end; padding: 1.5rem; }
+      .search-intro > p:last-child { margin-bottom: 0; }
+      .destination-results { grid-column: 1 / -1; }
+      .unique-columns { grid-template-columns: 1fr 1fr; }
+      .unique-side + .unique-side { border-top: 0; border-left: 1px solid var(--v2-rule); }
+    }
+    @media (min-width: 960px) {
+      .comparison-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .destination-results { grid-template-columns: repeat(4, minmax(0, 1fr)); }
     }
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .001ms !important; transition-duration: .001ms !important; }
@@ -115,23 +119,30 @@
   </style>
 </head>
 <body>
-  <a class="skip-link" href="#scenario-section">Skip to bundle scenarios</a>
+  <a class="skip-link" href="#destination-search">Skip to destination search</a>
   <header class="bundle-shell bundle-masthead">
-    <div class="bundle-brand"><span class="bundle-mark" aria-hidden="true">A</span><span>Passport bundles</span></div>
+    <div class="bundle-brand"><span class="bundle-mark" aria-hidden="true">P</span><span>Passport comparisons</span></div>
     <div class="bundle-date">2026 DATA<br>199 DESTINATIONS</div>
   </header>
 
   <main>
     <section class="bundle-shell bundle-hero" aria-labelledby="page-title">
       <div>
-        <p class="bundle-kicker">Albania as the starting point</p>
-        <h1 id="page-title">What does another passport add?</h1>
-        <p class="bundle-deck">Compare practical access gained, access already covered, and the gaps that remain when passports are combined.</p>
+        <p class="bundle-kicker">Four passports · six comparisons</p>
+        <h1 id="page-title">Compare access, country by country.</h1>
+        <p class="bundle-deck">Search a destination first, then scan every direct passport comparison without switching views.</p>
       </div>
       <aside class="weight-note" aria-label="How access is weighted">
         <div class="weight-row"><span class="weight-badge positive">Positive</span><span>Home, visa-free, visa on arrival, ETA, eVisitor, and lightweight registration all count equally.</span></div>
+        <div class="weight-row"><span class="weight-badge fee">Fee note</span><span>Visa-free and ETA/eVisitor access is normally free or pre-cleared. Visa on arrival may carry a border fee. They remain equally positive here.</span></div>
         <div class="weight-row"><span class="weight-badge negative">Negative</span><span>eVisa, visa required, and not admitted count equally. Exact labels and stay lengths are still shown.</span></div>
       </aside>
+    </section>
+
+    <section class="bundle-shell search-panel" id="destination-search" aria-labelledby="search-title">
+      <div class="search-intro"><p class="bundle-kicker">Quick answer</p><h2 id="search-title">Check a destination</h2><p>Type any country to see all four source statuses side by side.</p></div>
+      <div class="destination-control"><label for="destination-select">Destination</label><input id="destination-select" type="search" list="destination-options" autocomplete="off" placeholder="Try Viet Nam"><datalist id="destination-options"></datalist></div>
+      <div class="destination-results" id="destination-results" aria-live="polite"></div>
     </section>
 
     <section class="bundle-section" aria-labelledby="passport-title">
@@ -141,29 +152,10 @@
       </div>
     </section>
 
-    <section class="bundle-section" id="scenario-section" aria-labelledby="scenario-title">
+    <section class="bundle-section" aria-labelledby="comparisons-title">
       <div class="bundle-shell">
-        <div class="bundle-section-head"><h2 id="scenario-title">Bundle scenarios</h2><p>Choose a practical upgrade path or compare two complete passport bundles.</p></div>
-        <div class="scenario-control"><label for="scenario-select">Choose scenario</label><select id="scenario-select"></select></div>
-        <article class="scenario-card" id="scenario-view" aria-live="polite">
-          <div class="scenario-title"><p id="scenario-kind"></p><h3 id="scenario-name"></h3></div>
-          <div class="bundle-scoreboard" id="scenario-scores"></div>
-          <div class="combined-note" id="combined-note"></div>
-          <div class="outcome-grid" id="outcome-counts"></div>
-          <div class="contribution-grid">
-            <section class="contribution"><h4><span>RIGHT ADDS</span><br><b id="right-adds-heading"></b></h4><ul class="preview-list" id="right-adds-list"></ul></section>
-            <section class="contribution"><h4><span>LEFT KEEPS</span><br><b id="left-keeps-heading"></b></h4><ul class="preview-list" id="left-keeps-list"></ul></section>
-          </div>
-          <div class="outcome-details" id="outcome-details"></div>
-        </article>
-
-        <details id="destination-explorer">
-          <summary>Inspect any destination</summary>
-          <div class="destination-inspector">
-            <div class="destination-control"><label for="destination-select">Destination</label><input id="destination-select" type="search" list="destination-options" autocomplete="off" placeholder="Search destination"><datalist id="destination-options"></datalist></div>
-            <div class="destination-results" id="destination-results" aria-live="polite"></div>
-          </div>
-        </details>
+        <div class="bundle-section-head"><h2 id="comparisons-title">Direct comparisons</h2><p>All six pairings. Each card shows what only one passport unlocks; shared access stays condensed to counts.</p></div>
+        <div class="comparison-grid" id="direct-comparisons"></div>
       </div>
     </section>
   </main>
@@ -182,17 +174,6 @@
       { code: 'gr', name: 'Greece', mobility: 174 },
       { code: 'de', name: 'Germany', mobility: 174 },
       { code: 'us', name: 'United States', mobility: 168 },
-    ];
-
-    const SCENARIOS = [
-      { id: 'add-greece', group: 'upgrade', title: 'Add Greece to Albania', leftLabel: 'Albania', rightLabel: 'Greece', left: ['al'], right: ['gr'], combined: ['al', 'gr'] },
-      { id: 'add-us-to-al-gr', group: 'upgrade', title: 'Add the US to Albania + Greece', leftLabel: 'Albania + Greece', rightLabel: 'United States', left: ['al', 'gr'], right: ['us'], combined: ['al', 'gr', 'us'] },
-      { id: 'add-us', group: 'upgrade', title: 'Add the US to Albania', leftLabel: 'Albania', rightLabel: 'United States', left: ['al'], right: ['us'], combined: ['al', 'us'] },
-      { id: 'gr-vs-us', group: 'comparison', title: 'Greece bundle vs US bundle', leftLabel: 'Albania + Greece', rightLabel: 'Albania + United States', left: ['al', 'gr'], right: ['al', 'us'] },
-      { id: 'three-vs-al-us', group: 'comparison', title: 'Three passports vs Albania + US', leftLabel: 'Albania + Greece + United States', rightLabel: 'Albania + United States', left: ['al', 'gr', 'us'], right: ['al', 'us'] },
-      { id: 'al-us-vs-al-de', group: 'comparison', title: 'US bundle vs German bundle', leftLabel: 'Albania + United States', rightLabel: 'Albania + Germany', left: ['al', 'us'], right: ['al', 'de'] },
-      { id: 'al-gr-vs-al-de', group: 'comparison', title: 'Greek bundle vs German bundle', leftLabel: 'Albania + Greece', rightLabel: 'Albania + Germany', left: ['al', 'gr'], right: ['al', 'de'] },
-      { id: 'three-vs-al-de', group: 'comparison', title: 'Three passports vs German bundle', leftLabel: 'Albania + Greece + United States', rightLabel: 'Albania + Germany', left: ['al', 'gr', 'us'], right: ['al', 'de'] },
     ];
 
     const DIRECT_COMPARISONS = [
@@ -4827,19 +4808,9 @@
       return aWeight === 'positive' ? 1 : -1;
     }
 
-    function bundleAccess(row, passportCodes) {
-      return passportCodes.some((code) => accessWeight(row[code]) === 'positive')
-        ? 'positive'
-        : 'negative';
-    }
-
-    function summarizeBundle(data, passportCodes) {
-      const positive = data.filter((row) => bundleAccess(row, passportCodes) === 'positive').length;
-      return { positive, negative: data.length - positive, total: data.length };
-    }
-
     function summarizePassport(data, passportCode) {
-      return summarizeBundle(data, [passportCode]);
+      const positive = data.filter((row) => accessWeight(row[passportCode]) === 'positive').length;
+      return { positive, negative: data.length - positive, total: data.length };
     }
 
     function summarizePassportModes(data, passportCode) {
@@ -4863,51 +4834,19 @@
         || null;
     }
 
-    function compareBundles(row, leftCodes, rightCodes) {
-      const left = bundleAccess(row, leftCodes);
-      const right = bundleAccess(row, rightCodes);
-      if (left === 'negative' && right === 'positive') return 'rightAdds';
-      if (left === 'positive' && right === 'negative') return 'leftKeeps';
-      if (left === 'positive') return 'bothCover';
-      return 'neitherCovers';
-    }
-
     function comparePassports(data, leftCode, rightCode) {
       const result = { leftOnly: [], rightOnly: [], bothPositive: [], bothNegative: [] };
-      const outcomeKeys = {
-        leftKeeps: 'leftOnly',
-        rightAdds: 'rightOnly',
-        bothCover: 'bothPositive',
-        neitherCovers: 'bothNegative',
-      };
 
       for (const row of data) {
-        const outcome = compareBundles(row, [leftCode], [rightCode]);
-        result[outcomeKeys[outcome]].push(row);
+        const leftPositive = accessWeight(row[leftCode]) === 'positive';
+        const rightPositive = accessWeight(row[rightCode]) === 'positive';
+        if (leftPositive && !rightPositive) result.leftOnly.push(row);
+        else if (!leftPositive && rightPositive) result.rightOnly.push(row);
+        else if (leftPositive) result.bothPositive.push(row);
+        else result.bothNegative.push(row);
       }
 
       return result;
-    }
-
-    function buildScenario(data, definition) {
-      const result = {
-        rightAdds: [],
-        leftKeeps: [],
-        bothCover: [],
-        neitherCovers: [],
-      };
-
-      for (const row of data) {
-        result[compareBundles(row, definition.left, definition.right)].push(row);
-      }
-
-      const combined = definition.combined || [...new Set([...definition.left, ...definition.right])];
-      return {
-        ...result,
-        leftPositive: summarizeBundle(data, definition.left).positive,
-        rightPositive: summarizeBundle(data, definition.right).positive,
-        combinedPositive: summarizeBundle(data, combined).positive,
-      };
     }
 
     function rowOutcome(row) {
@@ -4937,63 +4876,47 @@
     function renderPassportCards() {
       const host = document.querySelector('#passport-cards');
       host.innerHTML = PASSPORTS.map((passport) => {
-        const metrics = summarizePassport(DESTINATIONS, passport.code);
+        const metrics = summarizePassportModes(DESTINATIONS, passport.code);
         return `<article class="bundle-passport-card">
           <div class="bundle-passport-head"><h3>${escapeHtml(passport.name)}</h3><span class="bundle-seal" aria-hidden="true">${passport.code.toUpperCase()}</span></div>
           <div class="access-number"><strong>${metrics.positive}</strong><span>positive destinations</span></div>
-          <div class="passport-meta"><span><strong>${metrics.negative}</strong>Negative access</span><span><strong>${passport.mobility}</strong>Passport Index score</span></div>
+          <div class="passport-meta"><span><strong>${metrics.freePrecleared}</strong>Free / pre-cleared</span><span><strong>${metrics.onArrival}</strong>On arrival</span><span><strong>${metrics.negative}</strong>Visa needed</span><span><strong>${passport.mobility}</strong>Passport Index score</span></div>
         </article>`;
       }).join('');
     }
 
-    function bundleSourceLabels(row, passportCodes) {
-      return passportCodes.map((code) => `<span><b>${escapeHtml(passportName(code))}:</b> ${escapeHtml(row[code].raw)}</span>`).join('');
+    function modeLabel(mode) {
+      return {
+        'free-precleared': 'Free / pre-cleared',
+        'on-arrival': 'On arrival',
+        'visa-needed': 'Visa needed',
+      }[mode];
     }
 
-    function renderOutcomeList(rows, definition) {
-      if (!rows.length) return '<p class="destination-sample">No destinations in this group.</p>';
-      return `<ul class="full-list">${rows.map((row) => `<li>
-        <span class="destination-name">${escapeHtml(row.destination)}</span>
-        <span class="source-labels"><span><b>Left bundle</b></span>${bundleSourceLabels(row, definition.left)}<span><b>Right bundle</b></span>${bundleSourceLabels(row, definition.right)}</span>
-      </li>`).join('')}</ul>`;
+    function destinationResultMarkup(row) {
+      return PASSPORTS.map((passport) => {
+        const mode = accessMode(row[passport.code]);
+        return `<article class="destination-result"><div class="destination-result-copy"><strong>${escapeHtml(passport.name)}</strong><div class="source-labels">${escapeHtml(row[passport.code].raw)}</div></div><span class="access-pill ${mode}">${modeLabel(mode)}</span></article>`;
+      }).join('');
     }
 
-    function renderPreview(rows) {
-      if (!rows.length) return '<li>Nothing unique here</li>';
-      return rows.slice(0, 5).map((row) => `<li>${escapeHtml(row.destination)}</li>`).join('');
+    function comparisonRowsMarkup(rows, leftCode, rightCode) {
+      if (!rows.length) return '<p class="empty-unique">No unique positive destinations.</p>';
+      return `<ul class="unique-list">${rows.map((row) => `<li><span class="destination-name">${escapeHtml(row.destination)}</span><span class="source-labels"><span><b>${escapeHtml(passportName(leftCode))}:</b> ${escapeHtml(row[leftCode].raw)}</span><span><b>${escapeHtml(passportName(rightCode))}:</b> ${escapeHtml(row[rightCode].raw)}</span></span></li>`).join('')}</ul>`;
     }
 
-    function renderScenario(definition) {
-      const result = buildScenario(DESTINATIONS, definition);
-      document.querySelector('#scenario-kind').textContent = definition.group === 'upgrade' ? 'Upgrade path' : 'Bundle comparison';
-      document.querySelector('#scenario-name').textContent = definition.title;
-      document.querySelector('#scenario-scores').innerHTML = `<div class="side-score"><small>${escapeHtml(definition.leftLabel)}</small><strong>${result.leftPositive}</strong><span>positive access</span></div><div class="versus">VS</div><div class="side-score"><small>${escapeHtml(definition.rightLabel)}</small><strong>${result.rightPositive}</strong><span>positive access</span></div>`;
-
-      const combined = document.querySelector('#combined-note');
-      if (definition.group === 'upgrade') {
-        const gain = result.combinedPositive - result.leftPositive;
-        combined.innerHTML = `<strong>${result.combinedPositive}</strong> positive destinations when combined · <strong>+${gain}</strong> over the starting bundle`;
-      } else {
-        combined.innerHTML = `Together, the two compared bundles cover <strong>${result.combinedPositive}</strong> positive destinations.`;
-      }
-
-      document.querySelector('#outcome-counts').innerHTML = `
-        <div class="outcome-stat"><strong>${result.rightAdds.length}</strong><span>Right adds</span><p>Positive only on the right</p></div>
-        <div class="outcome-stat"><strong>${result.leftKeeps.length}</strong><span>Left keeps</span><p>Positive only on the left</p></div>
-        <div class="outcome-stat"><strong>${result.bothCover.length}</strong><span>Both cover</span><p>Positive on both sides</p></div>
-        <div class="outcome-stat"><strong>${result.neitherCovers.length}</strong><span>Neither covers</span><p>Negative on both sides</p></div>`;
-      document.querySelector('#right-adds-heading').textContent = `${definition.rightLabel} contributes`;
-      document.querySelector('#left-keeps-heading').textContent = `${definition.leftLabel} still contributes`;
-      document.querySelector('#right-adds-list').innerHTML = renderPreview(result.rightAdds);
-      document.querySelector('#left-keeps-list').innerHTML = renderPreview(result.leftKeeps);
-
-      const groups = [
-        ['Right adds', result.rightAdds],
-        ['Left keeps', result.leftKeeps],
-        ['Both cover', result.bothCover],
-        ['Neither covers', result.neitherCovers],
-      ];
-      document.querySelector('#outcome-details').innerHTML = groups.map(([label, rows]) => `<details><summary>${label} · ${rows.length}</summary>${renderOutcomeList(rows, definition)}</details>`).join('');
+    function comparisonCardMarkup(definition) {
+      const result = comparePassports(DESTINATIONS, definition.left, definition.right);
+      const leftName = passportName(definition.left);
+      const rightName = passportName(definition.right);
+      return `<article class="comparison-card" id="comparison-${definition.id}">
+        <header class="comparison-head"><h3>${escapeHtml(leftName)}</h3><span class="comparison-vs">VS</span><h3>${escapeHtml(rightName)}</h3></header>
+        <div class="shared-counts"><div class="shared-count"><strong>${result.bothPositive.length}</strong><span>Positive on both</span></div><div class="shared-count"><strong>${result.bothNegative.length}</strong><span>Visa needed on both</span></div></div>
+        <div class="unique-columns">
+          <section class="unique-side"><h4>${escapeHtml(leftName)} only</h4><p>${result.leftOnly.length} unique positive</p>${comparisonRowsMarkup(result.leftOnly, definition.left, definition.right)}</section>
+          <section class="unique-side"><h4>${escapeHtml(rightName)} only</h4><p>${result.rightOnly.length} unique positive</p>${comparisonRowsMarkup(result.rightOnly, definition.left, definition.right)}</section>
+        </div>
+      </article>`;
     }
 
     function renderDestination(row) {
@@ -5001,27 +4924,23 @@
         document.querySelector('#destination-results').innerHTML = '<p class="destination-sample">No matching destination.</p>';
         return;
       }
-      document.querySelector('#destination-results').innerHTML = PASSPORTS.map((passport) => {
-        const weight = accessWeight(row[passport.code]);
-        return `<article class="destination-result"><div><strong>${escapeHtml(passport.name)}</strong><div class="source-labels">${escapeHtml(row[passport.code].raw)}</div></div><span class="access-pill ${weight}">${weight}</span></article>`;
-      }).join('');
+      document.querySelector('#destination-results').innerHTML = destinationResultMarkup(row);
     }
 
-    function initBundleInterface() {
-      const scenarioSelect = document.querySelector('#scenario-select');
+    function renderDirectComparisons() {
+      document.querySelector('#direct-comparisons').innerHTML = DIRECT_COMPARISONS.map(comparisonCardMarkup).join('');
+    }
+
+    function initDirectInterface() {
       const destinationSelect = document.querySelector('#destination-select');
       const destinationOptions = document.querySelector('#destination-options');
-      const upgradeOptions = SCENARIOS.filter(({ group }) => group === 'upgrade').map(({ id, title }) => `<option value="${id}">${escapeHtml(title)}</option>`).join('');
-      const comparisonOptions = SCENARIOS.filter(({ group }) => group === 'comparison').map(({ id, title }) => `<option value="${id}">${escapeHtml(title)}</option>`).join('');
-      scenarioSelect.innerHTML = `<optgroup label="Upgrade paths">${upgradeOptions}</optgroup><optgroup label="Bundle comparisons">${comparisonOptions}</optgroup>`;
       destinationOptions.innerHTML = DESTINATIONS.map((row) => `<option value="${escapeHtml(row.destination)}"></option>`).join('');
-      destinationSelect.value = DESTINATIONS[0].destination;
+      destinationSelect.value = 'VIET NAM';
 
       renderPassportCards();
-      renderScenario(SCENARIOS[0]);
-      renderDestination(DESTINATIONS[0]);
+      renderDirectComparisons();
+      renderDestination(findDestination(DESTINATIONS, destinationSelect.value));
 
-      scenarioSelect.addEventListener('change', () => renderScenario(SCENARIOS.find(({ id }) => id === scenarioSelect.value)));
       const updateDestination = () => renderDestination(findDestination(DESTINATIONS, destinationSelect.value));
       destinationSelect.addEventListener('input', updateDestination);
       destinationSelect.addEventListener('change', updateDestination);
@@ -5029,7 +4948,6 @@
 
     globalThis.PassportDashboard = {
       PASSPORTS,
-      SCENARIOS,
       DIRECT_COMPARISONS,
       DESTINATIONS,
       POSITIVE_TYPES,
@@ -5037,19 +4955,17 @@
       accessMode,
       classifyEntry,
       compareEntries,
-      bundleAccess,
-      summarizeBundle,
       summarizePassport,
       summarizePassportModes,
       findDestination,
-      compareBundles,
       comparePassports,
-      buildScenario,
+      destinationResultMarkup,
+      comparisonCardMarkup,
       rowOutcome,
     };
 
     if (typeof document !== 'undefined') {
-      document.addEventListener('DOMContentLoaded', initBundleInterface);
+      document.addEventListener('DOMContentLoaded', initDirectInterface);
     }
   })();
   </script>

@@ -123,25 +123,19 @@ test('destination lookup supports case-insensitive names and useful partial quer
   assert.equal(api.findDestination(api.DESTINATIONS, 'not a destination'), null);
 });
 
-test('bundle access uses the best available passport in the bundle', () => {
+test('destination and comparison markup preserve exact source labels and access modes', () => {
   const { api } = loadPage();
-  const azerbaijan = api.DESTINATIONS.find((row) => row.destination === 'AZERBAIJAN');
-  const angola = api.DESTINATIONS.find((row) => row.destination === 'ANGOLA');
+  const vietNam = api.findDestination(api.DESTINATIONS, 'viet nam');
+  const searchMarkup = api.destinationResultMarkup(vietNam);
+  const comparisonMarkup = api.comparisonCardMarkup({ id: 'de-us', left: 'de', right: 'us' });
 
-  assert.equal(api.bundleAccess(azerbaijan, ['al']), 'positive');
-  assert.equal(api.bundleAccess(angola, ['al']), 'negative');
-  assert.equal(api.bundleAccess(angola, ['al', 'gr']), 'positive');
-});
-
-test('adding a passport never reduces positive bundle access', () => {
-  const { api } = loadPage();
-  const albania = api.summarizeBundle(api.DESTINATIONS, ['al']);
-  const albaniaGreece = api.summarizeBundle(api.DESTINATIONS, ['al', 'gr']);
-  const albaniaGreeceUs = api.summarizeBundle(api.DESTINATIONS, ['al', 'gr', 'us']);
-
-  assert.ok(albaniaGreece.positive >= albania.positive);
-  assert.ok(albaniaGreeceUs.positive >= albaniaGreece.positive);
-  assert.equal(albania.total, 199);
+  assert.match(searchMarkup, /VISA-FREE 45/);
+  assert.match(searchMarkup, /EVISA 90/);
+  assert.match(searchMarkup, /Free \/ pre-cleared/);
+  assert.match(searchMarkup, /Visa needed/);
+  assert.match(comparisonMarkup, /VIET NAM/);
+  assert.match(comparisonMarkup, /Germany:<\/b> VISA-FREE 45/);
+  assert.match(comparisonMarkup, /United States:<\/b> EVISA 90/);
 });
 
 test('passport summaries reconcile positive and negative access to 199', () => {
@@ -160,26 +154,6 @@ test('passport mode summaries split positive access into free-precleared and on-
     assert.equal(summary.freePrecleared + summary.onArrival, summary.positive, passport.code);
     assert.equal(summary.positive + summary.negative, 199, passport.code);
   }
-});
-
-test('scenario definitions cover the eight requested bundle comparisons', () => {
-  const { api } = loadPage();
-  const definitions = Array.from(api.SCENARIOS, ({ group, left, right, combined = null }) => ({
-    group,
-    left: Array.from(left),
-    right: Array.from(right),
-    combined: combined ? Array.from(combined) : null,
-  }));
-  assert.deepEqual(definitions, [
-    { group: 'upgrade', left: ['al'], right: ['gr'], combined: ['al', 'gr'] },
-    { group: 'upgrade', left: ['al', 'gr'], right: ['us'], combined: ['al', 'gr', 'us'] },
-    { group: 'upgrade', left: ['al'], right: ['us'], combined: ['al', 'us'] },
-    { group: 'comparison', left: ['al', 'gr'], right: ['al', 'us'], combined: null },
-    { group: 'comparison', left: ['al', 'gr', 'us'], right: ['al', 'us'], combined: null },
-    { group: 'comparison', left: ['al', 'us'], right: ['al', 'de'], combined: null },
-    { group: 'comparison', left: ['al', 'gr'], right: ['al', 'de'], combined: null },
-    { group: 'comparison', left: ['al', 'gr', 'us'], right: ['al', 'de'], combined: null },
-  ]);
 });
 
 test('six direct comparison definitions cover every passport pairing once', () => {
@@ -205,34 +179,20 @@ test('each direct comparison partitions all destinations exactly once', () => {
   }
 });
 
-test('every scenario partitions all destinations exactly once', () => {
-  const { api } = loadPage();
-  for (const definition of api.SCENARIOS) {
-    const result = api.buildScenario(api.DESTINATIONS, definition);
-    const partition = [
-      ...result.rightAdds,
-      ...result.leftKeeps,
-      ...result.bothCover,
-      ...result.neitherCovers,
-    ];
-    assert.equal(partition.length, 199, definition.id);
-    assert.equal(new Set(partition.map((row) => row.destination)).size, 199, definition.id);
-  }
-});
-
-test('page contains the focused scenario and destination lookup landmarks', () => {
+test('page contains destination-first search and all direct comparisons without bundle controls', () => {
   const { html } = loadPage();
   assert.equal((html.match(/<h1\b/g) || []).length, 1);
-  assert.match(html, /id="passport-cards"/);
-  assert.match(html, /<label for="scenario-select">/);
-  assert.match(html, /id="scenario-view"/);
-  assert.match(html, /id="right-adds-list"/);
-  assert.match(html, /id="left-keeps-list"/);
-  assert.match(html, /<details[^>]*id="destination-explorer"/);
+  assert.match(html, /id="destination-search"/);
   assert.match(html, /<label for="destination-select">/);
   assert.match(html, /<input[^>]+id="destination-select"[^>]+type="search"[^>]+list="destination-options"/);
   assert.match(html, /<datalist id="destination-options"><\/datalist>/);
-  assert.doesNotMatch(html, /id="destination-body"/);
+  assert.match(html, /id="passport-cards"/);
+  assert.match(html, /id="direct-comparisons"/);
+  assert.doesNotMatch(html, /id="scenario-select"/);
+  assert.doesNotMatch(html, /Bundle scenarios/);
+  assert.doesNotMatch(html, /id="destination-explorer"/);
+  assert.doesNotMatch(html, /const SCENARIOS|function bundleAccess|function compareBundles|function buildScenario|\.scenario-card|\.bundle-scoreboard|\.outcome-grid/);
+  assert.match(html, /Visa on arrival may (?:carry|involve) a (?:border )?fee/i);
 });
 
 test('page styles are mobile-first with intentional card scrolling and touch targets', () => {
@@ -240,6 +200,7 @@ test('page styles are mobile-first with intentional card scrolling and touch tar
   assert.match(html, /scroll-snap-type:\s*x mandatory/);
   assert.match(html, /min-height:\s*44px/);
   assert.match(html, /@media \(min-width:\s*760px\)/);
+  assert.match(html, /grid-template-columns:\s*repeat\(2,\s*minmax\(0,\s*1fr\)\)/);
 });
 
 test('page is self-contained and includes source and travel warning', () => {

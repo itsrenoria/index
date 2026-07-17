@@ -9,30 +9,30 @@ Keep the existing destination typing experience while adding an integrated dropd
 The destination search remains one bordered control. It contains:
 
 - the existing search input for free typing and partial matching;
-- a native select control on the right with a compact chevron presentation;
-- an accessible label for each control;
-- a minimum 44-pixel interactive target for the dropdown.
+- a compact chevron button on the right;
+- one accessible listbox anchored directly below the full control;
+- a minimum 44-pixel interactive target for the button.
 
-The native select keeps keyboard, touch, and screen-reader behavior reliable in Safari without adding a custom popup component.
+Typing and browsing use the same visible list so suggestions always appear in one place.
 
 ## Behavior
 
-- The initial destination remains Viet Nam in both controls.
+- The initial destination remains Viet Nam.
 - Typing continues to update the four-passport result through the existing partial-match lookup.
-- Typing an exact destination synchronizes the dropdown to that destination.
-- Typing a partial query or unmatched text leaves the dropdown at its neutral “Choose” option.
-- Selecting a destination fills the typing field with the exact destination name and immediately updates the four-passport result.
-- The existing datalist suggestions remain available while typing.
+- Typing filters the shared listbox in place.
+- Opening the chevron shows all 199 destinations in the same listbox.
+- Clicking a destination fills the field with its exact name and immediately updates the result.
+- Arrow keys move through listbox options; Enter selects and Escape closes.
 
 ## Layout
 
-The search input and dropdown share one visual shell. The input fills the available width and the dropdown occupies a compact right-hand area separated by a vertical rule. The control uses the existing paper, ink, serif, and focus treatment on mobile and desktop.
+The search input and chevron share one visual shell. The input fills the available width and the chevron occupies a compact right-hand area separated by a vertical rule. The listbox matches the shell width, stays scrollable within the viewport, and uses the existing paper, ink, serif, and focus treatment on mobile and desktop.
 
 ## Testing and Verification
 
-- Add a pure synchronization helper that returns an exact destination name or an empty selection.
+- Add pure filtering and options-markup helpers.
 - Verify partial typing remains supported.
-- Verify the select contains one neutral option plus all 199 destinations.
+- Verify the listbox contains all 199 destinations when browsing.
 - Verify selecting a destination updates the search value and result through Safari interaction testing.
 - Run the complete Node test suite and check desktop and 440-pixel Safari layouts before committing and pushing.
 

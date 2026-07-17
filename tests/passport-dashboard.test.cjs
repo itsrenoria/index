@@ -74,6 +74,30 @@ test('destination lookup supports case-insensitive names and useful partial quer
   assert.equal(api.findDestination(api.DESTINATIONS, 'not a destination'), null);
 });
 
+test('destination options filter partial typing and expose every destination when empty', () => {
+  const { api } = loadPage();
+  assert.deepEqual(
+    Array.from(api.filterDestinationOptions(api.DESTINATIONS, 'azer'), ({ destination }) => destination),
+    ['AZERBAIJAN'],
+  );
+  assert.equal(api.filterDestinationOptions(api.DESTINATIONS, '').length, 199);
+  assert.equal(api.filterDestinationOptions(api.DESTINATIONS, 'not a destination').length, 0);
+});
+
+test('typing and browsing share one integrated destination listbox', () => {
+  const { html, api } = loadPage();
+  assert.match(html, /class="destination-control-shell"/);
+  assert.match(html, /<input[^>]+id="destination-select"[^>]+role="combobox"[^>]+aria-controls="destination-options"/);
+  assert.match(html, /<button[^>]+id="destination-dropdown"[^>]+aria-label="Browse destinations"/);
+  assert.match(html, /<ul[^>]+id="destination-options"[^>]+role="listbox"/);
+  const optionsMarkup = api.destinationOptionsMarkup(api.DESTINATIONS);
+  assert.equal((optionsMarkup.match(/role="option"/g) || []).length, 199);
+  assert.match(optionsMarkup, /data-destination="VIET NAM"[^>]*>VIET NAM<\/li>/);
+  assert.match(html, /\.destination-dropdown-trigger\s*\{[^}]*min-height:\s*44px/s);
+  assert.match(html, /\.destination-options\s*\{[^}]*position:\s*absolute[^}]*top:\s*calc\(100%\s*\+\s*4px\)/s);
+  assert.doesNotMatch(html, /<select[^>]+id="destination-dropdown"|<datalist/);
+});
+
 test('destination and comparison markup preserve exact source labels and access modes', () => {
   const { api } = loadPage();
   const vietNam = api.findDestination(api.DESTINATIONS, 'viet nam');
@@ -111,6 +135,15 @@ test('passport summaries reconcile positive and negative access to 199', () => {
     assert.equal(summary.positive + summary.negative, 199);
     assert.equal(summary.total, 199);
   }
+});
+
+test('passport reach cards use circular country flags', () => {
+  const { html, api } = loadPage();
+  assert.deepEqual(Array.from(api.PASSPORTS, ({ flag }) => flag), ['🇦🇱', '🇬🇷', '🇩🇪', '🇺🇸']);
+  for (const passport of api.PASSPORTS) {
+    assert.match(api.passportCardMarkup(passport, api.DESTINATIONS), new RegExp(`class="bundle-seal"[^>]*>${passport.flag}<`));
+  }
+  assert.match(html, /\.bundle-seal\s*\{[^}]*border-radius:\s*50%/s);
 });
 
 test('passport mode summaries split positive access into free-precleared and on-arrival', () => {
@@ -161,8 +194,8 @@ test('page contains destination-first search and all direct comparisons without 
   assert.equal((html.match(/<h1\b/g) || []).length, 1);
   assert.match(html, /id="destination-search"/);
   assert.match(html, /<label for="destination-select">/);
-  assert.match(html, /<input[^>]+id="destination-select"[^>]+type="search"[^>]+list="destination-options"/);
-  assert.match(html, /<datalist id="destination-options"><\/datalist>/);
+  assert.match(html, /<input[^>]+id="destination-select"[^>]+type="search"[^>]+role="combobox"/);
+  assert.match(html, /<ul[^>]+id="destination-options"[^>]+role="listbox"/);
   assert.match(html, /id="passport-cards"/);
   assert.match(html, /id="direct-comparisons"/);
   assert.doesNotMatch(html, /id="scenario-select"/);
@@ -181,6 +214,27 @@ test('section content is concise and descriptive', () => {
   assert.match(html, /Visa on arrival may include a border fee\./);
   assert.match(html, /View every destination for one passport\./);
   assert.doesNotMatch(html, /recalculated|simplified model|shared access stays condensed|switching views/i);
+});
+
+test('masthead navigation links to every primary section and the search legend follows results', () => {
+  const { html } = loadPage();
+  assert.match(html, /<title>Passport Index<\/title>/);
+  assert.match(html, /<span>Passport Index<\/span>/);
+  assert.doesNotMatch(html, /Passport comparisons|Four passports · six comparisons/i);
+  assert.match(html, /<nav[^>]+class="section-nav"[^>]+aria-label="Page sections"/);
+  for (const [target, label] of [
+    ['destination-search', 'Check destination'],
+    ['passport-reach', 'Passport reach'],
+    ['comparisons', 'Comparisons'],
+    ['passport-browser', 'Browse one passport'],
+  ]) {
+    assert.match(html, new RegExp(`<a href="#${target}">${label}<\\/a>`));
+  }
+  const resultsIndex = html.indexOf('id="destination-results"');
+  const legendIndex = html.indexOf('class="weight-note"');
+  const reachIndex = html.indexOf('id="passport-reach"');
+  assert.ok(resultsIndex < legendIndex && legendIndex < reachIndex);
+  assert.match(html, /\.section-nav-list\s*\{[^}]*overflow-x:\s*auto[^}]*white-space:\s*nowrap/s);
 });
 
 test('passport browser renders every destination for each selected passport', () => {

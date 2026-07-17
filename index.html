@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Direct Passport Comparison</title>
+  <title>Passport Index</title>
   <meta name="description" content="A destination-by-destination comparison of Albanian, Greek, German, and United States passports using 2026 Passport Index data.">
   <style id="bundle-ui">
     :root {
@@ -31,11 +31,16 @@
     .bundle-brand { display: flex; align-items: center; gap: .65rem; font: 800 .68rem/1 var(--v2-mono); letter-spacing: .08em; text-transform: uppercase; }
     .bundle-mark { display: grid; place-items: center; width: 34px; height: 40px; border: 1.5px solid currentColor; border-radius: 3px 6px 6px 3px; font-family: var(--v2-serif); font-size: 1rem; }
     .bundle-date { color: var(--v2-muted); font: .61rem/1.4 var(--v2-mono); text-align: right; }
+    .section-nav { position: sticky; z-index: 8; top: 0; border-bottom: 1px solid var(--v2-ink); background: rgba(244,237,223,.97); }
+    .section-nav-list { display: flex; gap: .25rem; margin: 0; padding: .35rem 0; overflow-x: auto; white-space: nowrap; scrollbar-width: thin; list-style: none; }
+    .section-nav a { display: flex; align-items: center; min-height: 44px; padding: .55rem .75rem; color: var(--v2-ink); font: 800 .61rem/1.15 var(--v2-mono); letter-spacing: .04em; text-decoration: none; text-transform: uppercase; }
+    .section-nav a:hover, .section-nav a:focus-visible { background: #eee3d2; outline: 2px solid var(--v2-green); outline-offset: -2px; }
+    #destination-search, #passport-reach, #comparisons, #passport-browser { scroll-margin-block-start: 4rem; }
     .bundle-hero { padding: clamp(2.75rem, 8vw, 4rem) 0 clamp(2.25rem, 6vw, 3rem); }
     .bundle-kicker { margin: 0 0 .8rem; color: var(--v2-red); font: 800 .67rem/1.2 var(--v2-mono); letter-spacing: .13em; text-transform: uppercase; }
     .bundle-hero h1 { max-width: 11ch; margin: 0 0 1.2rem; font: 500 clamp(3rem, 14vw, 5.4rem)/.9 var(--v2-serif); letter-spacing: -.05em; }
     .bundle-deck { max-width: 55ch; margin: 0; color: #46504b; font: 1.08rem/1.55 var(--v2-serif); }
-    .weight-note { display: grid; gap: .55rem; margin-top: 2rem; padding: 1rem; border: 1px solid var(--v2-rule); background: rgba(255,250,241,.7); }
+    .weight-note { display: grid; gap: .55rem; margin-top: 1rem; padding: 1rem; border: 1px solid var(--v2-rule); background: rgba(244,237,223,.65); }
     .weight-row { display: flex; align-items: flex-start; gap: .65rem; font-size: .76rem; }
     .weight-badge { flex: 0 0 auto; padding: .2rem .45rem; border-radius: 999px; font: 800 .58rem/1.2 var(--v2-mono); letter-spacing: .05em; text-transform: uppercase; }
     .weight-badge.free { color: var(--v2-green); background: var(--v2-soft-green); }
@@ -48,14 +53,27 @@
     .bundle-passport-card { flex: 0 0 min(82vw, 300px); min-height: 206px; padding: 1.2rem; border: 1px solid var(--v2-rule); background: var(--v2-card); scroll-snap-align: center; box-shadow: 5px 6px 0 rgba(23,33,29,.04); }
     .bundle-passport-head { display: flex; align-items: start; justify-content: space-between; gap: 1rem; padding-bottom: .9rem; border-bottom: 2px solid var(--v2-ink); }
     .bundle-passport-head h3 { margin: 0; font: 600 1.45rem/1 var(--v2-serif); }
-    .bundle-seal { display: grid; place-items: center; width: 42px; height: 42px; border: 1px solid var(--v2-red); border-radius: 50%; color: var(--v2-red); font: 800 .66rem/1 var(--v2-mono); }
+    .bundle-seal { display: grid; place-items: center; width: 42px; height: 42px; overflow: hidden; border: 1px solid var(--v2-red); border-radius: 50%; background: var(--v2-paper); font: normal 1.35rem/1 system-ui, sans-serif; }
     .access-number { display: flex; align-items: end; gap: .6rem; margin: 1rem 0 .85rem; }
     .access-number strong { font: 500 3.15rem/.8 var(--v2-serif); font-variant-numeric: tabular-nums; }
     .access-number span { max-width: 7rem; color: var(--v2-muted); font: 700 .6rem/1.25 var(--v2-mono); letter-spacing: .06em; text-transform: uppercase; }
     .passport-meta { display: grid; grid-template-columns: 1fr 1fr; gap: .6rem; color: var(--v2-muted); font-size: .68rem; }
     .passport-meta strong { display: block; color: var(--v2-ink); font-size: 1rem; }
+    .destination-control { position: relative; }
     .destination-control label { display: block; margin-bottom: .45rem; font: 800 .62rem/1.2 var(--v2-mono); letter-spacing: .09em; text-transform: uppercase; }
-    .destination-control input { width: 100%; min-height: 44px; padding: .65rem 2.4rem .65rem .75rem; border: 1px solid #8d877c; border-radius: 0; background: var(--v2-card); color: var(--v2-ink); }
+    .destination-control-shell { display: flex; min-width: 0; border: 1px solid #8d877c; background: var(--v2-card); }
+    .destination-control input { flex: 1 1 auto; min-width: 0; min-height: 44px; padding: .65rem .75rem; border: 0; border-radius: 0; background: transparent; color: var(--v2-ink); font: 600 1rem/1.2 var(--v2-serif); }
+    .destination-dropdown-trigger { position: relative; flex: 0 0 48px; min-height: 44px; border: 0; border-left: 1px solid var(--v2-rule); background: transparent; color: var(--v2-ink); cursor: pointer; }
+    .destination-dropdown-trigger::after { position: absolute; top: 50%; left: 50%; width: 8px; height: 8px; border-right: 2px solid currentColor; border-bottom: 2px solid currentColor; content: ""; transform: translate(-50%, -65%) rotate(45deg); transition: transform .15s ease; }
+    .destination-dropdown-trigger[aria-expanded="true"]::after { transform: translate(-50%, -35%) rotate(225deg); }
+    .destination-control-shell:focus-within { outline: 3px solid #c9843b; outline-offset: 2px; }
+    .destination-options { position: absolute; z-index: 5; top: calc(100% + 4px); right: 0; left: 0; max-height: min(55vh, 320px); margin: 0; padding: .3rem; overflow-y: auto; overscroll-behavior: contain; border: 1px solid var(--v2-ink); background: var(--v2-card); box-shadow: 6px 7px 0 rgba(23,33,29,.12); list-style: none; }
+    .destination-options[hidden] { display: none; }
+    .destination-option { min-height: 42px; padding: .7rem .75rem; border-bottom: 1px solid var(--v2-rule); font: 700 .84rem/1.25 var(--v2-sans); cursor: pointer; }
+    .destination-option:last-child { border-bottom: 0; }
+    .destination-option:hover, .destination-option.is-active { background: #eee3d2; }
+    .destination-option.is-active { outline: 2px solid var(--v2-green); outline-offset: -2px; }
+    .destination-option-empty { padding: .85rem .75rem; color: var(--v2-muted); font-size: .78rem; }
     .destination-name { display: block; font-family: var(--v2-serif); font-weight: 600; }
     .source-labels { display: grid; gap: .25rem; margin-top: .35rem; color: var(--v2-muted); font: .61rem/1.4 var(--v2-mono); }
     .source-labels b { color: var(--v2-ink); }
@@ -69,7 +87,6 @@
     .search-panel { margin-bottom: clamp(1.75rem, 4vw, 2.5rem); padding: 1.25rem; border: 1px solid var(--v2-ink); background: var(--v2-card); box-shadow: 8px 9px 0 rgba(23,33,29,.08); }
     .search-intro h2 { margin: 0; font: 500 2rem/1 var(--v2-serif); letter-spacing: -.03em; }
     .search-intro > p:last-child { margin: .55rem 0 1.2rem; color: var(--v2-muted); font-size: .8rem; }
-    .destination-control input { font: 600 1rem/1.2 var(--v2-serif); }
     .destination-result-copy { min-width: 0; }
     .destination-result .source-labels { overflow-wrap: anywhere; }
     .status-stack { display: flex; flex: 0 0 auto; flex-direction: column; align-items: flex-end; gap: .28rem; }
@@ -110,7 +127,7 @@
     .passport-choice { min-height: 44px; padding: .6rem .75rem; border: 1px solid transparent; background: transparent; color: var(--v2-muted); font: 800 .64rem/1.2 var(--v2-mono); letter-spacing: .04em; text-transform: uppercase; cursor: pointer; }
     .passport-choice:hover { color: var(--v2-ink); background: rgba(255,250,241,.65); }
     .passport-choice[aria-pressed="true"] { border-color: var(--v2-ink); background: var(--v2-card); color: var(--v2-ink); box-shadow: 3px 3px 0 rgba(23,33,29,.08); }
-    .passport-choice:focus-visible, .destination-control input:focus-visible { outline: 3px solid #c9843b; outline-offset: 2px; }
+    .passport-choice:focus-visible { outline: 3px solid #c9843b; outline-offset: 2px; }
     .passport-browser-summary { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; padding: 1rem; border-bottom: 2px solid var(--v2-ink); }
     .passport-browser-summary strong { font: 600 1.35rem/1 var(--v2-serif); }
     .passport-browser-summary span { color: var(--v2-muted); font: 800 .56rem/1.2 var(--v2-mono); letter-spacing: .05em; text-transform: uppercase; }
@@ -122,8 +139,8 @@
     .passport-browser-raw { min-width: 0; color: var(--v2-muted); font: .62rem/1.4 var(--v2-mono); overflow-wrap: anywhere; }
     .passport-browser-badges { display: flex; flex: 0 0 auto; flex-wrap: wrap; justify-content: flex-end; gap: .3rem; }
     @media (min-width: 760px) {
-      .bundle-hero { display: grid; grid-template-columns: 1.2fr .8fr; gap: 4rem; align-items: end; padding: clamp(4rem, 7vw, 5.2rem) 0 var(--section-space); }
-      .weight-note { margin: 0; }
+      .bundle-hero { padding: clamp(4rem, 7vw, 5.2rem) 0 var(--section-space); }
+      .weight-note { grid-column: 1 / -1; grid-template-columns: repeat(2, minmax(0, 1fr)); margin: .25rem 0 0; }
       .passport-strip { display: grid; grid-template-columns: repeat(4, 1fr); margin-inline: 0; padding-inline: 0; overflow: visible; }
       .bundle-passport-card { min-width: 0; }
       .destination-results { grid-template-columns: 1fr 1fr; }
@@ -149,37 +166,44 @@
 <body>
   <a class="skip-link" href="#destination-search">Skip to destination search</a>
   <header class="bundle-shell bundle-masthead">
-    <div class="bundle-brand"><span class="bundle-mark" aria-hidden="true">P</span><span>Passport comparisons</span></div>
+    <div class="bundle-brand"><span class="bundle-mark" aria-hidden="true">P</span><span>Passport Index</span></div>
     <div class="bundle-date">2026 DATA<br>199 DESTINATIONS</div>
   </header>
+  <nav class="section-nav" aria-label="Page sections">
+    <ul class="bundle-shell section-nav-list">
+      <li><a href="#destination-search">Check destination</a></li>
+      <li><a href="#passport-reach">Passport reach</a></li>
+      <li><a href="#comparisons">Comparisons</a></li>
+      <li><a href="#passport-browser">Browse one passport</a></li>
+    </ul>
+  </nav>
 
   <main>
     <section class="bundle-shell bundle-hero" aria-labelledby="page-title">
       <div>
-        <p class="bundle-kicker">Four passports · six comparisons</p>
         <h1 id="page-title">Compare access, country by country.</h1>
         <p class="bundle-deck">Search entry requirements and compare four passports across 199 destinations.</p>
       </div>
-      <aside class="weight-note" aria-label="Entry notes">
+    </section>
+
+    <section class="bundle-shell search-panel" id="destination-search" aria-labelledby="search-title">
+      <div class="search-intro"><p class="bundle-kicker">Quick answer</p><h2 id="search-title">Check a destination</h2><p>See the entry status for every passport.</p></div>
+      <div class="destination-control"><label for="destination-select">Destination</label><div class="destination-control-shell"><input id="destination-select" type="search" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="destination-options" autocomplete="off" placeholder="Try Viet Nam"><button class="destination-dropdown-trigger" id="destination-dropdown" type="button" aria-label="Browse destinations" aria-expanded="false" aria-controls="destination-options"></button></div><ul class="destination-options" id="destination-options" role="listbox" hidden></ul></div>
+      <div class="destination-results" id="destination-results" aria-live="polite"></div>
+      <aside class="weight-note" aria-label="Access legend">
         <div class="weight-row"><span class="weight-badge free">Free entry</span><span>Visa-free and ETA/eVisitor access is normally free or pre-cleared.</span></div>
         <div class="weight-row"><span class="weight-badge arrival">On arrival</span><span>Visa on arrival may include a border fee.</span></div>
       </aside>
     </section>
 
-    <section class="bundle-shell search-panel" id="destination-search" aria-labelledby="search-title">
-      <div class="search-intro"><p class="bundle-kicker">Quick answer</p><h2 id="search-title">Check a destination</h2><p>See the entry status for every passport.</p></div>
-      <div class="destination-control"><label for="destination-select">Destination</label><input id="destination-select" type="search" list="destination-options" autocomplete="off" placeholder="Try Viet Nam"><datalist id="destination-options"></datalist></div>
-      <div class="destination-results" id="destination-results" aria-live="polite"></div>
-    </section>
-
-    <section class="bundle-section" aria-labelledby="passport-title">
+    <section class="bundle-section" id="passport-reach" aria-labelledby="passport-title">
       <div class="bundle-shell">
         <div class="bundle-section-head"><h2 id="passport-title">Passport reach</h2><p>Access totals for each passport.</p></div>
         <div class="passport-strip" id="passport-cards" aria-label="Passport access cards"></div>
       </div>
     </section>
 
-    <section class="bundle-section" aria-labelledby="comparisons-title">
+    <section class="bundle-section" id="comparisons" aria-labelledby="comparisons-title">
       <div class="bundle-shell">
         <div class="bundle-section-head"><h2 id="comparisons-title">Direct comparisons</h2><p>Destinations available to only one of the two passports.</p></div>
         <div class="comparison-grid" id="direct-comparisons"></div>
@@ -213,10 +237,10 @@
     'use strict';
 
     const PASSPORTS = [
-      { code: 'al', name: 'Albania', mobility: 123 },
-      { code: 'gr', name: 'Greece', mobility: 174 },
-      { code: 'de', name: 'Germany', mobility: 174 },
-      { code: 'us', name: 'United States', mobility: 168 },
+      { code: 'al', name: 'Albania', flag: '🇦🇱', mobility: 123 },
+      { code: 'gr', name: 'Greece', flag: '🇬🇷', mobility: 174 },
+      { code: 'de', name: 'Germany', flag: '🇩🇪', mobility: 174 },
+      { code: 'us', name: 'United States', flag: '🇺🇸', mobility: 168 },
     ];
 
     const DIRECT_COMPARISONS = [
@@ -4852,6 +4876,17 @@
         || null;
     }
 
+    function filterDestinationOptions(data, query) {
+      const normalized = normalizeDestinationQuery(query);
+      if (!normalized) return data;
+      return data.filter((row) => normalizeDestinationQuery(row.destination).includes(normalized));
+    }
+
+    function destinationOptionsMarkup(data) {
+      if (!data.length) return '<li class="destination-option-empty">No destinations found.</li>';
+      return data.map((row, index) => `<li class="destination-option" id="destination-option-${index}" role="option" aria-selected="false" data-destination="${escapeHtml(row.destination)}" tabindex="-1">${escapeHtml(row.destination)}</li>`).join('');
+    }
+
     function comparePassports(data, leftCode, rightCode) {
       const result = { leftOnly: [], rightOnly: [], bothPositive: [], bothNegative: [] };
 
@@ -4877,16 +4912,18 @@
       return PASSPORTS.find((passport) => passport.code === code)?.name || code.toUpperCase();
     }
 
-    function renderPassportCards() {
-      const host = document.querySelector('#passport-cards');
-      host.innerHTML = PASSPORTS.map((passport) => {
-        const metrics = summarizePassportModes(DESTINATIONS, passport.code);
-        return `<article class="bundle-passport-card">
-          <div class="bundle-passport-head"><h3>${escapeHtml(passport.name)}</h3><span class="bundle-seal" aria-hidden="true">${passport.code.toUpperCase()}</span></div>
+    function passportCardMarkup(passport, data) {
+      const metrics = summarizePassportModes(data, passport.code);
+      return `<article class="bundle-passport-card">
+          <div class="bundle-passport-head"><h3>${escapeHtml(passport.name)}</h3><span class="bundle-seal" aria-hidden="true">${escapeHtml(passport.flag)}</span></div>
           <div class="access-number"><strong>${metrics.positive}</strong><span>positive destinations</span></div>
           <div class="passport-meta"><span><strong>${metrics.freePrecleared}</strong>Free / pre-cleared</span><span><strong>${metrics.onArrival}</strong>On arrival</span><span><strong>${metrics.negative}</strong>Negative</span><span><strong>${passport.mobility}</strong>Passport Index score</span></div>
         </article>`;
-      }).join('');
+    }
+
+    function renderPassportCards() {
+      const host = document.querySelector('#passport-cards');
+      host.innerHTML = PASSPORTS.map((passport) => passportCardMarkup(passport, DESTINATIONS)).join('');
     }
 
     function modeLabel(mode) {
@@ -4956,19 +4993,92 @@
     }
 
     function initDirectInterface() {
+      const destinationControl = document.querySelector('.destination-control');
       const destinationSelect = document.querySelector('#destination-select');
+      const destinationDropdown = document.querySelector('#destination-dropdown');
       const destinationOptions = document.querySelector('#destination-options');
-      destinationOptions.innerHTML = DESTINATIONS.map((row) => `<option value="${escapeHtml(row.destination)}"></option>`).join('');
       destinationSelect.value = 'VIET NAM';
+      let activeOptionIndex = -1;
 
       renderPassportCards();
       renderDirectComparisons();
       renderDestination(findDestination(DESTINATIONS, destinationSelect.value));
       renderPassportBrowser('al');
 
-      const updateDestination = () => renderDestination(findDestination(DESTINATIONS, destinationSelect.value));
-      destinationSelect.addEventListener('input', updateDestination);
-      destinationSelect.addEventListener('change', updateDestination);
+      const closeDestinationOptions = () => {
+        destinationOptions.hidden = true;
+        destinationSelect.setAttribute('aria-expanded', 'false');
+        destinationDropdown.setAttribute('aria-expanded', 'false');
+        destinationSelect.removeAttribute('aria-activedescendant');
+        activeOptionIndex = -1;
+      };
+      const openDestinationOptions = (rows) => {
+        destinationOptions.innerHTML = destinationOptionsMarkup(rows);
+        destinationOptions.hidden = false;
+        destinationSelect.setAttribute('aria-expanded', 'true');
+        destinationDropdown.setAttribute('aria-expanded', 'true');
+        destinationSelect.removeAttribute('aria-activedescendant');
+        activeOptionIndex = -1;
+      };
+      const activateDestinationOption = (nextIndex) => {
+        const options = Array.from(destinationOptions.querySelectorAll('[role="option"]'));
+        if (!options.length) return;
+        activeOptionIndex = (nextIndex + options.length) % options.length;
+        options.forEach((option, index) => {
+          const active = index === activeOptionIndex;
+          option.classList.toggle('is-active', active);
+          option.setAttribute('aria-selected', String(active));
+        });
+        const activeOption = options[activeOptionIndex];
+        destinationSelect.setAttribute('aria-activedescendant', activeOption.id);
+        activeOption.scrollIntoView({ block: 'nearest' });
+      };
+      const chooseDestination = (destination) => {
+        destinationSelect.value = destination;
+        renderDestination(findDestination(DESTINATIONS, destination));
+        closeDestinationOptions();
+        destinationSelect.focus();
+      };
+      const updateFromInput = () => {
+        renderDestination(findDestination(DESTINATIONS, destinationSelect.value));
+        openDestinationOptions(filterDestinationOptions(DESTINATIONS, destinationSelect.value));
+      };
+      destinationSelect.addEventListener('input', updateFromInput);
+      destinationSelect.addEventListener('keydown', (event) => {
+        if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+          event.preventDefault();
+          if (destinationOptions.hidden) {
+            openDestinationOptions(filterDestinationOptions(DESTINATIONS, destinationSelect.value));
+          }
+          const optionsCount = destinationOptions.querySelectorAll('[role="option"]').length;
+          if (!optionsCount) return;
+          const nextIndex = event.key === 'ArrowDown'
+            ? activeOptionIndex + 1
+            : (activeOptionIndex < 0 ? optionsCount - 1 : activeOptionIndex - 1);
+          activateDestinationOption(nextIndex);
+        } else if (event.key === 'Enter' && activeOptionIndex >= 0) {
+          event.preventDefault();
+          const activeOption = destinationOptions.querySelectorAll('[role="option"]')[activeOptionIndex];
+          if (activeOption) chooseDestination(activeOption.dataset.destination);
+        } else if (event.key === 'Escape') {
+          closeDestinationOptions();
+        }
+      });
+      destinationDropdown.addEventListener('click', () => {
+        if (destinationOptions.hidden) {
+          openDestinationOptions(DESTINATIONS);
+          destinationSelect.focus();
+        } else {
+          closeDestinationOptions();
+        }
+      });
+      destinationOptions.addEventListener('click', (event) => {
+        const option = event.target.closest('[data-destination]');
+        if (option) chooseDestination(option.dataset.destination);
+      });
+      document.addEventListener('pointerdown', (event) => {
+        if (!destinationControl.contains(event.target)) closeDestinationOptions();
+      });
 
       document.querySelectorAll('.passport-choice').forEach((button) => {
         button.addEventListener('click', () => {
@@ -4990,7 +5100,10 @@
       summarizePassport,
       summarizePassportModes,
       findDestination,
+      filterDestinationOptions,
+      destinationOptionsMarkup,
       comparePassports,
+      passportCardMarkup,
       destinationResultMarkup,
       comparisonCardMarkup,
       passportBrowserMarkup,

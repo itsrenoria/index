@@ -412,7 +412,7 @@ test('passport browser filters counts while preserving direct status badges', ()
 
 test('Browse passport selection enables status and clearing resets ALL', () => {
   const { html } = loadPage();
-  assert.match(html, /passportSelector = initChoiceSelector/);
+  assert.match(html, /initChoiceSelector\(document\.querySelector\('#passport-browser-control'\)/);
   assert.match(html, /passportStatusSelector = initChoiceSelector/);
   assert.match(html, /selectedPassportCode = value;[\s\S]*?passportStatusSelector\.setDisabled\(!selectedPassportCode\)/);
   assert.match(html, /if \(!selectedPassportCode\)[\s\S]*?selectedPassportGroup = 'all';[\s\S]*?passportStatusSelector\.setValue\('all'\)/);

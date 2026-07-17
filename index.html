@@ -5190,7 +5190,6 @@
       sync();
 
       return {
-        value: () => selectedValue,
         setValue: (value, notify = false) => choose(value, notify),
         setDisabled: (nextDisabled) => {
           disabled = nextDisabled;
@@ -5198,7 +5197,6 @@
           if (disabled) close();
         },
         refresh: sync,
-        close,
       };
     }
 
@@ -5241,7 +5239,7 @@
 
       const passportSelectorOptions = () => PASSPORTS.map(({ code, name }) => ({ value: code, label: name }));
       let comparisonRightSelector;
-      const comparisonLeftSelector = initChoiceSelector(document.querySelector('#comparison-left-control'), {
+      initChoiceSelector(document.querySelector('#comparison-left-control'), {
         options: passportSelectorOptions,
         placeholder: 'Choose passport',
         onChange: (value) => {
@@ -5276,13 +5274,12 @@
         clearValue: 'all',
         onChange: (value) => {
           selectedPassportGroup = value || 'all';
-          if (!value) passportStatusSelector.setValue('all');
           renderPassportBrowser();
         },
       });
       passportStatusSelector.setDisabled(true);
 
-      const passportSelector = initChoiceSelector(document.querySelector('#passport-browser-control'), {
+      initChoiceSelector(document.querySelector('#passport-browser-control'), {
         options: passportSelectorOptions,
         placeholder: 'Choose passport',
         onChange: (value) => {

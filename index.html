@@ -102,6 +102,22 @@
     .unique-list li { padding: .7rem 0; border-top: 1px dotted var(--v2-rule); }
     .unique-list .source-labels { gap: .18rem; }
     .empty-unique { margin: .8rem 0; color: var(--v2-muted); font-size: .75rem; }
+    .passport-browser-panel { border: 1px solid var(--v2-ink); background: var(--v2-card); box-shadow: 8px 9px 0 rgba(23,33,29,.06); }
+    .passport-choices { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); padding: .5rem; border-bottom: 1px solid var(--v2-rule); background: #eee3d2; }
+    .passport-choice { min-height: 44px; padding: .6rem .75rem; border: 1px solid transparent; background: transparent; color: var(--v2-muted); font: 800 .64rem/1.2 var(--v2-mono); letter-spacing: .04em; text-transform: uppercase; cursor: pointer; }
+    .passport-choice:hover { color: var(--v2-ink); background: rgba(255,250,241,.65); }
+    .passport-choice[aria-pressed="true"] { border-color: var(--v2-ink); background: var(--v2-card); color: var(--v2-ink); box-shadow: 3px 3px 0 rgba(23,33,29,.08); }
+    .passport-choice:focus-visible, .destination-control input:focus-visible { outline: 3px solid #c9843b; outline-offset: 2px; }
+    .passport-browser-summary { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; padding: 1rem; border-bottom: 2px solid var(--v2-ink); }
+    .passport-browser-summary strong { font: 600 1.35rem/1 var(--v2-serif); }
+    .passport-browser-summary span { color: var(--v2-muted); font: 800 .56rem/1.2 var(--v2-mono); letter-spacing: .05em; text-transform: uppercase; }
+    .passport-browser-list { margin: 0; padding: 0; list-style: none; }
+    .passport-browser-row { display: grid; gap: .55rem; padding: .8rem 1rem; border-bottom: 1px dotted var(--v2-rule); }
+    .passport-browser-row:last-child { border-bottom: 0; }
+    .passport-browser-row .destination-name { font-size: 1.05rem; }
+    .passport-browser-status { display: flex; align-items: flex-start; justify-content: space-between; gap: .75rem; min-width: 0; }
+    .passport-browser-raw { min-width: 0; color: var(--v2-muted); font: .62rem/1.4 var(--v2-mono); overflow-wrap: anywhere; }
+    .passport-browser-badges { display: flex; flex: 0 0 auto; flex-wrap: wrap; justify-content: flex-end; gap: .3rem; }
     @media (min-width: 760px) {
       .bundle-hero { display: grid; grid-template-columns: 1.2fr .8fr; gap: 4rem; align-items: end; padding: 5.2rem 0 4rem; }
       .weight-note { margin: 0; }
@@ -113,6 +129,9 @@
       .destination-results { grid-column: 1 / -1; }
       .unique-columns { grid-template-columns: 1fr 1fr; }
       .unique-side + .unique-side { border-top: 0; border-left: 1px solid var(--v2-rule); }
+      .passport-choices { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+      .passport-browser-row { grid-template-columns: minmax(10rem, .8fr) minmax(0, 1.2fr); align-items: center; gap: 1.5rem; }
+      .passport-browser-status { align-items: center; }
     }
     @media (min-width: 960px) {
       .comparison-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -161,6 +180,21 @@
       <div class="bundle-shell">
         <div class="bundle-section-head"><h2 id="comparisons-title">Direct comparisons</h2><p>Destinations available to only one of the two passports.</p></div>
         <div class="comparison-grid" id="direct-comparisons"></div>
+      </div>
+    </section>
+
+    <section class="bundle-section" id="passport-browser" aria-labelledby="passport-browser-title">
+      <div class="bundle-shell">
+        <div class="bundle-section-head"><h2 id="passport-browser-title">Browse one passport</h2><p>Full entry list for one passport.</p></div>
+        <div class="passport-browser-panel">
+          <div class="passport-choices" role="group" aria-label="Choose a passport">
+            <button class="passport-choice" type="button" data-passport="al" aria-pressed="true">Albania</button>
+            <button class="passport-choice" type="button" data-passport="gr" aria-pressed="false">Greece</button>
+            <button class="passport-choice" type="button" data-passport="de" aria-pressed="false">Germany</button>
+            <button class="passport-choice" type="button" data-passport="us" aria-pressed="false">United States</button>
+          </div>
+          <div id="passport-browser-results" aria-live="polite"></div>
+        </div>
       </div>
     </section>
   </main>
@@ -4887,6 +4921,19 @@
       </article>`;
     }
 
+    function passportBrowserMarkup(data, passportCode) {
+      const passport = PASSPORTS.find(({ code }) => code === passportCode);
+      if (!passport) return '';
+      const rows = data.map((row) => {
+        const entry = row[passportCode];
+        const rank = accessWeight(entry);
+        const mode = accessMode(entry);
+        const rankLabel = rank === 'positive' ? 'Positive' : 'Negative';
+        return `<li class="passport-browser-row"><span class="destination-name">${escapeHtml(row.destination)}</span><span class="passport-browser-status"><span class="passport-browser-raw">${escapeHtml(entry.raw)}</span><span class="passport-browser-badges"><span class="rank-pill ${rank}">${rankLabel}</span><span class="access-pill ${mode}">${modeLabel(mode)}</span></span></span></li>`;
+      }).join('');
+      return `<div class="passport-browser-summary"><strong>${escapeHtml(passport.name)}</strong><span>${data.length} destinations</span></div><ol class="passport-browser-list">${rows}</ol>`;
+    }
+
     function renderDestination(row) {
       if (!row) {
         document.querySelector('#destination-results').innerHTML = '<p class="destination-sample">No matching destination.</p>';
@@ -4899,6 +4946,10 @@
       document.querySelector('#direct-comparisons').innerHTML = DIRECT_COMPARISONS.map(comparisonCardMarkup).join('');
     }
 
+    function renderPassportBrowser(passportCode) {
+      document.querySelector('#passport-browser-results').innerHTML = passportBrowserMarkup(DESTINATIONS, passportCode);
+    }
+
     function initDirectInterface() {
       const destinationSelect = document.querySelector('#destination-select');
       const destinationOptions = document.querySelector('#destination-options');
@@ -4908,10 +4959,20 @@
       renderPassportCards();
       renderDirectComparisons();
       renderDestination(findDestination(DESTINATIONS, destinationSelect.value));
+      renderPassportBrowser('al');
 
       const updateDestination = () => renderDestination(findDestination(DESTINATIONS, destinationSelect.value));
       destinationSelect.addEventListener('input', updateDestination);
       destinationSelect.addEventListener('change', updateDestination);
+
+      document.querySelectorAll('.passport-choice').forEach((button) => {
+        button.addEventListener('click', () => {
+          document.querySelectorAll('.passport-choice').forEach((choice) => {
+            choice.setAttribute('aria-pressed', String(choice === button));
+          });
+          renderPassportBrowser(button.dataset.passport);
+        });
+      });
     }
 
     globalThis.PassportDashboard = {
@@ -4927,6 +4988,7 @@
       comparePassports,
       destinationResultMarkup,
       comparisonCardMarkup,
+      passportBrowserMarkup,
     };
 
     if (typeof document !== 'undefined') {

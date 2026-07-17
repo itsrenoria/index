@@ -176,6 +176,26 @@ test('section content is concise and descriptive', () => {
   assert.doesNotMatch(html, /recalculated|simplified model|shared access stays condensed|switching views/i);
 });
 
+test('passport browser renders every destination for each selected passport', () => {
+  const { api } = loadPage();
+  for (const passport of api.PASSPORTS) {
+    const markup = api.passportBrowserMarkup(api.DESTINATIONS, passport.code);
+    assert.equal((markup.match(/class="passport-browser-row"/g) || []).length, 199, passport.code);
+    assert.match(markup, /AFGHANISTAN/);
+    assert.match(markup, /ZIMBABWE/);
+    assert.match(markup, /rank-pill negative">Negative/);
+    assert.match(markup, /EVISA/);
+  }
+});
+
+test('passport browser offers four accessible choices with Albania selected', () => {
+  const { html } = loadPage();
+  assert.match(html, /id="passport-browser"/);
+  assert.equal((html.match(/<button[^>]+class="passport-choice"[^>]+data-passport=/g) || []).length, 4);
+  assert.match(html, /data-passport="al" aria-pressed="true"/);
+  assert.match(html, /id="passport-browser-results"[^>]+aria-live="polite"/);
+});
+
 test('page styles are mobile-first with intentional card scrolling and touch targets', () => {
   const { html } = loadPage();
   assert.match(html, /scroll-snap-type:\s*x mandatory/);

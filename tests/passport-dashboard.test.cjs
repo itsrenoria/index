@@ -205,6 +205,14 @@ test('page styles are mobile-first with intentional card scrolling and touch tar
   assert.ok(html.indexOf('.unique-list { max-height: 25rem') > html.indexOf('@media (min-width: 960px)'));
 });
 
+test('section rhythm uses shared responsive spacing without oversized fixed gaps', () => {
+  const { html } = loadPage();
+  assert.match(html, /--section-space:\s*clamp\(/);
+  assert.match(html, /\.bundle-section\s*\{[^}]*padding:\s*var\(--section-space\) 0/s);
+  assert.doesNotMatch(html, /(?:margin|padding)(?:-top|-bottom)?:\s*(?:[5-9]\d|\d{3,})px/);
+  assert.match(html, /\.passport-choice\s*\{[^}]*min-height:\s*44px/s);
+});
+
 test('page is self-contained and includes source and travel warning', () => {
   const { html } = loadPage();
   assert.doesNotMatch(html, /<(?:script|link)[^>]+(?:src|href)="https?:/i);

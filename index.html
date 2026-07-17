@@ -16,11 +16,13 @@
       --v2-green: #285e48;
       --v2-soft-green: #dfeadf;
       --v2-soft-red: #efddd7;
+      --section-space: clamp(2.25rem, 5vw, 3.25rem);
       --v2-serif: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
       --v2-sans: "Avenir Next", Avenir, "Gill Sans", "Trebuchet MS", sans-serif;
       --v2-mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
     }
-    body { background: var(--v2-paper); color: var(--v2-ink); font-family: var(--v2-sans); }
+    *, *::before, *::after { box-sizing: border-box; }
+    body { margin: 0; background: var(--v2-paper); color: var(--v2-ink); font-family: var(--v2-sans); }
     .skip-link { position: fixed; z-index: 10; top: .75rem; left: .75rem; padding: .7rem .9rem; transform: translateY(-200%); border: 2px solid var(--v2-ink); background: var(--v2-card); color: var(--v2-ink); font-weight: 800; }
     .skip-link:focus { transform: translateY(0); }
     .bundle-shell { width: min(calc(100% - 32px), 1040px); margin-inline: auto; }
@@ -28,7 +30,7 @@
     .bundle-brand { display: flex; align-items: center; gap: .65rem; font: 800 .68rem/1 var(--v2-mono); letter-spacing: .08em; text-transform: uppercase; }
     .bundle-mark { display: grid; place-items: center; width: 34px; height: 40px; border: 1.5px solid currentColor; border-radius: 3px 6px 6px 3px; font-family: var(--v2-serif); font-size: 1rem; }
     .bundle-date { color: var(--v2-muted); font: .61rem/1.4 var(--v2-mono); text-align: right; }
-    .bundle-hero { padding: 3.6rem 0 2.6rem; }
+    .bundle-hero { padding: clamp(2.75rem, 8vw, 4rem) 0 clamp(2.25rem, 6vw, 3rem); }
     .bundle-kicker { margin: 0 0 .8rem; color: var(--v2-red); font: 800 .67rem/1.2 var(--v2-mono); letter-spacing: .13em; text-transform: uppercase; }
     .bundle-hero h1 { max-width: 11ch; margin: 0 0 1.2rem; font: 500 clamp(3rem, 14vw, 5.4rem)/.9 var(--v2-serif); letter-spacing: -.05em; }
     .bundle-deck { max-width: 55ch; margin: 0; color: #46504b; font: 1.08rem/1.55 var(--v2-serif); }
@@ -37,7 +39,7 @@
     .weight-badge { flex: 0 0 auto; padding: .2rem .45rem; border-radius: 999px; font: 800 .58rem/1.2 var(--v2-mono); letter-spacing: .05em; text-transform: uppercase; }
     .weight-badge.free { color: var(--v2-green); background: var(--v2-soft-green); }
     .weight-badge.arrival { color: #75520d; background: #f0e1b7; }
-    .bundle-section { padding: 3rem 0; border-top: 1px solid var(--v2-rule); }
+    .bundle-section { padding: var(--section-space) 0; border-top: 1px solid var(--v2-rule); }
     .bundle-section-head { margin-bottom: 1.4rem; }
     .bundle-section-head h2 { margin: 0; font: 500 2.25rem/1 var(--v2-serif); letter-spacing: -.03em; }
     .bundle-section-head p { margin: .65rem 0 0; color: var(--v2-muted); font-size: .82rem; }
@@ -63,7 +65,7 @@
     .bundle-source { padding: 1.2rem 0 2.5rem; color: var(--v2-muted); font-size: .68rem; }
     .bundle-source p { margin: 0 0 .65rem; }
     .bundle-source .warning { color: var(--v2-red); }
-    .search-panel { margin-bottom: 3rem; padding: 1.25rem; border: 1px solid var(--v2-ink); background: var(--v2-card); box-shadow: 8px 9px 0 rgba(23,33,29,.08); }
+    .search-panel { margin-bottom: clamp(1.75rem, 4vw, 2.5rem); padding: 1.25rem; border: 1px solid var(--v2-ink); background: var(--v2-card); box-shadow: 8px 9px 0 rgba(23,33,29,.08); }
     .search-intro h2 { margin: 0; font: 500 2rem/1 var(--v2-serif); letter-spacing: -.03em; }
     .search-intro > p:last-child { margin: .55rem 0 1.2rem; color: var(--v2-muted); font-size: .8rem; }
     .destination-control input { font: 600 1rem/1.2 var(--v2-serif); }
@@ -119,7 +121,7 @@
     .passport-browser-raw { min-width: 0; color: var(--v2-muted); font: .62rem/1.4 var(--v2-mono); overflow-wrap: anywhere; }
     .passport-browser-badges { display: flex; flex: 0 0 auto; flex-wrap: wrap; justify-content: flex-end; gap: .3rem; }
     @media (min-width: 760px) {
-      .bundle-hero { display: grid; grid-template-columns: 1.2fr .8fr; gap: 4rem; align-items: end; padding: 5.2rem 0 4rem; }
+      .bundle-hero { display: grid; grid-template-columns: 1.2fr .8fr; gap: 4rem; align-items: end; padding: clamp(4rem, 7vw, 5.2rem) 0 var(--section-space); }
       .weight-note { margin: 0; }
       .passport-strip { display: grid; grid-template-columns: repeat(4, 1fr); margin-inline: 0; padding-inline: 0; overflow: visible; }
       .bundle-passport-card { min-width: 0; }

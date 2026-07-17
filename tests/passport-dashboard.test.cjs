@@ -153,6 +153,15 @@ test('passport summaries reconcile positive and negative access to 199', () => {
   }
 });
 
+test('passport mode summaries split positive access into free-precleared and on-arrival', () => {
+  const { api } = loadPage();
+  for (const passport of api.PASSPORTS) {
+    const summary = api.summarizePassportModes(api.DESTINATIONS, passport.code);
+    assert.equal(summary.freePrecleared + summary.onArrival, summary.positive, passport.code);
+    assert.equal(summary.positive + summary.negative, 199, passport.code);
+  }
+});
+
 test('scenario definitions cover the eight requested bundle comparisons', () => {
   const { api } = loadPage();
   const definitions = Array.from(api.SCENARIOS, ({ group, left, right, combined = null }) => ({

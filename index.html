@@ -4842,6 +4842,13 @@
       return summarizeBundle(data, [passportCode]);
     }
 
+    function summarizePassportModes(data, passportCode) {
+      const summary = summarizePassport(data, passportCode);
+      const freePrecleared = data.filter((row) => accessMode(row[passportCode]) === 'free-precleared').length;
+      const onArrival = data.filter((row) => accessMode(row[passportCode]) === 'on-arrival').length;
+      return { ...summary, freePrecleared, onArrival };
+    }
+
     function normalizeDestinationQuery(value) {
       return String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim().toUpperCase();
     }
@@ -5033,6 +5040,7 @@
       bundleAccess,
       summarizeBundle,
       summarizePassport,
+      summarizePassportModes,
       findDestination,
       compareBundles,
       comparePassports,

@@ -154,11 +154,12 @@
     .unique-list li { padding: .7rem 0; border-top: 1px dotted var(--v2-rule); }
     .unique-list .source-labels { gap: .18rem; }
     .empty-unique { margin: .8rem 0; color: var(--v2-muted); font-size: .75rem; }
-    .passport-browser-panel { border: 1px solid var(--v2-ink); background: var(--v2-card); box-shadow: 8px 9px 0 rgba(23,33,29,.06); }
-    .passport-browser-controls { padding: 1rem; border-bottom: 1px solid var(--v2-rule); background: #eee3d2; }
-    .passport-browser-summary { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; padding: 1rem; border-bottom: 2px solid var(--v2-ink); }
-    .passport-browser-summary strong { font: 600 1.35rem/1 var(--v2-serif); }
-    .passport-browser-summary span { color: var(--v2-muted); font: 800 .56rem/1.2 var(--v2-mono); letter-spacing: .05em; text-transform: uppercase; }
+    .passport-browser-result-card { min-width: 0; overflow: hidden; border: 1px solid var(--v2-rule); background: var(--v2-card); box-shadow: 6px 7px 0 rgba(23,33,29,.04); }
+    .passport-browser-header { display: grid; grid-template-columns: minmax(0, 1fr); gap: .7rem; padding: 1rem; border-bottom: 2px solid var(--v2-ink); background: #f3eadb; }
+    .passport-browser-heading { min-width: 0; }
+    .passport-browser-eyebrow { display: block; margin-bottom: .35rem; color: var(--v2-red); font: 800 .52rem/1 var(--v2-mono); letter-spacing: .09em; text-transform: uppercase; }
+    .passport-browser-title { margin: 0; font: 600 clamp(1.65rem, 7vw, 2.2rem)/.95 var(--v2-serif); letter-spacing: -.025em; overflow-wrap: anywhere; }
+    .passport-browser-count { justify-self: start; padding: .42rem .55rem; border: 1px solid var(--v2-rule); background: var(--v2-card); color: var(--v2-ink); font: 800 .56rem/1 var(--v2-mono); letter-spacing: .03em; text-transform: uppercase; }
     .passport-browser-list { margin: 0; padding: 0; list-style: none; }
     .passport-browser-row { display: grid; gap: .55rem; padding: .8rem 1rem; border-bottom: 1px dotted var(--v2-rule); }
     .passport-browser-row:last-child { border-bottom: 0; }
@@ -185,6 +186,8 @@
       .unique-columns { grid-template-columns: 1fr 1fr; }
       .unique-side + .unique-side { border-top: 0; border-left: 1px solid var(--v2-rule); }
       .browser-selector-grid { grid-template-columns: minmax(0, 1fr) minmax(14rem, .65fr); margin-bottom: 0; }
+      .passport-browser-header { grid-template-columns: minmax(0, 1fr) auto; align-items: end; }
+      .passport-browser-count { justify-self: end; }
       .passport-browser-row { grid-template-columns: minmax(10rem, .8fr) minmax(0, 1.2fr); align-items: center; gap: 1.5rem; }
       .passport-browser-status { align-items: center; }
     }
@@ -261,24 +264,20 @@
     <section class="bundle-section" id="passport-browser" aria-labelledby="passport-browser-title">
       <div class="bundle-shell">
         <div class="bundle-section-head"><h2 id="passport-browser-title">Browse one passport</h2><p>Browse destinations by access status.</p></div>
-        <div class="passport-browser-panel">
-          <div class="passport-browser-controls">
-            <div class="selector-grid browser-selector-grid">
-              <div class="choice-selector" id="passport-browser-control" data-choice-selector>
-                <label for="passport-browser-selector">Passport</label>
-                <div class="choice-selector-shell"><button class="choice-selector-trigger" id="passport-browser-selector" type="button" role="combobox" aria-expanded="false" aria-controls="passport-browser-options">Choose passport</button><button class="choice-selector-clear" type="button" aria-label="Clear passport" hidden>×</button><button class="choice-selector-arrow" type="button" aria-label="Browse passport options" aria-expanded="false" aria-controls="passport-browser-options"></button></div>
-                <ul class="choice-selector-options" id="passport-browser-options" role="listbox" hidden></ul>
-              </div>
-              <div class="choice-selector" id="passport-status-control" data-choice-selector>
-                <label for="passport-status-selector">Access status</label>
-                <div class="choice-selector-shell"><button class="choice-selector-trigger" id="passport-status-selector" type="button" role="combobox" aria-expanded="false" aria-controls="passport-status-options" disabled>ALL</button><button class="choice-selector-clear" type="button" aria-label="Reset access status" hidden>×</button><button class="choice-selector-arrow" type="button" aria-label="Browse access status options" aria-expanded="false" aria-controls="passport-status-options" disabled></button></div>
-                <ul class="choice-selector-options" id="passport-status-options" role="listbox" hidden></ul>
-              </div>
-            </div>
+        <div class="selector-grid browser-selector-grid">
+          <div class="choice-selector" id="passport-browser-control" data-choice-selector>
+            <label for="passport-browser-selector">Passport</label>
+            <div class="choice-selector-shell"><button class="choice-selector-trigger" id="passport-browser-selector" type="button" role="combobox" aria-expanded="false" aria-controls="passport-browser-options">Choose passport</button><button class="choice-selector-clear" type="button" aria-label="Clear passport" hidden>×</button><button class="choice-selector-arrow" type="button" aria-label="Browse passport options" aria-expanded="false" aria-controls="passport-browser-options"></button></div>
+            <ul class="choice-selector-options" id="passport-browser-options" role="listbox" hidden></ul>
           </div>
-          <p class="live-status" id="passport-browser-status" aria-live="polite" aria-atomic="true">Choose a passport to view destinations.</p>
-          <div id="passport-browser-results"><p class="section-empty">Choose a passport to view destinations.</p></div>
+          <div class="choice-selector" id="passport-status-control" data-choice-selector>
+            <label for="passport-status-selector">Access status</label>
+            <div class="choice-selector-shell"><button class="choice-selector-trigger" id="passport-status-selector" type="button" role="combobox" aria-expanded="false" aria-controls="passport-status-options" disabled>ALL</button><button class="choice-selector-clear" type="button" aria-label="Reset access status" hidden>×</button><button class="choice-selector-arrow" type="button" aria-label="Browse access status options" aria-expanded="false" aria-controls="passport-status-options" disabled></button></div>
+            <ul class="choice-selector-options" id="passport-status-options" role="listbox" hidden></ul>
+          </div>
         </div>
+        <p class="live-status" id="passport-browser-status" aria-live="polite" aria-atomic="true">Choose a passport to view destinations.</p>
+        <div id="passport-browser-results"><p class="section-empty">Choose a passport to view destinations.</p></div>
       </div>
     </section>
   </main>
@@ -5066,7 +5065,14 @@
         const status = accessStatus(entry);
         return `<li class="passport-browser-row"><span class="destination-name">${escapeHtml(row.destination)}</span><span class="passport-browser-status"><span class="passport-browser-raw">${escapeHtml(entry.raw)}</span><span class="passport-browser-badges"><span class="access-pill ${status}">${statusLabel(status)}</span></span></span></li>`;
       }).join('');
-      return `<div class="passport-browser-summary"><strong>${escapeHtml(passport.name)}</strong><span>${filteredRows.length} destinations</span></div><ol class="passport-browser-list">${rows}</ol>`;
+      const destinationLabel = `${filteredRows.length} ${filteredRows.length === 1 ? 'destination' : 'destinations'}`;
+      return `<article class="passport-browser-result-card">
+  <header class="passport-browser-header">
+    <div class="passport-browser-heading"><span class="passport-browser-eyebrow">Passport access</span><h3 class="passport-browser-title">${escapeHtml(passport.name)}</h3></div>
+    <span class="passport-browser-count">${destinationLabel}</span>
+  </header>
+  <ol class="passport-browser-list">${rows}</ol>
+</article>`;
     }
 
     function renderDestination(row) {

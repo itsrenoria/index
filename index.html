@@ -118,11 +118,16 @@
     .unique-list .source-labels { gap: .18rem; }
     .empty-unique { margin: .8rem 0; color: var(--v2-muted); font-size: .75rem; }
     .passport-browser-panel { border: 1px solid var(--v2-ink); background: var(--v2-card); box-shadow: 8px 9px 0 rgba(23,33,29,.06); }
-    .passport-choices { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); padding: .5rem; border-bottom: 1px solid var(--v2-rule); background: #eee3d2; }
+    .passport-browser-controls { display: grid; gap: .5rem; padding: .5rem; border-bottom: 1px solid var(--v2-rule); background: #eee3d2; }
+    .passport-choices { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .passport-choice { min-height: 44px; padding: .6rem .75rem; border: 1px solid transparent; background: transparent; color: var(--v2-muted); font: 800 .64rem/1.2 var(--v2-mono); letter-spacing: .04em; text-transform: uppercase; cursor: pointer; }
     .passport-choice:hover { color: var(--v2-ink); background: rgba(255,250,241,.65); }
     .passport-choice[aria-pressed="true"] { border-color: var(--v2-ink); background: var(--v2-card); color: var(--v2-ink); box-shadow: 3px 3px 0 rgba(23,33,29,.08); }
     .passport-choice:focus-visible { outline: 3px solid #c9843b; outline-offset: 2px; }
+    .passport-status-control { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: .55rem; }
+    .passport-status-control label { color: var(--v2-muted); font: 800 .56rem/1.2 var(--v2-mono); letter-spacing: .06em; text-transform: uppercase; }
+    .passport-status-control select { min-height: 44px; padding: .55rem 2rem .55rem .65rem; border: 1px solid var(--v2-ink); border-radius: 0; background: var(--v2-card); color: var(--v2-ink); font: 800 .6rem/1.2 var(--v2-mono); text-transform: uppercase; }
+    .passport-status-control select:focus-visible { outline: 3px solid #c9843b; outline-offset: 2px; }
     .passport-browser-summary { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; padding: 1rem; border-bottom: 2px solid var(--v2-ink); }
     .passport-browser-summary strong { font: 600 1.35rem/1 var(--v2-serif); }
     .passport-browser-summary span { color: var(--v2-muted); font: 800 .56rem/1.2 var(--v2-mono); letter-spacing: .05em; text-transform: uppercase; }
@@ -153,6 +158,7 @@
       .destination-results { grid-column: 1 / -1; }
       .unique-columns { grid-template-columns: 1fr 1fr; }
       .unique-side + .unique-side { border-top: 0; border-left: 1px solid var(--v2-rule); }
+      .passport-browser-controls { grid-template-columns: minmax(0, 1fr) auto; align-items: center; }
       .passport-choices { grid-template-columns: repeat(4, minmax(0, 1fr)); }
       .passport-browser-row { grid-template-columns: minmax(10rem, .8fr) minmax(0, 1.2fr); align-items: center; gap: 1.5rem; }
       .passport-browser-status { align-items: center; }
@@ -216,13 +222,23 @@
       <div class="bundle-shell">
         <div class="bundle-section-head"><h2 id="passport-browser-title">Browse one passport</h2><p>View every destination for one passport.</p></div>
         <div class="passport-browser-panel">
-          <div class="passport-choices" role="group" aria-label="Choose a passport">
-            <button class="passport-choice" type="button" data-passport="al" aria-pressed="true">Albania</button>
-            <button class="passport-choice" type="button" data-passport="gr" aria-pressed="false">Greece</button>
-            <button class="passport-choice" type="button" data-passport="de" aria-pressed="false">Germany</button>
-            <button class="passport-choice" type="button" data-passport="us" aria-pressed="false">United States</button>
+          <div class="passport-browser-controls">
+            <div class="passport-choices" role="group" aria-label="Choose a passport">
+              <button class="passport-choice" type="button" data-passport="al" aria-pressed="true">Albania</button>
+              <button class="passport-choice" type="button" data-passport="gr" aria-pressed="false">Greece</button>
+              <button class="passport-choice" type="button" data-passport="de" aria-pressed="false">Germany</button>
+              <button class="passport-choice" type="button" data-passport="us" aria-pressed="false">United States</button>
+            </div>
+            <div class="passport-status-control">
+              <label for="passport-status-filter">Access status</label>
+              <select id="passport-status-filter">
+                <option value="visa-free">Visa free</option>
+                <option value="on-arrival">On arrival</option>
+                <option value="visa-needed">Visa needed</option>
+              </select>
+            </div>
           </div>
-          <p class="live-status" id="passport-browser-status" aria-live="polite" aria-atomic="true">Showing 199 destinations for Albania.</p>
+          <p class="live-status" id="passport-browser-status" aria-live="polite" aria-atomic="true">Showing 80 destinations for Albania.</p>
           <div id="passport-browser-results"></div>
         </div>
       </div>
@@ -4949,6 +4965,21 @@
       }[status];
     }
 
+    const BROWSER_ACCESS_GROUPS = [
+      ['visa-free', 'Visa free'],
+      ['on-arrival', 'On arrival'],
+      ['visa-needed', 'Visa needed'],
+    ];
+
+    function filterPassportDestinations(data, passportCode, group) {
+      const groupStatuses = {
+        'visa-free': ['visa-free', 'eta', 'evisitor', 'entry-form'],
+        'on-arrival': ['on-arrival'],
+        'visa-needed': ['evisa', 'visa-needed'],
+      }[group] || [];
+      return data.filter((row) => groupStatuses.includes(accessStatus(row[passportCode])));
+    }
+
     function destinationResultMarkup(row) {
       return PASSPORTS
         .filter((passport) => row[passport.code].type !== 'home')
@@ -4980,15 +5011,16 @@
       </article>`;
     }
 
-    function passportBrowserMarkup(data, passportCode) {
+    function passportBrowserMarkup(data, passportCode, group = 'visa-free') {
       const passport = PASSPORTS.find(({ code }) => code === passportCode);
       if (!passport) return '';
-      const rows = data.map((row) => {
+      const filteredRows = filterPassportDestinations(data, passportCode, group);
+      const rows = filteredRows.map((row) => {
         const entry = row[passportCode];
         const status = accessStatus(entry);
         return `<li class="passport-browser-row"><span class="destination-name">${escapeHtml(row.destination)}</span><span class="passport-browser-status"><span class="passport-browser-raw">${escapeHtml(entry.raw)}</span><span class="passport-browser-badges"><span class="access-pill ${status}">${statusLabel(status)}</span></span></span></li>`;
       }).join('');
-      return `<div class="passport-browser-summary"><strong>${escapeHtml(passport.name)}</strong><span>${data.length} destinations</span></div><ol class="passport-browser-list">${rows}</ol>`;
+      return `<div class="passport-browser-summary"><strong>${escapeHtml(passport.name)}</strong><span>${filteredRows.length} destinations</span></div><ol class="passport-browser-list">${rows}</ol>`;
     }
 
     function renderDestination(row) {
@@ -5003,9 +5035,13 @@
       document.querySelector('#direct-comparisons').innerHTML = DIRECT_COMPARISONS.map(comparisonCardMarkup).join('');
     }
 
-    function renderPassportBrowser(passportCode) {
-      document.querySelector('#passport-browser-results').innerHTML = passportBrowserMarkup(DESTINATIONS, passportCode);
-      document.querySelector('#passport-browser-status').textContent = `Showing ${DESTINATIONS.length} destinations for ${passportName(passportCode)}.`;
+    let selectedPassportCode = 'al';
+    let selectedPassportGroup = 'visa-free';
+
+    function renderPassportBrowser() {
+      const rows = filterPassportDestinations(DESTINATIONS, selectedPassportCode, selectedPassportGroup);
+      document.querySelector('#passport-browser-results').innerHTML = passportBrowserMarkup(DESTINATIONS, selectedPassportCode, selectedPassportGroup);
+      document.querySelector('#passport-browser-status').textContent = `Showing ${rows.length} destinations for ${passportName(selectedPassportCode)}.`;
     }
 
     function initDirectInterface() {
@@ -5013,13 +5049,14 @@
       const destinationSelect = document.querySelector('#destination-select');
       const destinationDropdown = document.querySelector('#destination-dropdown');
       const destinationOptions = document.querySelector('#destination-options');
+      const passportStatusFilter = document.querySelector('#passport-status-filter');
       destinationSelect.value = 'VIET NAM';
       let activeOptionIndex = -1;
 
       renderPassportCards();
       renderDirectComparisons();
       renderDestination(findDestination(DESTINATIONS, destinationSelect.value));
-      renderPassportBrowser('al');
+      renderPassportBrowser();
 
       const closeDestinationOptions = () => {
         destinationOptions.hidden = true;
@@ -5110,8 +5147,13 @@
           document.querySelectorAll('.passport-choice').forEach((choice) => {
             choice.setAttribute('aria-pressed', String(choice === button));
           });
-          renderPassportBrowser(button.dataset.passport);
+          selectedPassportCode = button.dataset.passport;
+          renderPassportBrowser();
         });
+      });
+      passportStatusFilter.addEventListener('change', () => {
+        selectedPassportGroup = passportStatusFilter.value;
+        renderPassportBrowser();
       });
     }
 
@@ -5123,6 +5165,8 @@
       accessWeight,
       accessStatus,
       statusLabel,
+      BROWSER_ACCESS_GROUPS,
+      filterPassportDestinations,
       summarizePassport,
       summarizePassportModes,
       findDestination,

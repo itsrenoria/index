@@ -188,7 +188,6 @@ test('destination search omits the home passport while retaining the other three
     for (const otherPassport of api.PASSPORTS.filter(({ code }) => code !== passport.code)) {
       assert.match(markup, new RegExp(`<strong>${otherPassport.name}<\\/strong>`), `${passport.code}/${otherPassport.code}`);
     }
-    assert.match(api.passportBrowserMarkup(api.DESTINATIONS, passport.code), /access-pill home">Home country/);
   }
 });
 
@@ -282,19 +281,70 @@ test('destination listbox closes when keyboard focus leaves the composite contro
   assert.match(html, /destinationDropdown\.addEventListener\('keydown',[\s\S]*?event\.key === 'Escape'[\s\S]*?closeDestinationOptions\(\)/);
 });
 
-test('Browse renders every destination with direct status badges only', () => {
+test('Browse access filter groups direct statuses into three persistent choices', () => {
   const { api } = loadPage();
-  for (const passport of api.PASSPORTS) {
-    const markup = api.passportBrowserMarkup(api.DESTINATIONS, passport.code);
-    assert.equal((markup.match(/class="passport-browser-row"/g) || []).length, 199, passport.code);
-    assert.match(markup, /AFGHANISTAN/);
-    assert.match(markup, /ZIMBABWE/);
-    assert.match(markup, /access-pill [^"]+">[^<]+<\/span>/);
-    assert.doesNotMatch(markup, /rank-pill/);
-    assert.doesNotMatch(markup, />Positive</);
-    assert.doesNotMatch(markup, />Negative</);
-    assert.match(markup, /EVISA/);
+  assert.deepEqual(
+    Array.from(api.BROWSER_ACCESS_GROUPS, (group) => Array.from(group)),
+    [
+      ['visa-free', 'Visa free'],
+      ['on-arrival', 'On arrival'],
+      ['visa-needed', 'Visa needed'],
+    ],
+  );
+
+  const expected = [
+    ['visa-free', 80, new Set(['visa-free', 'eta', 'evisitor', 'entry-form'])],
+    ['on-arrival', 27, new Set(['on-arrival'])],
+    ['visa-needed', 91, new Set(['evisa', 'visa-needed'])],
+  ];
+  for (const [group, count, allowedStatuses] of expected) {
+    const rows = api.filterPassportDestinations(api.DESTINATIONS, 'al', group);
+    const statuses = rows.map((row) => api.accessStatus(row.al));
+    assert.equal(rows.length, count, group);
+    assert.ok(statuses.every((status) => allowedStatuses.has(status)), group);
+    assert.ok(statuses.every((status) => !['home', 'not-admitted'].includes(status)), group);
   }
+});
+
+test('Browse access filter control offers exactly the three grouped choices', () => {
+  const { html } = loadPage();
+  const filterControl = html.match(/<label[^>]+for="passport-status-filter"[\s\S]*?<select[^>]+id="passport-status-filter"[\s\S]*?<\/select>/);
+  assert.ok(filterControl, 'the access filter should have a visible label and select');
+  assert.deepEqual(
+    Array.from(filterControl[0].matchAll(/<option value="([^"]+)">([^<]+)<\/option>/g), (match) => [match[1], match[2]]),
+    [
+      ['visa-free', 'Visa free'],
+      ['on-arrival', 'On arrival'],
+      ['visa-needed', 'Visa needed'],
+    ],
+  );
+  assert.doesNotMatch(filterControl[0], /All statuses|Home country|Not admitted/i);
+});
+
+test('passport browser filters counts while preserving direct status badges', () => {
+  const { api } = loadPage();
+  const visaFreeMarkup = api.passportBrowserMarkup(api.DESTINATIONS, 'al');
+  assert.match(visaFreeMarkup, /80 destinations/);
+  assert.equal((visaFreeMarkup.match(/class="passport-browser-row"/g) || []).length, 80);
+  assert.match(visaFreeMarkup, /access-pill visa-free">Visa free/);
+  assert.match(visaFreeMarkup, /access-pill eta">ETA/);
+  assert.match(visaFreeMarkup, /access-pill entry-form">Entry form/);
+  assert.doesNotMatch(visaFreeMarkup, /rank-pill|>Positive<|>Negative</);
+
+  const visaNeededMarkup = api.passportBrowserMarkup(api.DESTINATIONS, 'al', 'visa-needed');
+  assert.match(visaNeededMarkup, /91 destinations/);
+  assert.equal((visaNeededMarkup.match(/class="passport-browser-row"/g) || []).length, 91);
+  assert.match(visaNeededMarkup, /access-pill evisa">eVisa/);
+  assert.match(visaNeededMarkup, /access-pill visa-needed">Visa needed/);
+});
+
+test('passport browser keeps passport and group selections across either change', () => {
+  const { html } = loadPage();
+  assert.match(html, /let selectedPassportCode = 'al';/);
+  assert.match(html, /let selectedPassportGroup = 'visa-free';/);
+  assert.match(html, /function renderPassportBrowser\(\)[\s\S]*?passportBrowserMarkup\(DESTINATIONS, selectedPassportCode, selectedPassportGroup\)/);
+  assert.match(html, /button\.addEventListener\('click',[\s\S]*?selectedPassportCode = button\.dataset\.passport;[\s\S]*?renderPassportBrowser\(\);/);
+  assert.match(html, /passportStatusFilter\.addEventListener\('change',[\s\S]*?selectedPassportGroup = passportStatusFilter\.value;[\s\S]*?renderPassportBrowser\(\);/);
 });
 
 test('passport browser offers four accessible choices with Albania selected', () => {

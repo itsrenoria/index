@@ -35,9 +35,8 @@
     .weight-note { display: grid; gap: .55rem; margin-top: 2rem; padding: 1rem; border: 1px solid var(--v2-rule); background: rgba(255,250,241,.7); }
     .weight-row { display: flex; align-items: flex-start; gap: .65rem; font-size: .76rem; }
     .weight-badge { flex: 0 0 auto; padding: .2rem .45rem; border-radius: 999px; font: 800 .58rem/1.2 var(--v2-mono); letter-spacing: .05em; text-transform: uppercase; }
-    .weight-badge.positive { color: var(--v2-green); background: var(--v2-soft-green); }
-    .weight-badge.negative { color: var(--v2-red); background: var(--v2-soft-red); }
-    .weight-badge.fee { color: #75520d; background: #f0e1b7; }
+    .weight-badge.free { color: var(--v2-green); background: var(--v2-soft-green); }
+    .weight-badge.arrival { color: #75520d; background: #f0e1b7; }
     .bundle-section { padding: 3rem 0; border-top: 1px solid var(--v2-rule); }
     .bundle-section-head { margin-bottom: 1.4rem; }
     .bundle-section-head h2 { margin: 0; font: 500 2.25rem/1 var(--v2-serif); letter-spacing: -.03em; }
@@ -137,31 +136,30 @@
       <div>
         <p class="bundle-kicker">Four passports · six comparisons</p>
         <h1 id="page-title">Compare access, country by country.</h1>
-        <p class="bundle-deck">Search a destination first, then scan every direct passport comparison without switching views.</p>
+        <p class="bundle-deck">Search entry requirements and compare four passports across 199 destinations.</p>
       </div>
-      <aside class="weight-note" aria-label="How access is weighted">
-        <div class="weight-row"><span class="weight-badge positive">Positive</span><span>Home, visa-free, visa on arrival, ETA, eVisitor, and lightweight registration all count equally.</span></div>
-        <div class="weight-row"><span class="weight-badge fee">Fee note</span><span>Visa-free and ETA/eVisitor access is normally free or pre-cleared. Visa on arrival may carry a border fee. They remain equally positive here.</span></div>
-        <div class="weight-row"><span class="weight-badge negative">Negative</span><span>eVisa, visa required, and not admitted count equally. Exact labels and stay lengths are still shown.</span></div>
+      <aside class="weight-note" aria-label="Entry notes">
+        <div class="weight-row"><span class="weight-badge free">Free entry</span><span>Visa-free and ETA/eVisitor access is normally free or pre-cleared.</span></div>
+        <div class="weight-row"><span class="weight-badge arrival">On arrival</span><span>Visa on arrival may involve a border fee.</span></div>
       </aside>
     </section>
 
     <section class="bundle-shell search-panel" id="destination-search" aria-labelledby="search-title">
-      <div class="search-intro"><p class="bundle-kicker">Quick answer</p><h2 id="search-title">Check a destination</h2><p>Type any country to see all four source statuses side by side.</p></div>
+      <div class="search-intro"><p class="bundle-kicker">Quick answer</p><h2 id="search-title">Check a destination</h2><p>See the entry status for every passport.</p></div>
       <div class="destination-control"><label for="destination-select">Destination</label><input id="destination-select" type="search" list="destination-options" autocomplete="off" placeholder="Try Viet Nam"><datalist id="destination-options"></datalist></div>
       <div class="destination-results" id="destination-results" aria-live="polite"></div>
     </section>
 
     <section class="bundle-section" aria-labelledby="passport-title">
       <div class="bundle-shell">
-        <div class="bundle-section-head"><h2 id="passport-title">Passport reach</h2><p>Positive access is recalculated with the simplified model. The Passport Index score remains a smaller source reference.</p></div>
+        <div class="bundle-section-head"><h2 id="passport-title">Passport reach</h2><p>Access totals for each passport.</p></div>
         <div class="passport-strip" id="passport-cards" aria-label="Passport access cards"></div>
       </div>
     </section>
 
     <section class="bundle-section" aria-labelledby="comparisons-title">
       <div class="bundle-shell">
-        <div class="bundle-section-head"><h2 id="comparisons-title">Direct comparisons</h2><p>All six pairings. Each card shows what only one passport unlocks; shared access stays condensed to counts.</p></div>
+        <div class="bundle-section-head"><h2 id="comparisons-title">Direct comparisons</h2><p>Destinations available to only one of the two passports.</p></div>
         <div class="comparison-grid" id="direct-comparisons"></div>
       </div>
     </section>

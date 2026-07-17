@@ -167,6 +167,15 @@ test('page contains destination-first search and all direct comparisons without 
   assert.match(html, /Visa on arrival may (?:carry|involve) a (?:border )?fee/i);
 });
 
+test('section content is concise and descriptive', () => {
+  const { html } = loadPage();
+  assert.match(html, /Search entry requirements and compare four passports across 199 destinations\./);
+  assert.match(html, /See the entry status for every passport\./);
+  assert.match(html, /Access totals for each passport\./);
+  assert.match(html, /Destinations available to only one of the two passports\./);
+  assert.doesNotMatch(html, /recalculated|simplified model|shared access stays condensed|switching views/i);
+});
+
 test('page styles are mobile-first with intentional card scrolling and touch targets', () => {
   const { html } = loadPage();
   assert.match(html, /scroll-snap-type:\s*x mandatory/);

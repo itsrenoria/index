@@ -77,11 +77,33 @@
     .destination-control-shell:focus-within { outline: 3px solid #c9843b; outline-offset: 2px; }
     .destination-options { position: absolute; z-index: 5; top: calc(100% + 4px); right: 0; left: 0; max-height: min(55vh, 320px); margin: 0; padding: .3rem; overflow-y: auto; overscroll-behavior: contain; border: 1px solid var(--v2-ink); background: var(--v2-card); box-shadow: 6px 7px 0 rgba(23,33,29,.12); list-style: none; }
     .destination-options[hidden] { display: none; }
-    .destination-option { min-height: 42px; padding: .7rem .75rem; border-bottom: 1px solid var(--v2-rule); font: 700 .84rem/1.25 var(--v2-sans); cursor: pointer; }
+    .destination-option { min-height: 44px; padding: .7rem .75rem; border-bottom: 1px solid var(--v2-rule); font: 700 .84rem/1.25 var(--v2-sans); cursor: pointer; }
     .destination-option:last-child { border-bottom: 0; }
     .destination-option:hover, .destination-option.is-active { background: #eee3d2; }
     .destination-option.is-active { outline: 2px solid var(--v2-green); outline-offset: -2px; }
     .destination-option-empty { padding: .85rem .75rem; color: var(--v2-muted); font-size: .78rem; }
+    .choice-selector { position: relative; min-width: 0; }
+    .choice-selector label { display: block; margin-bottom: .45rem; font: 800 .62rem/1.2 var(--v2-mono); letter-spacing: .09em; text-transform: uppercase; }
+    .choice-selector-shell { display: flex; min-width: 0; border: 1px solid #8d877c; background: var(--v2-card); }
+    .choice-selector-shell:focus-within { outline: 3px solid #c9843b; outline-offset: 2px; }
+    .choice-selector-trigger { flex: 1 1 auto; min-width: 0; min-height: 44px; padding: .65rem .75rem; overflow: hidden; border: 0; background: transparent; color: var(--v2-ink); font: 600 1rem/1.2 var(--v2-serif); text-align: left; text-overflow: ellipsis; white-space: nowrap; cursor: pointer; }
+    .choice-selector-trigger:disabled { color: var(--v2-muted); cursor: not-allowed; }
+    .choice-selector-clear, .choice-selector-arrow { position: relative; flex: 0 0 44px; min-width: 44px; min-height: 44px; border: 0; border-left: 1px solid var(--v2-rule); background: transparent; color: var(--v2-ink); cursor: pointer; }
+    .choice-selector-clear { color: var(--v2-muted); font: 400 1.25rem/1 var(--v2-sans); }
+    .choice-selector-clear:hover, .choice-selector-arrow:hover { background: #eee3d2; color: var(--v2-ink); }
+    .choice-selector-clear:focus-visible, .choice-selector-arrow:focus-visible, .choice-selector-trigger:focus-visible { outline: 0; }
+    .choice-selector-clear[hidden] { display: none; }
+    .choice-selector-arrow:disabled { color: var(--v2-muted); cursor: not-allowed; }
+    .choice-selector-arrow::after { position: absolute; top: 50%; left: 50%; width: 8px; height: 8px; border-right: 2px solid currentColor; border-bottom: 2px solid currentColor; content: ""; transform: translate(-50%, -65%) rotate(45deg); transition: transform .15s ease; }
+    .choice-selector-arrow[aria-expanded="true"]::after { transform: translate(-50%, -35%) rotate(225deg); }
+    .choice-selector-options { position: absolute; z-index: 6; top: calc(100% + 4px); right: 0; left: 0; max-height: min(55vh, 320px); margin: 0; padding: .3rem; overflow-y: auto; overscroll-behavior: contain; border: 1px solid var(--v2-ink); background: var(--v2-card); box-shadow: 6px 7px 0 rgba(23,33,29,.12); list-style: none; }
+    .choice-selector-options.opens-above { top: auto; bottom: calc(100% + 4px); }
+    .choice-selector-options[hidden] { display: none; }
+    .choice-selector-option { min-height: 44px; padding: .7rem .75rem; border-bottom: 1px solid var(--v2-rule); font: 700 .84rem/1.25 var(--v2-sans); cursor: pointer; }
+    .choice-selector-option:last-child { border-bottom: 0; }
+    .choice-selector-option:hover, .choice-selector-option.is-active { background: #eee3d2; }
+    .choice-selector-option[aria-disabled="true"] { color: var(--v2-muted); cursor: not-allowed; opacity: .55; }
+    .choice-selector-option.is-active { outline: 2px solid var(--v2-green); outline-offset: -2px; }
     .destination-name { display: block; font-family: var(--v2-serif); font-weight: 600; }
     .source-labels { display: grid; gap: .25rem; margin-top: .35rem; color: var(--v2-muted); font: .61rem/1.4 var(--v2-mono); }
     .source-labels b { color: var(--v2-ink); }
@@ -104,6 +126,8 @@
     .access-pill.home, .access-pill.visa-free, .access-pill.eta, .access-pill.evisitor, .access-pill.entry-form { color: var(--v2-green); background: var(--v2-soft-green); }
     .access-pill.on-arrival { color: #75520d; background: #f0e1b7; }
     .access-pill.evisa, .access-pill.visa-needed, .access-pill.not-admitted { color: var(--v2-red); background: var(--v2-soft-red); }
+    .selector-grid { display: grid; gap: .8rem; margin-bottom: 1rem; }
+    .section-empty { margin: 0; padding: 1.2rem; border: 1px solid var(--v2-rule); background: var(--v2-card); color: var(--v2-muted); font-size: .8rem; }
     .comparison-grid { display: grid; gap: 1rem; }
     .comparison-card { min-width: 0; border: 1px solid var(--v2-rule); background: var(--v2-card); box-shadow: 6px 7px 0 rgba(23,33,29,.04); }
     .comparison-head { display: grid; grid-template-columns: 1fr 34px 1fr; align-items: center; padding: 1rem; border-bottom: 2px solid var(--v2-ink); }
@@ -131,23 +155,7 @@
     .unique-list .source-labels { gap: .18rem; }
     .empty-unique { margin: .8rem 0; color: var(--v2-muted); font-size: .75rem; }
     .passport-browser-panel { border: 1px solid var(--v2-ink); background: var(--v2-card); box-shadow: 8px 9px 0 rgba(23,33,29,.06); }
-    .passport-browser-controls { display: grid; gap: .5rem; padding: .5rem; border-bottom: 1px solid var(--v2-rule); background: #eee3d2; }
-    .passport-choices { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
-    .passport-choice { min-height: 44px; padding: .6rem .75rem; border: 1px solid transparent; background: transparent; color: var(--v2-muted); font: 800 .64rem/1.2 var(--v2-mono); letter-spacing: .04em; text-transform: uppercase; cursor: pointer; }
-    .passport-choice:hover { color: var(--v2-ink); background: rgba(255,250,241,.65); }
-    .passport-choice[aria-pressed="true"] { border-color: var(--v2-ink); background: var(--v2-card); color: var(--v2-ink); box-shadow: 3px 3px 0 rgba(23,33,29,.08); }
-    .passport-choice:focus-visible { outline: 3px solid #c9843b; outline-offset: 2px; }
-    .passport-status-control { display: grid; gap: .4rem; }
-    .passport-status-control label { color: var(--v2-muted); font: 800 .56rem/1.2 var(--v2-mono); letter-spacing: .06em; text-transform: uppercase; }
-    .passport-status-shell { position: relative; border: 1px solid #8d877c; background: var(--v2-card); }
-    .passport-status-shell::after { position: absolute; top: 50%; right: 18px; width: 8px; height: 8px; border-right: 2px solid currentColor; border-bottom: 2px solid currentColor; content: ""; pointer-events: none; transform: translateY(-65%) rotate(45deg); }
-    .passport-status-control select { flex: 1 1 auto; min-width: 0; min-height: 44px; padding: .65rem 5.4rem .65rem .75rem; border: 0; border-radius: 0; appearance: none; background: transparent; color: var(--v2-ink); font: 800 .6rem/1.2 var(--v2-mono); text-transform: uppercase; cursor: pointer; }
-    .passport-status-clear { position: relative; z-index: 1; flex: 0 0 44px; min-width: 44px; min-height: 44px; margin-right: 44px; padding: 0; border: 0; border-right: 1px solid var(--v2-rule); border-left: 1px solid var(--v2-rule); background: transparent; color: var(--v2-muted); font: 400 1.25rem/1 var(--v2-sans); cursor: pointer; }
-    .passport-status-clear:hover { background: #eee3d2; color: var(--v2-ink); }
-    .passport-status-clear[hidden] { display: none; }
-    .passport-status-shell:has(.passport-status-clear[hidden]) select { padding-right: 3rem; }
-    .passport-status-clear:focus-visible { outline: 3px solid #c9843b; outline-offset: -3px; }
-    .passport-browser-empty { margin: 0; padding: 1.5rem 1rem; color: var(--v2-muted); font: .82rem/1.5 var(--v2-sans); }
+    .passport-browser-controls { padding: 1rem; border-bottom: 1px solid var(--v2-rule); background: #eee3d2; }
     .passport-browser-summary { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; padding: 1rem; border-bottom: 2px solid var(--v2-ink); }
     .passport-browser-summary strong { font: 600 1.35rem/1 var(--v2-serif); }
     .passport-browser-summary span { color: var(--v2-muted); font: 800 .56rem/1.2 var(--v2-mono); letter-spacing: .05em; text-transform: uppercase; }
@@ -173,10 +181,10 @@
       .search-panel { display: grid; grid-template-columns: minmax(0, .8fr) minmax(0, 1.2fr); gap: 1.5rem 2rem; align-items: end; padding: 1.5rem; }
       .search-intro > p:last-child { margin-bottom: 0; }
       .destination-results { grid-column: 1 / -1; }
+      .comparison-selector-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .unique-columns { grid-template-columns: 1fr 1fr; }
       .unique-side + .unique-side { border-top: 0; border-left: 1px solid var(--v2-rule); }
-      .passport-browser-controls { grid-template-columns: minmax(0, 1fr) auto; align-items: center; }
-      .passport-choices { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+      .browser-selector-grid { grid-template-columns: minmax(0, 1fr) minmax(14rem, .65fr); margin-bottom: 0; }
       .passport-browser-row { grid-template-columns: minmax(10rem, .8fr) minmax(0, 1.2fr); align-items: center; gap: 1.5rem; }
       .passport-browser-status { align-items: center; }
     }
@@ -233,7 +241,20 @@
     <section class="bundle-section" id="comparisons" aria-labelledby="comparisons-title">
       <div class="bundle-shell">
         <div class="bundle-section-head"><h2 id="comparisons-title">Direct comparisons</h2><p>Destinations available to only one of the two passports.</p></div>
-        <div class="comparison-grid" id="direct-comparisons"></div>
+        <div class="selector-grid comparison-selector-grid">
+          <div class="choice-selector" id="comparison-left-control" data-choice-selector>
+            <label for="comparison-left-selector">First passport</label>
+            <div class="choice-selector-shell"><button class="choice-selector-trigger" id="comparison-left-selector" type="button" role="combobox" aria-expanded="false" aria-controls="comparison-left-options">Choose passport</button><button class="choice-selector-clear" type="button" aria-label="Clear first passport" hidden>×</button><button class="choice-selector-arrow" type="button" aria-label="Browse first passport options" aria-expanded="false" aria-controls="comparison-left-options"></button></div>
+            <ul class="choice-selector-options" id="comparison-left-options" role="listbox" hidden></ul>
+          </div>
+          <div class="choice-selector" id="comparison-right-control" data-choice-selector>
+            <label for="comparison-right-selector">Second passport</label>
+            <div class="choice-selector-shell"><button class="choice-selector-trigger" id="comparison-right-selector" type="button" role="combobox" aria-expanded="false" aria-controls="comparison-right-options" disabled>Choose passport</button><button class="choice-selector-clear" type="button" aria-label="Clear second passport" hidden>×</button><button class="choice-selector-arrow" type="button" aria-label="Browse second passport options" aria-expanded="false" aria-controls="comparison-right-options" disabled></button></div>
+            <ul class="choice-selector-options" id="comparison-right-options" role="listbox" hidden></ul>
+          </div>
+        </div>
+        <p class="live-status" id="comparison-status" aria-live="polite" aria-atomic="true">Choose two passports to compare.</p>
+        <div class="comparison-grid" id="direct-comparisons"><p class="section-empty">Choose two passports to compare.</p></div>
       </div>
     </section>
 
@@ -242,27 +263,21 @@
         <div class="bundle-section-head"><h2 id="passport-browser-title">Browse one passport</h2><p>Browse destinations by access status.</p></div>
         <div class="passport-browser-panel">
           <div class="passport-browser-controls">
-            <div class="passport-choices" role="group" aria-label="Choose a passport">
-              <button class="passport-choice" type="button" data-passport="al" aria-pressed="true">Albania</button>
-              <button class="passport-choice" type="button" data-passport="gr" aria-pressed="false">Greece</button>
-              <button class="passport-choice" type="button" data-passport="de" aria-pressed="false">Germany</button>
-              <button class="passport-choice" type="button" data-passport="us" aria-pressed="false">United States</button>
-            </div>
-            <div class="passport-status-control">
-              <label for="passport-status-filter">Access status</label>
-              <div class="destination-control-shell passport-status-shell">
-                <select id="passport-status-filter">
-                  <option value="">Choose status</option>
-                  <option value="visa-free">Visa free</option>
-                  <option value="on-arrival">On arrival</option>
-                  <option value="visa-needed">Visa needed</option>
-                </select>
-                <button class="passport-status-clear" id="passport-status-clear" type="button" aria-label="Clear access status">×</button>
+            <div class="selector-grid browser-selector-grid">
+              <div class="choice-selector" id="passport-browser-control" data-choice-selector>
+                <label for="passport-browser-selector">Passport</label>
+                <div class="choice-selector-shell"><button class="choice-selector-trigger" id="passport-browser-selector" type="button" role="combobox" aria-expanded="false" aria-controls="passport-browser-options">Choose passport</button><button class="choice-selector-clear" type="button" aria-label="Clear passport" hidden>×</button><button class="choice-selector-arrow" type="button" aria-label="Browse passport options" aria-expanded="false" aria-controls="passport-browser-options"></button></div>
+                <ul class="choice-selector-options" id="passport-browser-options" role="listbox" hidden></ul>
+              </div>
+              <div class="choice-selector" id="passport-status-control" data-choice-selector>
+                <label for="passport-status-selector">Access status</label>
+                <div class="choice-selector-shell"><button class="choice-selector-trigger" id="passport-status-selector" type="button" role="combobox" aria-expanded="false" aria-controls="passport-status-options" disabled>ALL</button><button class="choice-selector-clear" type="button" aria-label="Reset access status" hidden>×</button><button class="choice-selector-arrow" type="button" aria-label="Browse access status options" aria-expanded="false" aria-controls="passport-status-options" disabled></button></div>
+                <ul class="choice-selector-options" id="passport-status-options" role="listbox" hidden></ul>
               </div>
             </div>
           </div>
-          <p class="live-status" id="passport-browser-status" aria-live="polite" aria-atomic="true">Showing 80 destinations for Albania.</p>
-          <div id="passport-browser-results"></div>
+          <p class="live-status" id="passport-browser-status" aria-live="polite" aria-atomic="true">Choose a passport to view destinations.</p>
+          <div id="passport-browser-results"><p class="section-empty">Choose a passport to view destinations.</p></div>
         </div>
       </div>
     </section>
@@ -4935,6 +4950,10 @@
       return data.map((row, index) => `<li class="destination-option" id="destination-option-${index}" role="option" aria-selected="false" data-destination="${escapeHtml(row.destination)}" tabindex="-1">${escapeHtml(row.destination)}</li>`).join('');
     }
 
+    function choiceOptionsMarkup(options, selectedValue, optionIdPrefix = 'choice-option') {
+      return options.map((option, index) => `<li class="choice-selector-option" id="${escapeHtml(optionIdPrefix)}-${index}" role="option" data-value="${escapeHtml(option.value)}" aria-selected="${option.value === selectedValue}" aria-disabled="${Boolean(option.disabled)}" tabindex="-1">${escapeHtml(option.label)}</li>`).join('');
+    }
+
     function comparePassports(data, leftCode, rightCode) {
       const result = { leftOnly: [], rightOnly: [], bothPositive: [], bothNegative: [] };
 
@@ -4989,12 +5008,15 @@
     }
 
     const BROWSER_ACCESS_GROUPS = [
+      ['all', 'ALL'],
       ['visa-free', 'Visa free'],
       ['on-arrival', 'On arrival'],
       ['visa-needed', 'Visa needed'],
     ];
 
     function filterPassportDestinations(data, passportCode, group) {
+      if (!passportCode) return [];
+      if (group === 'all') return data;
       const groupStatuses = {
         'visa-free': ['visa-free', 'eta', 'evisitor', 'entry-form'],
         'on-arrival': ['on-arrival'],
@@ -5034,10 +5056,10 @@
       </article>`;
     }
 
-    function passportBrowserMarkup(data, passportCode, group = 'visa-free') {
+    function passportBrowserMarkup(data, passportCode, group = 'all') {
+      if (!passportCode) return '<p class="section-empty">Choose a passport to view destinations.</p>';
       const passport = PASSPORTS.find(({ code }) => code === passportCode);
       if (!passport) return '';
-      if (!group) return '<p class="passport-browser-empty">Choose an access status to view destinations.</p>';
       const filteredRows = filterPassportDestinations(data, passportCode, group);
       const rows = filteredRows.map((row) => {
         const entry = row[passportCode];
@@ -5055,19 +5077,138 @@
       document.querySelector('#destination-results').innerHTML = destinationResultMarkup(row);
     }
 
-    function renderDirectComparisons() {
-      document.querySelector('#direct-comparisons').innerHTML = DIRECT_COMPARISONS.map(comparisonCardMarkup).join('');
+    let selectedComparisonLeft = '';
+    let selectedComparisonRight = '';
+
+    function renderSelectedComparison() {
+      const host = document.querySelector('#direct-comparisons');
+      const status = document.querySelector('#comparison-status');
+      if (!selectedComparisonLeft || !selectedComparisonRight) {
+        host.innerHTML = '<p class="section-empty">Choose two passports to compare.</p>';
+        status.textContent = 'Choose two passports to compare.';
+        return;
+      }
+      host.innerHTML = comparisonCardMarkup({
+        id: `${selectedComparisonLeft}-${selectedComparisonRight}`,
+        left: selectedComparisonLeft,
+        right: selectedComparisonRight,
+      });
+      status.textContent = `Comparing ${passportName(selectedComparisonLeft)} and ${passportName(selectedComparisonRight)}.`;
     }
 
-    let selectedPassportCode = 'al';
-    let selectedPassportGroup = 'visa-free';
+    let selectedPassportCode = '';
+    let selectedPassportGroup = 'all';
 
     function renderPassportBrowser() {
       const rows = filterPassportDestinations(DESTINATIONS, selectedPassportCode, selectedPassportGroup);
       document.querySelector('#passport-browser-results').innerHTML = passportBrowserMarkup(DESTINATIONS, selectedPassportCode, selectedPassportGroup);
-      document.querySelector('#passport-browser-status').textContent = selectedPassportGroup
+      document.querySelector('#passport-browser-status').textContent = selectedPassportCode
         ? `Showing ${rows.length} destinations for ${passportName(selectedPassportCode)}.`
-        : `Choose an access status for ${passportName(selectedPassportCode)}.`;
+        : 'Choose a passport to view destinations.';
+    }
+
+    function initChoiceSelector(control, config) {
+      const trigger = control.querySelector('.choice-selector-trigger');
+      const clear = control.querySelector('.choice-selector-clear');
+      const arrow = control.querySelector('.choice-selector-arrow');
+      const listbox = control.querySelector('.choice-selector-options');
+      let selectedValue = config.initialValue || '';
+      let activeIndex = -1;
+      let disabled = false;
+
+      const options = () => config.options();
+      const selectedOption = () => options().find(({ value }) => value === selectedValue);
+      const enabledOptions = () => Array.from(listbox.querySelectorAll('[role="option"]')).filter((option) => option.getAttribute('aria-disabled') !== 'true');
+      const sync = () => {
+        trigger.textContent = selectedOption()?.label || config.placeholder;
+        clear.hidden = !selectedValue || disabled || selectedValue === config.clearValue;
+        trigger.disabled = disabled;
+        arrow.disabled = disabled;
+        listbox.innerHTML = choiceOptionsMarkup(options(), selectedValue, `${listbox.id}-option`);
+      };
+      const close = () => {
+        listbox.hidden = true;
+        trigger.setAttribute('aria-expanded', 'false');
+        arrow.setAttribute('aria-expanded', 'false');
+        trigger.removeAttribute('aria-activedescendant');
+        activeIndex = -1;
+      };
+      const open = () => {
+        if (disabled) return;
+        listbox.innerHTML = choiceOptionsMarkup(options(), selectedValue, `${listbox.id}-option`);
+        const bounds = control.getBoundingClientRect();
+        const spaceBelow = window.innerHeight - bounds.bottom - 8;
+        const spaceAbove = bounds.top - 8;
+        const preferredHeight = Math.min(320, options().length * 44 + 10);
+        const opensAbove = spaceBelow < preferredHeight && spaceAbove > spaceBelow;
+        listbox.classList.toggle('opens-above', opensAbove);
+        listbox.style.maxHeight = `${Math.max(44, Math.min(320, opensAbove ? spaceAbove : spaceBelow))}px`;
+        listbox.hidden = false;
+        trigger.setAttribute('aria-expanded', 'true');
+        arrow.setAttribute('aria-expanded', 'true');
+      };
+      const choose = (value, notify = true) => {
+        const option = options().find((item) => item.value === value && !item.disabled);
+        if (value && !option) return;
+        selectedValue = value;
+        sync();
+        close();
+        if (notify) config.onChange(selectedValue);
+      };
+      const moveActiveOption = (direction) => {
+        const availableOptions = enabledOptions();
+        if (!availableOptions.length) return;
+        activeIndex = direction === 'next'
+          ? (activeIndex + 1) % availableOptions.length
+          : (activeIndex <= 0 ? availableOptions.length - 1 : activeIndex - 1);
+        listbox.querySelectorAll('[role="option"]').forEach((option) => option.classList.remove('is-active'));
+        const activeOption = availableOptions[activeIndex];
+        activeOption.classList.add('is-active');
+        trigger.setAttribute('aria-activedescendant', activeOption.id);
+        activeOption.scrollIntoView({ block: 'nearest' });
+      };
+
+      trigger.addEventListener('click', () => (listbox.hidden ? open() : close()));
+      arrow.addEventListener('click', () => (listbox.hidden ? open() : close()));
+      clear.addEventListener('click', () => {
+        choose(config.clearValue || '');
+        trigger.focus();
+      });
+      listbox.addEventListener('click', (event) => {
+        const option = event.target.closest('[data-value]');
+        if (option && option.getAttribute('aria-disabled') !== 'true') choose(option.dataset.value);
+      });
+      control.addEventListener('keydown', (event) => {
+        if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+          event.preventDefault();
+          if (listbox.hidden) open();
+          moveActiveOption(event.key === 'ArrowDown' ? 'next' : 'previous');
+        } else if (event.key === 'Enter' && activeIndex >= 0) {
+          event.preventDefault();
+          const activeOption = enabledOptions()[activeIndex];
+          if (activeOption) choose(activeOption.dataset.value);
+        } else if (event.key === 'Escape') {
+          close();
+          trigger.focus();
+        }
+      });
+      control.addEventListener('focusout', (event) => {
+        if (!control.contains(event.relatedTarget)) close();
+      });
+      document.addEventListener('pointerdown', (event) => {
+        if (!control.contains(event.target)) close();
+      });
+      sync();
+
+      return {
+        setValue: (value, notify = false) => choose(value, notify),
+        setDisabled: (nextDisabled) => {
+          disabled = nextDisabled;
+          sync();
+          if (disabled) close();
+        },
+        refresh: sync,
+      };
     }
 
     function initDirectInterface() {
@@ -5078,10 +5219,7 @@
       const destinationSelect = document.querySelector('#destination-select');
       const destinationDropdown = document.querySelector('#destination-dropdown');
       const destinationOptions = document.querySelector('#destination-options');
-      const passportStatusFilter = document.querySelector('#passport-status-filter');
-      const passportStatusClear = document.querySelector('#passport-status-clear');
       destinationSelect.value = 'VIET NAM';
-      passportStatusFilter.value = selectedPassportGroup;
       let activeOptionIndex = -1;
 
       function setSiteMenuOpen(open) {
@@ -5107,9 +5245,64 @@
       });
 
       renderPassportCards();
-      renderDirectComparisons();
       renderDestination(findDestination(DESTINATIONS, destinationSelect.value));
       renderPassportBrowser();
+
+      const passportSelectorOptions = () => PASSPORTS.map(({ code, name }) => ({ value: code, label: name }));
+      let comparisonRightSelector;
+      initChoiceSelector(document.querySelector('#comparison-left-control'), {
+        options: passportSelectorOptions,
+        placeholder: 'Choose passport',
+        onChange: (value) => {
+          selectedComparisonLeft = value;
+          if (!selectedComparisonLeft || selectedComparisonRight === selectedComparisonLeft) {
+            selectedComparisonRight = '';
+            comparisonRightSelector.setValue('');
+          }
+          comparisonRightSelector.setDisabled(!selectedComparisonLeft);
+          comparisonRightSelector.refresh();
+          renderSelectedComparison();
+        },
+      });
+      comparisonRightSelector = initChoiceSelector(document.querySelector('#comparison-right-control'), {
+        options: () => PASSPORTS.map(({ code, name }) => ({
+          value: code,
+          label: name,
+          disabled: code === selectedComparisonLeft,
+        })),
+        placeholder: 'Choose passport',
+        onChange: (value) => {
+          selectedComparisonRight = value;
+          renderSelectedComparison();
+        },
+      });
+      comparisonRightSelector.setDisabled(true);
+
+      const passportStatusSelector = initChoiceSelector(document.querySelector('#passport-status-control'), {
+        options: () => BROWSER_ACCESS_GROUPS.map(([value, label]) => ({ value, label })),
+        placeholder: 'ALL',
+        initialValue: 'all',
+        clearValue: 'all',
+        onChange: (value) => {
+          selectedPassportGroup = value || 'all';
+          renderPassportBrowser();
+        },
+      });
+      passportStatusSelector.setDisabled(true);
+
+      initChoiceSelector(document.querySelector('#passport-browser-control'), {
+        options: passportSelectorOptions,
+        placeholder: 'Choose passport',
+        onChange: (value) => {
+          selectedPassportCode = value;
+          passportStatusSelector.setDisabled(!selectedPassportCode);
+          if (!selectedPassportCode) {
+            selectedPassportGroup = 'all';
+            passportStatusSelector.setValue('all');
+          }
+          renderPassportBrowser();
+        },
+      });
 
       const closeDestinationOptions = () => {
         destinationOptions.hidden = true;
@@ -5195,27 +5388,6 @@
         if (!destinationControl.contains(event.target)) closeDestinationOptions();
       });
 
-      document.querySelectorAll('.passport-choice').forEach((button) => {
-        button.addEventListener('click', () => {
-          document.querySelectorAll('.passport-choice').forEach((choice) => {
-            choice.setAttribute('aria-pressed', String(choice === button));
-          });
-          selectedPassportCode = button.dataset.passport;
-          renderPassportBrowser();
-        });
-      });
-      passportStatusFilter.addEventListener('change', () => {
-        selectedPassportGroup = passportStatusFilter.value;
-        passportStatusClear.hidden = !selectedPassportGroup;
-        renderPassportBrowser();
-      });
-      passportStatusClear.addEventListener('click', () => {
-        selectedPassportGroup = '';
-        passportStatusFilter.value = '';
-        passportStatusClear.hidden = true;
-        renderPassportBrowser();
-        passportStatusFilter.focus();
-      });
     }
 
     globalThis.PassportDashboard = {
@@ -5233,6 +5405,7 @@
       findDestination,
       filterDestinationOptions,
       destinationOptionsMarkup,
+      choiceOptionsMarkup,
       comparePassports,
       passportCardMarkup,
       destinationResultMarkup,

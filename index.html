@@ -5096,7 +5096,7 @@
       siteMenu.addEventListener('click', (event) => {
         if (event.target.closest('a')) setSiteMenuOpen(false);
       });
-      siteHeader.addEventListener('keydown', (event) => {
+      document.addEventListener('keydown', (event) => {
         if (event.key === 'Escape' && !siteMenu.hidden) {
           setSiteMenuOpen(false);
           siteMenuToggle.focus();

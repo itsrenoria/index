@@ -295,7 +295,8 @@ test('hamburger menu is compact on mobile and supports expected dismissal behavi
   assert.match(html, /function setSiteMenuOpen\(open\)[\s\S]*?siteMenu\.hidden = !open;[\s\S]*?aria-expanded[\s\S]*?Close page menu[\s\S]*?Open page menu/);
   assert.match(html, /siteMenuToggle\.addEventListener\('click',[\s\S]*?setSiteMenuOpen/);
   assert.match(html, /siteMenu\.addEventListener\('click',[\s\S]*?closest\('a'\)[\s\S]*?setSiteMenuOpen\(false\)/);
-  assert.match(html, /siteHeader\.addEventListener\('keydown',[\s\S]*?event\.key === 'Escape'[\s\S]*?setSiteMenuOpen\(false\)[\s\S]*?siteMenuToggle\.focus\(\)/);
+  assert.match(html, /document\.addEventListener\('keydown',[\s\S]*?event\.key === 'Escape'[\s\S]*?!siteMenu\.hidden[\s\S]*?setSiteMenuOpen\(false\)[\s\S]*?siteMenuToggle\.focus\(\)/);
+  assert.doesNotMatch(html, /siteHeader\.addEventListener\('keydown'/);
   assert.match(html, /document\.addEventListener\('pointerdown',[\s\S]*?!siteHeader\.contains\(event\.target\)[\s\S]*?setSiteMenuOpen\(false\)/);
   assert.doesNotMatch(html, /\.section-nav-list\s*\{[^}]*overflow-x:\s*auto|\.section-nav li \+ li\s*\{[^}]*border-left/s);
 });

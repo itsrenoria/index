@@ -28,17 +28,19 @@ The selectors share behavior and styling rather than duplicating separate compar
 The section shows two empty selectors:
 
 1. First passport
-2. Second passport
+2. Second passport, disabled until the first passport is selected
 
 The results area contains a concise prompt and no comparison card.
 
 ### Selection behavior
 
 - Selecting the first passport preserves the empty second selector.
+- Selecting the first passport enables the second selector.
 - The first passport is unavailable in the second selector so a passport cannot be compared with itself.
 - A comparison card renders only when two different passports have been selected.
 - Changing either selection immediately renders the corresponding comparison.
 - Clearing either selection hides the comparison and restores the prompt.
+- Clearing the first passport also clears and disables the second selector.
 - When the first passport changes to the passport already selected second, the second selection is cleared.
 
 ### Results

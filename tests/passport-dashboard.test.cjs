@@ -250,18 +250,21 @@ test('section content is concise and descriptive', () => {
   assert.doesNotMatch(html, /recalculated|simplified model|shared access stays condensed|switching views/i);
 });
 
-test('unified header links to every primary section without the former legend', () => {
+test('unified masthead links to every primary section without the former legend', () => {
   const { html } = loadPage();
+  const header = html.match(/<header class="site-header">[\s\S]*?<\/header>/)?.[0];
   assert.match(html, /<title>Passport Index<\/title>/);
   assert.match(html, /<span>Passport Index<\/span>/);
   assert.doesNotMatch(html, /Passport comparisons|Four passports · six comparisons/i);
-  assert.match(html, /<header class="site-header">[\s\S]*?<nav class="section-nav"/);
+  assert.ok(header);
+  assert.match(header, /<nav class="section-nav"/);
   assert.match(html, /<img class="bundle-mark"[^>]+src="data:image\/png;base64,/);
   assert.doesNotMatch(html, /<span class="bundle-mark">P<\/span>/);
   assert.match(html, /Passport access · country by country/i);
   assert.doesNotMatch(html, /Access legend|weight-note|weight-row|weight-badge/);
+  assert.doesNotMatch(header, /2026 DATA/i);
+  assert.doesNotMatch(header, /199 DESTINATIONS/i);
   assert.doesNotMatch(html, /bundle-date/);
-  assert.doesNotMatch(html, /2026 DATA<br>199 DESTINATIONS/i);
   assert.match(html, /@media \(max-width:\s*480px\)[\s\S]*?\.site-header/);
   assert.match(html, /<nav[^>]+class="section-nav"[^>]+aria-label="Page sections"/);
   for (const [target, label] of [
@@ -273,6 +276,15 @@ test('unified header links to every primary section without the former legend', 
     assert.match(html, new RegExp(`<a href="#${target}">${label}<\\/a>`));
   }
   assert.match(html, /\.section-nav-list\s*\{[^}]*margin-inline:\s*auto[^}]*overflow-x:\s*auto[^}]*white-space:\s*nowrap/s);
+});
+
+test('mobile header is one full-width segmented menu bar', () => {
+  const { html } = loadPage();
+  assert.match(html, /@media \(max-width:\s*480px\)[\s\S]*?\.site-header \.bundle-shell\s*\{[^}]*width:\s*100%/s);
+  assert.match(html, /@media \(max-width:\s*480px\)[\s\S]*?\.bundle-masthead\s*\{[^}]*gap:\s*0/s);
+  assert.match(html, /@media \(max-width:\s*480px\)[\s\S]*?\.bundle-brand\s*\{[^}]*padding-inline:\s*\.5rem[^}]*border-right:\s*1px solid var\(--v2-rule\)/s);
+  assert.match(html, /@media \(max-width:\s*480px\)[\s\S]*?\.section-nav li \+ li\s*\{[^}]*border-left:\s*1px solid var\(--v2-rule\)/s);
+  assert.match(html, /@media \(max-width:\s*480px\)[\s\S]*?\.section-nav a\s*\{[^}]*min-height:\s*44px/s);
 });
 
 test('destination listbox closes when keyboard focus leaves the composite control', () => {

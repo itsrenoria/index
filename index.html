@@ -139,13 +139,14 @@
     .passport-browser-raw { min-width: 0; color: var(--v2-muted); font: .62rem/1.4 var(--v2-mono); overflow-wrap: anywhere; }
     .passport-browser-badges { display: flex; flex: 0 0 auto; flex-wrap: wrap; justify-content: flex-end; gap: .3rem; }
     @media (max-width: 480px) {
-      .site-header .bundle-shell { width: min(calc(100% - 16px), 1040px); }
-      .bundle-masthead { min-height: 52px; gap: .3rem; }
-      .bundle-brand { gap: .25rem; font-size: .5rem; letter-spacing: .02em; }
+      .site-header .bundle-shell { width: 100%; }
+      .bundle-masthead { min-height: 52px; gap: 0; }
+      .bundle-brand { align-self: stretch; gap: .25rem; padding-inline: .5rem; border-right: 1px solid var(--v2-rule); font-size: .5rem; letter-spacing: .02em; }
       .bundle-mark { width: 28px; height: 28px; }
       .section-nav { flex: 1 1 auto; margin-left: 0; }
       .section-nav-list { justify-content: space-between; gap: 0; overflow-x: visible; }
       .section-nav li { flex: 1 1 25%; }
+      .section-nav li + li { border-left: 1px solid var(--v2-rule); }
       .section-nav a { justify-content: center; min-height: 44px; padding-inline: .2rem; font-size: .5rem; letter-spacing: 0; }
     }
     @media (min-width: 760px) {

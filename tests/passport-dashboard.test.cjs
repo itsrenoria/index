@@ -107,6 +107,66 @@ test('the embedded dataset contains every retrieved destination exactly once', (
   );
 });
 
+test('bundle access uses the best available passport in the bundle', () => {
+  const { api } = loadPage();
+  const azerbaijan = api.DESTINATIONS.find((row) => row.destination === 'AZERBAIJAN');
+  const angola = api.DESTINATIONS.find((row) => row.destination === 'ANGOLA');
+
+  assert.equal(api.bundleAccess(azerbaijan, ['al']), 'positive');
+  assert.equal(api.bundleAccess(angola, ['al']), 'negative');
+  assert.equal(api.bundleAccess(angola, ['al', 'gr']), 'positive');
+});
+
+test('adding a passport never reduces positive bundle access', () => {
+  const { api } = loadPage();
+  const albania = api.summarizeBundle(api.DESTINATIONS, ['al']);
+  const albaniaGreece = api.summarizeBundle(api.DESTINATIONS, ['al', 'gr']);
+  const albaniaGreeceUs = api.summarizeBundle(api.DESTINATIONS, ['al', 'gr', 'us']);
+
+  assert.ok(albaniaGreece.positive >= albania.positive);
+  assert.ok(albaniaGreeceUs.positive >= albaniaGreece.positive);
+  assert.equal(albania.total, 199);
+});
+
+test('passport summaries reconcile positive and negative access to 199', () => {
+  const { api } = loadPage();
+  for (const passport of api.PASSPORTS) {
+    const summary = api.summarizePassport(api.DESTINATIONS, passport.code);
+    assert.equal(summary.positive + summary.negative, 199);
+    assert.equal(summary.total, 199);
+  }
+});
+
+test('scenario definitions cover the eight requested bundle comparisons', () => {
+  const { api } = loadPage();
+  const definitions = Array.from(api.SCENARIOS, ({ left, right }) => [Array.from(left), Array.from(right)]);
+  assert.deepEqual(definitions, [
+    [['al'], ['gr']],
+    [['al', 'gr'], ['us']],
+    [['al'], ['us']],
+    [['al', 'gr'], ['al', 'us']],
+    [['al', 'gr', 'us'], ['al', 'us']],
+    [['al', 'us'], ['al', 'de']],
+    [['al', 'gr'], ['al', 'de']],
+    [['al', 'gr', 'us'], ['al', 'de']],
+  ]);
+});
+
+test('every scenario partitions all destinations exactly once', () => {
+  const { api } = loadPage();
+  for (const definition of api.SCENARIOS) {
+    const result = api.buildScenario(api.DESTINATIONS, definition);
+    const partition = [
+      ...result.rightAdds,
+      ...result.leftKeeps,
+      ...result.bothCover,
+      ...result.neitherCovers,
+    ];
+    assert.equal(partition.length, 199, definition.id);
+    assert.equal(new Set(partition.map((row) => row.destination)).size, 199, definition.id);
+  }
+});
+
 function sampleRows() {
   return [
     {

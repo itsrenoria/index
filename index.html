@@ -315,6 +315,17 @@
       { code: 'us', name: 'United States', mobility: 168 },
     ];
 
+    const SCENARIOS = [
+      { id: 'add-greece', group: 'upgrade', title: 'Add Greece to Albania', leftLabel: 'Albania', rightLabel: 'Greece', left: ['al'], right: ['gr'], combined: ['al', 'gr'] },
+      { id: 'add-us-to-al-gr', group: 'upgrade', title: 'Add the US to Albania + Greece', leftLabel: 'Albania + Greece', rightLabel: 'United States', left: ['al', 'gr'], right: ['us'], combined: ['al', 'gr', 'us'] },
+      { id: 'add-us', group: 'upgrade', title: 'Add the US to Albania', leftLabel: 'Albania', rightLabel: 'United States', left: ['al'], right: ['us'], combined: ['al', 'us'] },
+      { id: 'gr-vs-us', group: 'comparison', title: 'Greece bundle vs US bundle', leftLabel: 'Albania + Greece', rightLabel: 'Albania + United States', left: ['al', 'gr'], right: ['al', 'us'] },
+      { id: 'three-vs-al-us', group: 'comparison', title: 'Three passports vs Albania + US', leftLabel: 'Albania + Greece + United States', rightLabel: 'Albania + United States', left: ['al', 'gr', 'us'], right: ['al', 'us'] },
+      { id: 'al-us-vs-al-de', group: 'comparison', title: 'US bundle vs German bundle', leftLabel: 'Albania + United States', rightLabel: 'Albania + Germany', left: ['al', 'us'], right: ['al', 'de'] },
+      { id: 'al-gr-vs-al-de', group: 'comparison', title: 'Greek bundle vs German bundle', leftLabel: 'Albania + Greece', rightLabel: 'Albania + Germany', left: ['al', 'gr'], right: ['al', 'de'] },
+      { id: 'three-vs-al-de', group: 'comparison', title: 'Three passports vs German bundle', leftLabel: 'Albania + Greece + United States', rightLabel: 'Albania + Germany', left: ['al', 'gr', 'us'], right: ['al', 'de'] },
+    ];
+
     const POSITIVE_TYPES = new Set([
       'home',
       'visa-free',
@@ -4932,6 +4943,51 @@
       return aWeight === 'positive' ? 1 : -1;
     }
 
+    function bundleAccess(row, passportCodes) {
+      return passportCodes.some((code) => accessWeight(row[code]) === 'positive')
+        ? 'positive'
+        : 'negative';
+    }
+
+    function summarizeBundle(data, passportCodes) {
+      const positive = data.filter((row) => bundleAccess(row, passportCodes) === 'positive').length;
+      return { positive, negative: data.length - positive, total: data.length };
+    }
+
+    function summarizePassport(data, passportCode) {
+      return summarizeBundle(data, [passportCode]);
+    }
+
+    function compareBundles(row, leftCodes, rightCodes) {
+      const left = bundleAccess(row, leftCodes);
+      const right = bundleAccess(row, rightCodes);
+      if (left === 'negative' && right === 'positive') return 'rightAdds';
+      if (left === 'positive' && right === 'negative') return 'leftKeeps';
+      if (left === 'positive') return 'bothCover';
+      return 'neitherCovers';
+    }
+
+    function buildScenario(data, definition) {
+      const result = {
+        rightAdds: [],
+        leftKeeps: [],
+        bothCover: [],
+        neitherCovers: [],
+      };
+
+      for (const row of data) {
+        result[compareBundles(row, definition.left, definition.right)].push(row);
+      }
+
+      const combined = definition.combined || [...new Set([...definition.left, ...definition.right])];
+      return {
+        ...result,
+        leftPositive: summarizeBundle(data, definition.left).positive,
+        rightPositive: summarizeBundle(data, definition.right).positive,
+        combinedPositive: summarizeBundle(data, combined).positive,
+      };
+    }
+
     function rowOutcome(row) {
       const codes = PASSPORTS.map((passport) => passport.code);
       let bestCode = codes[0];
@@ -5153,11 +5209,17 @@
 
     globalThis.PassportDashboard = {
       PASSPORTS,
+      SCENARIOS,
       DESTINATIONS,
       POSITIVE_TYPES,
       accessWeight,
       classifyEntry,
       compareEntries,
+      bundleAccess,
+      summarizeBundle,
+      summarizePassport,
+      compareBundles,
+      buildScenario,
       rowOutcome,
       summarize,
       differenceScore,

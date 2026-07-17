@@ -50,6 +50,11 @@ test('the embedded dataset contains every retrieved destination exactly once', (
   const { api } = loadPage();
   assert.equal(api.DESTINATIONS.length, 199);
   assert.equal(new Set(api.DESTINATIONS.map((row) => row.destination)).size, 199);
+  assert.deepEqual(
+    Array.from(api.DESTINATIONS, ({ destination }) => destination),
+    Array.from(api.DESTINATIONS, ({ destination }) => destination)
+      .sort(new Intl.Collator('en', { sensitivity: 'base' }).compare),
+  );
   assert.equal(
     api.DESTINATIONS.find((row) => row.destination === 'AZERBAIJAN').al.raw,
     'VISA-FREE 90',
@@ -164,7 +169,7 @@ test('page contains destination-first search and all direct comparisons without 
   assert.doesNotMatch(html, /Bundle scenarios/);
   assert.doesNotMatch(html, /id="destination-explorer"/);
   assert.doesNotMatch(html, /const SCENARIOS|function bundleAccess|function compareBundles|function buildScenario|\.scenario-card|\.bundle-scoreboard|\.outcome-grid/);
-  assert.match(html, /Visa on arrival may (?:carry|involve) a (?:border )?fee/i);
+  assert.match(html, /Visa on arrival may (?:carry|include|involve) a (?:border )?fee/i);
 });
 
 test('section content is concise and descriptive', () => {
@@ -173,6 +178,8 @@ test('section content is concise and descriptive', () => {
   assert.match(html, /See the entry status for every passport\./);
   assert.match(html, /Access totals for each passport\./);
   assert.match(html, /Destinations available to only one of the two passports\./);
+  assert.match(html, /Visa on arrival may include a border fee\./);
+  assert.match(html, /View every destination for one passport\./);
   assert.doesNotMatch(html, /recalculated|simplified model|shared access stays condensed|switching views/i);
 });
 
@@ -193,7 +200,9 @@ test('passport browser offers four accessible choices with Albania selected', ()
   assert.match(html, /id="passport-browser"/);
   assert.equal((html.match(/<button[^>]+class="passport-choice"[^>]+data-passport=/g) || []).length, 4);
   assert.match(html, /data-passport="al" aria-pressed="true"/);
-  assert.match(html, /id="passport-browser-results"[^>]+aria-live="polite"/);
+  assert.match(html, /id="passport-browser-status"[^>]+aria-live="polite"[^>]+aria-atomic="true"/);
+  assert.doesNotMatch(html, /id="passport-browser-results"[^>]+aria-live=/);
+  assert.match(html, /--v2-muted:\s*#53605a/);
 });
 
 test('page styles are mobile-first with intentional card scrolling and touch targets', () => {
@@ -216,6 +225,7 @@ test('section rhythm uses shared responsive spacing without oversized fixed gaps
 test('page is self-contained and includes source and travel warning', () => {
   const { html } = loadPage();
   assert.doesNotMatch(html, /<(?:script|link)[^>]+(?:src|href)="https?:/i);
+  assert.doesNotMatch(html, /@import|url\(\s*['"]?https?:|<(?:img|iframe)\b|\b(?:fetch|XMLHttpRequest|WebSocket)\s*\(/i);
   assert.match(html, /href="https:\/\/www\.passportindex\.org\/comparebyPassport\.php/);
   assert.match(html, /verify (?:the )?rules with official sources before travel/i);
   assert.match(html, /@media \(prefers-reduced-motion: reduce\)/);

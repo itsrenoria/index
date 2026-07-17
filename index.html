@@ -10,7 +10,7 @@
       --v2-paper: #f4eddf;
       --v2-card: #fffaf1;
       --v2-ink: #17211d;
-      --v2-muted: #66706a;
+      --v2-muted: #53605a;
       --v2-rule: rgba(23, 33, 29, .18);
       --v2-red: #9b332f;
       --v2-green: #285e48;
@@ -25,6 +25,7 @@
     body { margin: 0; background: var(--v2-paper); color: var(--v2-ink); font-family: var(--v2-sans); }
     .skip-link { position: fixed; z-index: 10; top: .75rem; left: .75rem; padding: .7rem .9rem; transform: translateY(-200%); border: 2px solid var(--v2-ink); background: var(--v2-card); color: var(--v2-ink); font-weight: 800; }
     .skip-link:focus { transform: translateY(0); }
+    .live-status { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; border: 0; }
     .bundle-shell { width: min(calc(100% - 32px), 1040px); margin-inline: auto; }
     .bundle-masthead { display: flex; align-items: center; justify-content: space-between; min-height: 64px; border-bottom: 1px solid var(--v2-rule); }
     .bundle-brand { display: flex; align-items: center; gap: .65rem; font: 800 .68rem/1 var(--v2-mono); letter-spacing: .08em; text-transform: uppercase; }
@@ -161,7 +162,7 @@
       </div>
       <aside class="weight-note" aria-label="Entry notes">
         <div class="weight-row"><span class="weight-badge free">Free entry</span><span>Visa-free and ETA/eVisitor access is normally free or pre-cleared.</span></div>
-        <div class="weight-row"><span class="weight-badge arrival">On arrival</span><span>Visa on arrival may involve a border fee.</span></div>
+        <div class="weight-row"><span class="weight-badge arrival">On arrival</span><span>Visa on arrival may include a border fee.</span></div>
       </aside>
     </section>
 
@@ -187,7 +188,7 @@
 
     <section class="bundle-section" id="passport-browser" aria-labelledby="passport-browser-title">
       <div class="bundle-shell">
-        <div class="bundle-section-head"><h2 id="passport-browser-title">Browse one passport</h2><p>Full entry list for one passport.</p></div>
+        <div class="bundle-section-head"><h2 id="passport-browser-title">Browse one passport</h2><p>View every destination for one passport.</p></div>
         <div class="passport-browser-panel">
           <div class="passport-choices" role="group" aria-label="Choose a passport">
             <button class="passport-choice" type="button" data-passport="al" aria-pressed="true">Albania</button>
@@ -195,7 +196,8 @@
             <button class="passport-choice" type="button" data-passport="de" aria-pressed="false">Germany</button>
             <button class="passport-choice" type="button" data-passport="us" aria-pressed="false">United States</button>
           </div>
-          <div id="passport-browser-results" aria-live="polite"></div>
+          <p class="live-status" id="passport-browser-status" aria-live="polite" aria-atomic="true">Showing 199 destinations for Albania.</p>
+          <div id="passport-browser-results"></div>
         </div>
       </div>
     </section>
@@ -4950,6 +4952,7 @@
 
     function renderPassportBrowser(passportCode) {
       document.querySelector('#passport-browser-results').innerHTML = passportBrowserMarkup(DESTINATIONS, passportCode);
+      document.querySelector('#passport-browser-status').textContent = `Showing ${DESTINATIONS.length} destinations for ${passportName(passportCode)}.`;
     }
 
     function initDirectInterface() {

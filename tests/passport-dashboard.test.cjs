@@ -157,25 +157,37 @@ test('passport reach cards use circular country flags', () => {
   assert.match(html, /\.bundle-seal\s*\{[^}]*border-radius:\s*50%/s);
 });
 
-test('passport reach reports exact visa-free and on-arrival counts', () => {
+test('passport reach reports exact accessible-abroad counts', () => {
   const { api } = loadPage();
+  const expected = {
+    al: { visaFree: 80, onArrival: 27, accessibleAbroad: 107 },
+    gr: { visaFree: 131, onArrival: 29, accessibleAbroad: 160 },
+    de: { visaFree: 132, onArrival: 29, accessibleAbroad: 161 },
+    us: { visaFree: 121, onArrival: 34, accessibleAbroad: 155 },
+  };
   for (const passport of api.PASSPORTS) {
     const summary = api.summarizePassportModes(api.DESTINATIONS, passport.code);
-    const exactVisaFree = api.DESTINATIONS.filter((row) => row[passport.code].type === 'visa-free').length;
-    assert.equal(summary.visaFree, exactVisaFree, passport.code);
-    assert.equal(summary.positive + summary.negative, 199, passport.code);
+    assert.deepEqual(
+      { visaFree: summary.visaFree, onArrival: summary.onArrival, accessibleAbroad: summary.accessibleAbroad },
+      expected[passport.code],
+    );
+    assert.equal(summary.accessibleAbroad, summary.visaFree + summary.onArrival);
     const card = api.passportCardMarkup(passport, api.DESTINATIONS);
-    assert.match(card, new RegExp(`<strong>${exactVisaFree}<\\/strong>Visa free`));
-    assert.doesNotMatch(card, /Free \/ pre-cleared/);
+    assert.match(card, new RegExp(`<strong>${summary.accessibleAbroad}<\\/strong><span>accessible abroad<\\/span>`));
   }
 });
 
-test('search and passport browsing show home country as its own status', () => {
+test('destination search omits the home passport while retaining the other three', () => {
   const { api } = loadPage();
   for (const passport of api.PASSPORTS) {
     const homeRow = api.DESTINATIONS.find((row) => row[passport.code].type === 'home');
     assert.ok(homeRow, passport.code);
-    assert.match(api.destinationResultMarkup(homeRow), /access-pill home">Home country/);
+    const markup = api.destinationResultMarkup(homeRow);
+    assert.equal((markup.match(/class="destination-result"/g) || []).length, 3, passport.code);
+    assert.doesNotMatch(markup, new RegExp(`<strong>${passport.name}<\\/strong>`), passport.code);
+    for (const otherPassport of api.PASSPORTS.filter(({ code }) => code !== passport.code)) {
+      assert.match(markup, new RegExp(`<strong>${otherPassport.name}<\\/strong>`), `${passport.code}/${otherPassport.code}`);
+    }
     assert.match(api.passportBrowserMarkup(api.DESTINATIONS, passport.code), /access-pill home">Home country/);
   }
 });
@@ -271,14 +283,17 @@ test('destination listbox closes when keyboard focus leaves the composite contro
   assert.match(html, /destinationDropdown\.addEventListener\('keydown',[\s\S]*?event\.key === 'Escape'[\s\S]*?closeDestinationOptions\(\)/);
 });
 
-test('passport browser renders every destination for each selected passport', () => {
+test('Browse renders every destination with direct status badges only', () => {
   const { api } = loadPage();
   for (const passport of api.PASSPORTS) {
     const markup = api.passportBrowserMarkup(api.DESTINATIONS, passport.code);
     assert.equal((markup.match(/class="passport-browser-row"/g) || []).length, 199, passport.code);
     assert.match(markup, /AFGHANISTAN/);
     assert.match(markup, /ZIMBABWE/);
-    assert.match(markup, /rank-pill negative">Negative/);
+    assert.match(markup, /access-pill [^"]+">[^<]+<\/span>/);
+    assert.doesNotMatch(markup, /rank-pill/);
+    assert.doesNotMatch(markup, />Positive</);
+    assert.doesNotMatch(markup, />Negative</);
     assert.match(markup, /EVISA/);
   }
 });

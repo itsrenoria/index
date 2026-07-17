@@ -4869,9 +4869,9 @@
 
     function summarizePassportModes(data, passportCode) {
       const summary = summarizePassport(data, passportCode);
-      const visaFree = data.filter((row) => row[passportCode].type === 'visa-free').length;
+      const visaFree = data.filter((row) => ['visa-free', 'eta', 'registration'].includes(row[passportCode].type)).length;
       const onArrival = data.filter((row) => row[passportCode].type === 'visa-on-arrival').length;
-      return { ...summary, visaFree, onArrival };
+      return { negative: summary.negative, visaFree, onArrival, accessibleAbroad: visaFree + onArrival };
     }
 
     function normalizeDestinationQuery(value) {
@@ -4928,7 +4928,7 @@
       const metrics = summarizePassportModes(data, passport.code);
       return `<article class="bundle-passport-card">
           <div class="bundle-passport-head"><h3>${escapeHtml(passport.name)}</h3><span class="bundle-seal" aria-hidden="true">${escapeHtml(passport.flag)}</span></div>
-          <div class="access-number"><strong>${metrics.positive}</strong><span>positive destinations</span></div>
+          <div class="access-number"><strong>${metrics.accessibleAbroad}</strong><span>accessible abroad</span></div>
           <div class="passport-meta"><span><strong>${metrics.visaFree}</strong>Visa free</span><span><strong>${metrics.onArrival}</strong>On arrival</span><span><strong>${metrics.negative}</strong>Negative</span><span><strong>${passport.mobility}</strong>Passport Index score</span></div>
         </article>`;
     }
@@ -4953,12 +4953,15 @@
     }
 
     function destinationResultMarkup(row) {
-      return PASSPORTS.map((passport) => {
-        const status = accessStatus(row[passport.code]);
-        const rank = accessWeight(row[passport.code]);
-        const rankLabel = rank === 'positive' ? 'Positive' : 'Negative';
-        return `<article class="destination-result"><div class="destination-result-copy"><strong>${escapeHtml(passport.name)}</strong><div class="source-labels">${escapeHtml(row[passport.code].raw)}</div></div><span class="status-stack"><span class="rank-pill ${rank}">${rankLabel}</span><span class="access-pill ${status}">${statusLabel(status)}</span></span></article>`;
-      }).join('');
+      return PASSPORTS
+        .filter((passport) => row[passport.code].type !== 'home')
+        .map((passport) => {
+          const status = accessStatus(row[passport.code]);
+          const rank = accessWeight(row[passport.code]);
+          const rankLabel = rank === 'positive' ? 'Positive' : 'Negative';
+          return `<article class="destination-result"><div class="destination-result-copy"><strong>${escapeHtml(passport.name)}</strong><div class="source-labels">${escapeHtml(row[passport.code].raw)}</div></div><span class="status-stack"><span class="rank-pill ${rank}">${rankLabel}</span><span class="access-pill ${status}">${statusLabel(status)}</span></span></article>`;
+        })
+        .join('');
     }
 
     function comparisonRowsMarkup(rows, leftCode, rightCode) {
@@ -4985,10 +4988,8 @@
       if (!passport) return '';
       const rows = data.map((row) => {
         const entry = row[passportCode];
-        const rank = accessWeight(entry);
         const status = accessStatus(entry);
-        const rankLabel = rank === 'positive' ? 'Positive' : 'Negative';
-        return `<li class="passport-browser-row"><span class="destination-name">${escapeHtml(row.destination)}</span><span class="passport-browser-status"><span class="passport-browser-raw">${escapeHtml(entry.raw)}</span><span class="passport-browser-badges"><span class="rank-pill ${rank}">${rankLabel}</span><span class="access-pill ${status}">${statusLabel(status)}</span></span></span></li>`;
+        return `<li class="passport-browser-row"><span class="destination-name">${escapeHtml(row.destination)}</span><span class="passport-browser-status"><span class="passport-browser-raw">${escapeHtml(entry.raw)}</span><span class="passport-browser-badges"><span class="access-pill ${status}">${statusLabel(status)}</span></span></span></li>`;
       }).join('');
       return `<div class="passport-browser-summary"><strong>${escapeHtml(passport.name)}</strong><span>${data.length} destinations</span></div><ol class="passport-browser-list">${rows}</ol>`;
     }

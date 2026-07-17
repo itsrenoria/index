@@ -239,7 +239,6 @@ test('page contains destination-first search and all direct comparisons without 
   assert.doesNotMatch(html, /Bundle scenarios/);
   assert.doesNotMatch(html, /id="destination-explorer"/);
   assert.doesNotMatch(html, /const SCENARIOS|function bundleAccess|function compareBundles|function buildScenario|\.scenario-card|\.bundle-scoreboard|\.outcome-grid/);
-  assert.match(html, /May include a border fee\./);
 });
 
 test('section content is concise and descriptive', () => {
@@ -248,16 +247,23 @@ test('section content is concise and descriptive', () => {
   assert.match(html, /See the entry status for every passport\./);
   assert.match(html, /Access totals for each passport\./);
   assert.match(html, /Destinations available to only one of the two passports\./);
-  assert.match(html, /May include a border fee\./);
   assert.match(html, /View every destination for one passport\./);
   assert.doesNotMatch(html, /recalculated|simplified model|shared access stays condensed|switching views/i);
 });
 
-test('masthead navigation links to every primary section and the search legend follows results', () => {
+test('unified header links to every primary section without the former legend', () => {
   const { html } = loadPage();
   assert.match(html, /<title>Passport Index<\/title>/);
   assert.match(html, /<span>Passport Index<\/span>/);
   assert.doesNotMatch(html, /Passport comparisons|Four passports · six comparisons/i);
+  assert.match(html, /<header class="site-header">[\s\S]*?<nav class="section-nav"/);
+  assert.match(html, /<img class="bundle-mark"[^>]+src="data:image\/png;base64,/);
+  assert.doesNotMatch(html, /<span class="bundle-mark">P<\/span>/);
+  assert.match(html, /Passport access · country by country/i);
+  assert.doesNotMatch(html, /Access legend|weight-note|weight-row|weight-badge/);
+  assert.doesNotMatch(html, /bundle-date/);
+  assert.doesNotMatch(html, /2026 DATA<br>199 DESTINATIONS/i);
+  assert.match(html, /@media \(max-width:\s*480px\)[\s\S]*?\.site-header/);
   assert.match(html, /<nav[^>]+class="section-nav"[^>]+aria-label="Page sections"/);
   for (const [target, label] of [
     ['destination-search', 'Check'],
@@ -267,13 +273,6 @@ test('masthead navigation links to every primary section and the search legend f
   ]) {
     assert.match(html, new RegExp(`<a href="#${target}">${label}<\\/a>`));
   }
-  assert.match(html, /Visa-free, ETA or eVisitor\./);
-  assert.match(html, /May include a border fee\./);
-  assert.doesNotMatch(html, /normally free or pre-cleared|Visa on arrival may include/);
-  const resultsIndex = html.indexOf('id="destination-results"');
-  const legendIndex = html.indexOf('class="weight-note"');
-  const reachIndex = html.indexOf('id="passport-reach"');
-  assert.ok(resultsIndex < legendIndex && legendIndex < reachIndex);
   assert.match(html, /\.section-nav-list\s*\{[^}]*margin-inline:\s*auto[^}]*overflow-x:\s*auto[^}]*white-space:\s*nowrap/s);
 });
 
@@ -329,7 +328,10 @@ test('section rhythm uses shared responsive spacing without oversized fixed gaps
 test('page is self-contained and includes source and travel warning', () => {
   const { html } = loadPage();
   assert.doesNotMatch(html, /<(?:script|link)[^>]+(?:src|href)="https?:/i);
-  assert.doesNotMatch(html, /@import|url\(\s*['"]?https?:|<(?:img|iframe)\b|\b(?:fetch|XMLHttpRequest|WebSocket)\s*\(/i);
+  assert.doesNotMatch(html, /@import|url\(\s*['"]?https?:|<iframe\b|\b(?:fetch|XMLHttpRequest|WebSocket)\s*\(/i);
+  for (const [image] of html.matchAll(/<img\b[^>]*>/gi)) {
+    assert.match(image, /src="data:image\/png;base64,/i);
+  }
   assert.match(html, /href="https:\/\/www\.passportindex\.org\/comparebyPassport\.php/);
   assert.match(html, /verify (?:the )?rules with official sources before travel/i);
   assert.match(html, /@media \(prefers-reduced-motion: reduce\)/);

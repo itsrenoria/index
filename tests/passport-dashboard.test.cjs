@@ -86,6 +86,19 @@ test('destination and comparison markup preserve exact source labels and access 
   assert.match(comparisonMarkup, /United States:<\/b> EVISA 90/);
 });
 
+test('comparison markup separates shared metrics, passport headers, and destinations', () => {
+  const { html, api } = loadPage();
+  const markup = api.comparisonCardMarkup({ id: 'al-gr', left: 'al', right: 'gr' });
+  assert.equal((markup.match(/class="metric-tile/g) || []).length, 2);
+  assert.equal((markup.match(/class="unique-header/g) || []).length, 2);
+  assert.equal((markup.match(/class="unique-body"/g) || []).length, 2);
+  assert.match(markup, /unique-eyebrow">Unique access/);
+  assert.match(markup, /unique-count">1 destination/);
+  assert.match(html, /\.metric-tile\.metric-positive\s*\{[^}]*border-top:/s);
+  assert.match(html, /\.metric-tile\.metric-negative\s*\{[^}]*border-top:/s);
+  assert.match(html, /\.unique-header\s*\{[^}]*background:/s);
+});
+
 test('passport summaries reconcile positive and negative access to 199', () => {
   const { api } = loadPage();
   for (const passport of api.PASSPORTS) {

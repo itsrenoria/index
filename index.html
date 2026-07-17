@@ -83,20 +83,26 @@
     .comparison-head h3 { margin: 0; font: 600 1.3rem/1 var(--v2-serif); }
     .comparison-head h3:last-child { text-align: right; }
     .comparison-vs { color: var(--v2-red); font: 800 .6rem/1 var(--v2-mono); text-align: center; }
-    .shared-counts { display: grid; grid-template-columns: 1fr 1fr; border-bottom: 1px solid var(--v2-rule); background: #eee3d2; }
-    .shared-count { padding: .75rem 1rem; }
-    .shared-count + .shared-count { border-left: 1px solid var(--v2-rule); }
-    .shared-count strong { font: 500 1.6rem/1 var(--v2-serif); }
-    .shared-count span { display: block; margin-top: .2rem; color: var(--v2-muted); font: 700 .56rem/1.2 var(--v2-mono); text-transform: uppercase; }
+    .metric-strip { display: grid; grid-template-columns: 1fr 1fr; border-bottom: 1px solid var(--v2-rule); background: #eee3d2; }
+    .metric-tile { min-width: 0; padding: .8rem 1rem 1rem; }
+    .metric-tile + .metric-tile { border-left: 1px solid var(--v2-rule); }
+    .metric-tile.metric-positive { border-top: 4px solid var(--v2-green); }
+    .metric-tile.metric-negative { border-top: 4px solid var(--v2-red); }
+    .metric-kicker { display: block; margin-bottom: .55rem; color: var(--v2-muted); font: 800 .51rem/1 var(--v2-mono); letter-spacing: .08em; text-transform: uppercase; }
+    .metric-tile strong { display: block; font: 500 2.1rem/.85 var(--v2-serif); font-variant-numeric: tabular-nums; }
+    .metric-label { display: block; margin-top: .5rem; color: var(--v2-ink); font: 800 .57rem/1.25 var(--v2-mono); letter-spacing: .03em; text-transform: uppercase; }
     .unique-columns { display: grid; }
-    .unique-side { min-width: 0; padding: 1rem; }
+    .unique-side { min-width: 0; }
     .unique-side + .unique-side { border-top: 1px solid var(--v2-rule); }
-    .unique-side h4 { margin: 0 0 .2rem; font: 600 1rem/1.2 var(--v2-serif); }
-    .unique-side > p { margin: 0 0 .8rem; color: var(--v2-red); font: 800 .58rem/1.2 var(--v2-mono); letter-spacing: .05em; text-transform: uppercase; }
+    .unique-header { display: flex; align-items: center; justify-content: space-between; gap: .8rem; min-height: 74px; padding: .8rem 1rem; border-bottom: 1px solid var(--v2-rule); background: #f3eadb; }
+    .unique-eyebrow { display: block; margin-bottom: .25rem; color: var(--v2-red); font: 800 .5rem/1 var(--v2-mono); letter-spacing: .09em; text-transform: uppercase; }
+    .unique-header h4 { margin: 0; font: 600 1.2rem/1 var(--v2-serif); }
+    .unique-count { flex: 0 0 auto; padding: .38rem .52rem; border: 1px solid var(--v2-rule); background: var(--v2-card); color: var(--v2-ink); font: 800 .54rem/1 var(--v2-mono); letter-spacing: .03em; text-transform: uppercase; }
+    .unique-body { padding: .35rem 1rem .65rem; }
     .unique-list { margin: 0; padding: 0 .35rem 0 0; list-style: none; scrollbar-width: thin; }
     .unique-list li { padding: .7rem 0; border-top: 1px dotted var(--v2-rule); }
     .unique-list .source-labels { gap: .18rem; }
-    .empty-unique { margin: .8rem 0 0; color: var(--v2-muted); font-size: .75rem; }
+    .empty-unique { margin: .8rem 0; color: var(--v2-muted); font-size: .75rem; }
     @media (min-width: 760px) {
       .bundle-hero { display: grid; grid-template-columns: 1.2fr .8fr; gap: 4rem; align-items: end; padding: 5.2rem 0 4rem; }
       .weight-note { margin: 0; }
@@ -4875,10 +4881,10 @@
       const rightName = passportName(definition.right);
       return `<article class="comparison-card" id="comparison-${definition.id}">
         <header class="comparison-head"><h3>${escapeHtml(leftName)}</h3><span class="comparison-vs">VS</span><h3>${escapeHtml(rightName)}</h3></header>
-        <div class="shared-counts"><div class="shared-count"><strong>${result.bothPositive.length}</strong><span>Positive on both</span></div><div class="shared-count"><strong>${result.bothNegative.length}</strong><span>Negative on both</span></div></div>
+        <div class="metric-strip"><div class="metric-tile metric-positive"><span class="metric-kicker">Shared access</span><strong>${result.bothPositive.length}</strong><span class="metric-label">Positive on both</span></div><div class="metric-tile metric-negative"><span class="metric-kicker">Shared access</span><strong>${result.bothNegative.length}</strong><span class="metric-label">Negative on both</span></div></div>
         <div class="unique-columns">
-          <section class="unique-side"><h4>${escapeHtml(leftName)} only</h4><p>${result.leftOnly.length} unique positive</p>${comparisonRowsMarkup(result.leftOnly, definition.left, definition.right)}</section>
-          <section class="unique-side"><h4>${escapeHtml(rightName)} only</h4><p>${result.rightOnly.length} unique positive</p>${comparisonRowsMarkup(result.rightOnly, definition.left, definition.right)}</section>
+          <section class="unique-side"><header class="unique-header"><div><span class="unique-eyebrow">Unique access</span><h4>${escapeHtml(leftName)}</h4></div><span class="unique-count">${result.leftOnly.length} ${result.leftOnly.length === 1 ? 'destination' : 'destinations'}</span></header><div class="unique-body">${comparisonRowsMarkup(result.leftOnly, definition.left, definition.right)}</div></section>
+          <section class="unique-side"><header class="unique-header"><div><span class="unique-eyebrow">Unique access</span><h4>${escapeHtml(rightName)}</h4></div><span class="unique-count">${result.rightOnly.length} ${result.rightOnly.length === 1 ? 'destination' : 'destinations'}</span></header><div class="unique-body">${comparisonRowsMarkup(result.rightOnly, definition.left, definition.right)}</div></section>
         </div>
       </article>`;
     }

@@ -347,11 +347,12 @@ test('destination listbox closes when keyboard focus leaves the composite contro
   assert.match(html, /destinationDropdown\.addEventListener\('keydown',[\s\S]*?event\.key === 'Escape'[\s\S]*?closeDestinationOptions\(\)/);
 });
 
-test('Browse access filter groups direct statuses into three persistent choices', () => {
+test('Browse access filter includes ALL and groups exact statuses into three choices', () => {
   const { api } = loadPage();
   assert.deepEqual(
     Array.from(api.BROWSER_ACCESS_GROUPS, (group) => Array.from(group)),
     [
+      ['all', 'All'],
       ['visa-free', 'Visa free'],
       ['on-arrival', 'On arrival'],
       ['visa-needed', 'Visa needed'],
@@ -372,41 +373,29 @@ test('Browse access filter groups direct statuses into three persistent choices'
   }
 });
 
-test('Browse access filter matches the destination control and adds a clear option', () => {
+test('Browse starts empty with Passport and disabled ALL status selectors', () => {
   const { html } = loadPage();
-  const filterControl = html.match(/<div class="passport-status-control">[\s\S]*?<\/div>\s*<\/div>/);
-  assert.ok(filterControl, 'the access filter should have a visible label and select');
-  assert.match(filterControl[0], /class="destination-control-shell passport-status-shell"/);
-  assert.match(filterControl[0], /<button[^>]+id="passport-status-clear"[^>]+aria-label="Clear access status"/);
-  assert.deepEqual(
-    Array.from(filterControl[0].matchAll(/<option value="([^"]*)">([^<]+)<\/option>/g), (match) => [match[1], match[2]]),
-    [
-      ['', 'Choose status'],
-      ['visa-free', 'Visa free'],
-      ['on-arrival', 'On arrival'],
-      ['visa-needed', 'Visa needed'],
-    ],
-  );
-  assert.doesNotMatch(filterControl[0], /All statuses|Home country|Not admitted/i);
-  assert.match(html, /\.passport-status-shell\s*\{[^}]*border:\s*1px solid #8d877c[^}]*background:\s*var\(--v2-card\)/s);
-  assert.match(html, /\.passport-status-clear\s*\{[^}]*min-width:\s*44px[^}]*min-height:\s*44px/s);
+  assert.match(html, /id="passport-browser-selector"/);
+  assert.match(html, /id="passport-status-selector"[^>]+disabled/);
+  assert.match(html, /id="passport-browser-results"[\s\S]*?Choose a passport to view destinations\./);
+  assert.doesNotMatch(html, /class="passport-choice"/);
+  assert.match(html, /let selectedPassportCode = '';/);
+  assert.match(html, /let selectedPassportGroup = 'all';/);
 });
 
-test('clearing Browse access status preserves the passport and prompts for a selection', () => {
-  const { html, api } = loadPage();
-  const markup = api.passportBrowserMarkup(api.DESTINATIONS, 'al', '');
-  assert.equal(api.filterPassportDestinations(api.DESTINATIONS, 'al', '').length, 0);
-  assert.match(markup, /Choose an access status to view destinations\./);
-  assert.doesNotMatch(markup, /passport-browser-row|destinations<\/span>/);
-  assert.match(html, /const passportStatusClear = document\.querySelector\('#passport-status-clear'\);/);
-  assert.match(html, /passportStatusClear\.addEventListener\('click',[\s\S]*?selectedPassportGroup = '';[\s\S]*?passportStatusFilter\.value = '';[\s\S]*?passportStatusClear\.hidden = true;[\s\S]*?renderPassportBrowser\(\);/);
-  assert.match(html, /passportStatusFilter\.addEventListener\('change',[\s\S]*?passportStatusClear\.hidden = !selectedPassportGroup;/);
-  assert.match(html, /selectedPassportGroup\s*\?\s*`Showing \$\{rows\.length\} destinations for \$\{passportName\(selectedPassportCode\)\}\.\s*`\s*:\s*`Choose an access status for \$\{passportName\(selectedPassportCode\)\}\.\s*`/);
+test('Browse ALL includes every exact-status destination', () => {
+  const { api } = loadPage();
+  const rows = api.filterPassportDestinations(api.DESTINATIONS, 'al', 'all');
+  const markup = api.passportBrowserMarkup(api.DESTINATIONS, 'al', 'all');
+  assert.equal(rows.length, 199);
+  assert.equal((markup.match(/class="passport-browser-row"/g) || []).length, 199);
+  assert.match(markup, /access-pill home">Home country/);
+  assert.match(api.passportBrowserMarkup(api.DESTINATIONS, 'us', 'all'), /access-pill not-admitted">Not admitted/);
 });
 
 test('passport browser filters counts while preserving direct status badges', () => {
   const { api } = loadPage();
-  const visaFreeMarkup = api.passportBrowserMarkup(api.DESTINATIONS, 'al');
+  const visaFreeMarkup = api.passportBrowserMarkup(api.DESTINATIONS, 'al', 'visa-free');
   assert.match(visaFreeMarkup, /80 destinations/);
   assert.equal((visaFreeMarkup.match(/class="passport-browser-row"/g) || []).length, 80);
   assert.match(visaFreeMarkup, /access-pill visa-free">Visa free/);
@@ -421,23 +410,15 @@ test('passport browser filters counts while preserving direct status badges', ()
   assert.match(visaNeededMarkup, /access-pill visa-needed">Visa needed/);
 });
 
-test('passport browser keeps passport and group selections across either change', () => {
+test('Browse passport selection enables status and clearing resets ALL', () => {
   const { html } = loadPage();
-  assert.match(html, /let selectedPassportCode = 'al';/);
-  assert.match(html, /let selectedPassportGroup = 'visa-free';/);
-  assert.match(html, /function renderPassportBrowser\(\)[\s\S]*?passportBrowserMarkup\(DESTINATIONS, selectedPassportCode, selectedPassportGroup\)/);
-  assert.match(html, /button\.addEventListener\('click',[\s\S]*?selectedPassportCode = button\.dataset\.passport;[\s\S]*?renderPassportBrowser\(\);/);
-  assert.match(html, /passportStatusFilter\.addEventListener\('change',[\s\S]*?selectedPassportGroup = passportStatusFilter\.value;[\s\S]*?renderPassportBrowser\(\);/);
-});
-
-test('passport browser offers four accessible choices with Albania selected', () => {
-  const { html } = loadPage();
-  assert.match(html, /id="passport-browser"/);
-  assert.equal((html.match(/<button[^>]+class="passport-choice"[^>]+data-passport=/g) || []).length, 4);
-  assert.match(html, /data-passport="al" aria-pressed="true"/);
+  assert.match(html, /passportSelector = initChoiceSelector/);
+  assert.match(html, /passportStatusSelector = initChoiceSelector/);
+  assert.match(html, /selectedPassportCode = value;[\s\S]*?passportStatusSelector\.setDisabled\(!selectedPassportCode\)/);
+  assert.match(html, /if \(!selectedPassportCode\)[\s\S]*?selectedPassportGroup = 'all';[\s\S]*?passportStatusSelector\.setValue\('all'\)/);
   assert.match(html, /id="passport-browser-status"[^>]+aria-live="polite"[^>]+aria-atomic="true"/);
   assert.doesNotMatch(html, /id="passport-browser-results"[^>]+aria-live=/);
-  assert.match(html, /--v2-muted:\s*#53605a/);
+  assert.match(html, /clearValue:\s*'all'/);
 });
 
 test('page styles are mobile-first with intentional card scrolling and touch targets', () => {
@@ -455,7 +436,7 @@ test('section rhythm uses shared responsive spacing without oversized fixed gaps
   assert.match(html, /--section-space:\s*clamp\(/);
   assert.match(html, /\.bundle-section\s*\{[^}]*padding:\s*var\(--section-space\) 0/s);
   assert.doesNotMatch(html, /(?:margin|padding)(?:-top|-bottom)?:\s*(?:[5-9]\d|\d{3,})px/);
-  assert.match(html, /\.passport-choice\s*\{[^}]*min-height:\s*44px/s);
+  assert.match(html, /\.choice-selector-trigger\s*\{[^}]*min-height:\s*44px/s);
 });
 
 test('page is self-contained and includes source and travel warning', () => {

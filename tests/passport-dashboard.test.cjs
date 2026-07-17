@@ -16,54 +16,15 @@ function loadPage() {
   return { html, api: context.PassportDashboard };
 }
 
-test('positive access outranks negative access', () => {
+test('access weights group convenient and visa-needed entries', () => {
   const { api } = loadPage();
-  assert.equal(
-    api.compareEntries(
-      { type: 'visa-free', days: 90 },
-      { type: 'evisa', days: null },
-    ),
-    1,
-  );
-});
-
-test('visa-free, visa on arrival, and ETA have equal weight', () => {
-  const { api } = loadPage();
-  assert.equal(
-    api.compareEntries(
-      { type: 'visa-free', days: 30 },
-      { type: 'eta', days: 180 },
-    ),
-    0,
-  );
-  assert.equal(
-    api.compareEntries(
-      { type: 'visa-on-arrival', days: 7 },
-      { type: 'visa-free', days: 360 },
-    ),
-    0,
-  );
-});
-
-test('permitted stay length never changes comparison weight', () => {
-  const { api } = loadPage();
-  assert.equal(
-    api.compareEntries(
-      { type: 'visa-free', days: 7 },
-      { type: 'visa-free', days: 360 },
-    ),
-    0,
-  );
-});
-
-test('eVisa, visa required, and not admitted have equal negative weight', () => {
-  const { api } = loadPage();
-  assert.equal(api.compareEntries({ type: 'evisa' }, { type: 'visa-required' }), 0);
-  assert.equal(api.compareEntries({ type: 'visa-required' }, { type: 'not-admitted' }), 0);
-});
-
-test('access weight classifies registration as positive and not-admitted as negative', () => {
-  const { api } = loadPage();
+  for (const type of ['home', 'visa-free', 'visa-on-arrival', 'eta', 'registration']) {
+    assert.equal(api.accessWeight({ type, days: 7 }), 'positive', type);
+    assert.equal(api.accessWeight({ type, days: 360 }), 'positive', type);
+  }
+  for (const type of ['evisa', 'visa-required', 'not-admitted']) {
+    assert.equal(api.accessWeight({ type }), 'negative', type);
+  }
   assert.equal(api.accessWeight({ type: 'registration' }), 'positive');
   assert.equal(api.accessWeight({ type: 'not-admitted' }), 'negative');
 });
@@ -77,29 +38,12 @@ test('access annotation separates free or pre-cleared entry from arrival entry',
   assert.equal(api.accessMode({ type: 'evisa' }), 'visa-needed');
 });
 
-test('row outcome returns the strongest passport', () => {
-  const { api } = loadPage();
-  const sample = {
-    destination: 'AZERBAIJAN',
-    gr: { type: 'evisa', days: 30 },
-    al: { type: 'visa-free', days: 90 },
-    us: { type: 'evisa', days: 30 },
-    de: { type: 'evisa', days: 30 },
-  };
-
-  assert.deepEqual(Array.from(api.rowOutcome(sample).winners), ['al']);
-});
-
-test('source labels are classified without hiding their raw wording', () => {
-  const { api } = loadPage();
-  assert.deepEqual(
-    { ...api.classifyEntry('EVISITORS 90') },
-    { raw: 'EVISITORS 90', type: 'eta', days: 90 },
-  );
-  assert.deepEqual(
-    { ...api.classifyEntry('ARRIVAL CARD 30') },
-    { raw: 'ARRIVAL CARD 30', type: 'registration', days: 30 },
-  );
+test('superseded helpers and unused styles are absent', () => {
+  const { html, api } = loadPage();
+  assert.equal(api.compareEntries, undefined);
+  assert.equal(api.rowOutcome, undefined);
+  assert.equal(api.classifyEntry, undefined);
+  assert.doesNotMatch(html, /body::before|\.sr-only\s*\{/);
 });
 
 test('the embedded dataset contains every retrieved destination exactly once', () => {
@@ -225,11 +169,6 @@ test('page is self-contained and includes source and travel warning', () => {
   assert.match(html, /href="https:\/\/www\.passportindex\.org\/comparebyPassport\.php/);
   assert.match(html, /verify (?:the )?rules with official sources before travel/i);
   assert.match(html, /@media \(prefers-reduced-motion: reduce\)/);
-});
-
-test('screen-reader context is visually hidden without removing it from accessibility', () => {
-  const { html } = loadPage();
-  assert.match(html, /\.sr-only\s*\{[^}]*position:\s*absolute[^}]*clip:/s);
 });
 
 test('skip link stays hidden until keyboard focus', () => {

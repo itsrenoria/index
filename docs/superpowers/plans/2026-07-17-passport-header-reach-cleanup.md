@@ -237,11 +237,12 @@ git commit -m "feat: filter passport destinations by access status"
 
 - [ ] **Step 1: Write failing mobile-menu and data-stamp regression tests**
 
-Assert the mobile media rule gives `.site-header .bundle-shell` full width, removes the nav gap, gives the brand a right divider, gives adjacent nav items dividers, and keeps link touch height at 44px. Replace the coupled data-stamp assertion with independent rejections:
+Assert the mobile media rule gives `.site-header .bundle-shell` full width, removes the nav gap, gives the brand a right divider, gives adjacent nav items dividers, and keeps link touch height at 44px. Extract the `.site-header` markup and independently reject both former data-stamp labels inside the header; reject the dead class globally:
 
 ```js
-assert.doesNotMatch(html, /2026 DATA/i);
-assert.doesNotMatch(html, /199 DESTINATIONS/i);
+const siteHeader = html.match(/<header class="site-header">[\s\S]*?<\/header>/)?.[0] || '';
+assert.doesNotMatch(siteHeader, /2026 DATA/i);
+assert.doesNotMatch(siteHeader, /199 DESTINATIONS/i);
 assert.doesNotMatch(html, /bundle-date/);
 ```
 

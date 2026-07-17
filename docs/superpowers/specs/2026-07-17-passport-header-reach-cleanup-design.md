@@ -48,6 +48,11 @@ Refine the Passport Index header, destination search, reach cards, and passport 
 - Remove the `Positive` and `Negative` ranking badges from Browse rows only.
 - Keep the direct entry-status badge such as `Visa free`, `ETA`, `eVisitor`, `Entry form`, `On arrival`, `eVisa`, `Visa needed`, `Home country`, or `Not admitted`.
 - Preserve the raw source label and full destination list.
+- Add one compact `Access status` dropdown beside the passport controls.
+- Offer `All statuses`, `Home country`, `Visa free`, `ETA`, `eVisitor`, `Entry form`, `On arrival`, `eVisa`, `Visa needed`, and `Not admitted` in that order.
+- Keep the selected status filter when switching passports so the same access type can be compared across passports.
+- Show the filtered count as `<visible> of 199 destinations`; show `199 destinations` for `All statuses`.
+- When a passport has no destinations for the selected status, show `No destinations match this status.` instead of an empty list.
 
 ## Responsive and Accessibility Requirements
 
@@ -59,6 +64,7 @@ Refine the Passport Index header, destination search, reach cards, and passport 
 ## Verification
 
 - Add failing tests before implementation for the restored descriptor, removed legend, home-passport omission, reconciled reach totals, and Browse badge simplification.
+- Add failing tests for the Browse filter options, filtering behavior, persistent filter state, filtered summary, and empty state.
 - Verify the complete automated suite and `git diff --check`.
 - Inspect mobile and desktop layouts in Safari, including the 320px and 440px unified header.
 - Confirm the deployed GitHub Pages build matches the pushed commit and contains the revised copy and behavior.

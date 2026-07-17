@@ -17,6 +17,7 @@
 - Reach `Visa free` combines `visa-free`, `eta`, and `registration`; Reach totals exclude `home`.
 - Destination search omits only the passport whose selected destination entry has type `home`.
 - Browse keeps direct status badges and removes Positive / Negative rank badges.
+- Browse provides one persistent direct-status dropdown with the exact options and empty-state copy from the spec.
 - Preserve the root `.DS_Store` as an unrelated untracked file.
 
 ---
@@ -162,7 +163,75 @@ git commit -m "feat: unify passport header and navigation"
 
 ---
 
-### Task 3: Responsive Visual Verification and Publication
+### Task 3: Add the Browse Access Filter
+
+**Files:**
+- Modify: `tests/passport-dashboard.test.cjs`
+- Modify: `index.html`
+
+**Interfaces:**
+- Consumes: `accessStatus(entry)`, `statusLabel(status)`, `PASSPORTS`, `DESTINATIONS`, and the existing passport-choice state.
+- Produces: `BROWSER_STATUS_OPTIONS`; `filterPassportDestinations(data, passportCode, status)`; `passportBrowserMarkup(data, passportCode, status = 'all')`; persistent `selectedPassportStatus`; one `#passport-status-filter` select control.
+
+- [ ] **Step 1: Write failing pure-filter tests**
+
+Assert that `BROWSER_STATUS_OPTIONS` equals:
+
+```js
+[
+  ['all', 'All statuses'],
+  ['home', 'Home country'],
+  ['visa-free', 'Visa free'],
+  ['eta', 'ETA'],
+  ['evisitor', 'eVisitor'],
+  ['entry-form', 'Entry form'],
+  ['on-arrival', 'On arrival'],
+  ['evisa', 'eVisa'],
+  ['visa-needed', 'Visa needed'],
+  ['not-admitted', 'Not admitted'],
+]
+```
+
+For every non-`all` option, assert that every returned row satisfies `accessStatus(row[passportCode]) === status`. Assert that `all` returns all 199 rows and that Albania filtered by `evisa` returns 47 rows.
+
+- [ ] **Step 2: Write failing markup and state tests**
+
+Assert that the HTML contains a labelled `#passport-status-filter` select with the exact options. Assert filtered markup reports `47 of 199 destinations`, contains only 47 list rows for Albania `evisa`, preserves `access-pill evisa`, and emits `No destinations match this status.` for Albania `not-admitted`. Assert both passport and status change listeners call one render function using the persistent selected values.
+
+- [ ] **Step 3: Run focused tests and verify RED**
+
+Run: `node --test --test-name-pattern="Browse access filter|passport browser" tests/passport-dashboard.test.cjs`
+
+Expected: FAIL because the filter constants, helper, control, state, and filtered rendering do not exist.
+
+- [ ] **Step 4: Implement the minimal filter**
+
+Define the exact option list and pure filtering helper. Extend `passportBrowserMarkup` with a default `status = 'all'`, filter before row rendering, show `199 destinations` for all or `${rows.length} of ${data.length} destinations` for filtered results, and return the empty-state copy when no rows match.
+
+Add a compact labelled select beside the passport controls. Track `selectedPassportCode` and `selectedPassportStatus`; use one `renderPassportBrowser()` function from both change listeners without resetting the other selected value.
+
+- [ ] **Step 5: Run focused and complete tests and verify GREEN**
+
+Run:
+
+```bash
+node --test --test-name-pattern="Browse access filter|passport browser" tests/passport-dashboard.test.cjs
+node --test tests/passport-dashboard.test.cjs
+git diff --check
+```
+
+Expected: focused and complete suites pass; diff check is silent.
+
+- [ ] **Step 6: Commit Task 3**
+
+```bash
+git add index.html tests/passport-dashboard.test.cjs
+git commit -m "feat: filter passport destinations by access status"
+```
+
+---
+
+### Task 4: Responsive Visual Verification and Publication
 
 **Files:**
 - Modify if required by QA: `index.html`

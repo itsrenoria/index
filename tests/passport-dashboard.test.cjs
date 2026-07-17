@@ -387,6 +387,32 @@ test('Browse starts empty with Passport and disabled ALL status selectors', () =
   assert.match(html, /let selectedPassportGroup = 'all';/);
 });
 
+test('Browse selectors sit outside a separate result card', () => {
+  const { html, api } = loadPage();
+  const section = html.match(/<section class="bundle-section" id="passport-browser"[\s\S]*?<\/section>/)?.[0];
+  assert.ok(section);
+  assert.match(section, /class="selector-grid browser-selector-grid"[\s\S]*?id="passport-browser-results"/);
+  assert.doesNotMatch(section, /passport-browser-panel|passport-browser-controls/);
+
+  const emptyMarkup = api.passportBrowserMarkup(api.DESTINATIONS, '', 'all');
+  assert.match(emptyMarkup, /Choose a passport to view destinations\./);
+  assert.doesNotMatch(emptyMarkup, /passport-browser-result-card/);
+});
+
+test('Browse result card gives every passport a semantic formatted title', () => {
+  const { html, api } = loadPage();
+  for (const passport of api.PASSPORTS) {
+    const markup = api.passportBrowserMarkup(api.DESTINATIONS, passport.code, 'all');
+    assert.match(markup, /<article class="passport-browser-result-card">/);
+    assert.match(markup, /class="passport-browser-eyebrow">Passport access<\/span>/);
+    assert.match(markup, new RegExp(`<h3 class="passport-browser-title">${passport.name}<\\/h3>`));
+    assert.match(markup, /class="passport-browser-count">199 destinations<\/span>/);
+  }
+  assert.match(html, /\.passport-browser-header\s*\{[^}]*display:\s*grid[^}]*grid-template-columns:\s*minmax\(0,\s*1fr\)/s);
+  assert.match(html, /\.passport-browser-title\s*\{[^}]*overflow-wrap:\s*anywhere/s);
+  assert.match(html, /@media \(min-width:\s*760px\)[\s\S]*?\.passport-browser-header\s*\{[^}]*grid-template-columns:\s*minmax\(0,\s*1fr\) auto/s);
+});
+
 test('Browse ALL includes every exact-status destination', () => {
   const { api } = loadPage();
   const rows = api.filterPassportDestinations(api.DESTINATIONS, 'al', 'all');

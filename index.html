@@ -315,17 +315,13 @@
       { code: 'us', name: 'United States', mobility: 168 },
     ];
 
-    const TYPE_RANK = Object.freeze({
-      home: 0,
-      'visa-free': 1,
-      'visa-on-arrival': 2,
-      eta: 3,
-      registration: 3,
-      evisa: 4,
-      'visa-required': 5,
-      'not-admitted': 6,
-      unknown: 7,
-    });
+    const POSITIVE_TYPES = new Set([
+      'home',
+      'visa-free',
+      'visa-on-arrival',
+      'eta',
+      'registration',
+    ]);
 
     const DESTINATIONS = [
   {
@@ -4925,16 +4921,15 @@
       return { raw, type, days: dayMatch ? Number(dayMatch[1]) : null };
     }
 
+    function accessWeight(entry) {
+      return POSITIVE_TYPES.has(entry?.type) ? 'positive' : 'negative';
+    }
+
     function compareEntries(a, b) {
-      const aRank = TYPE_RANK[a.type] ?? TYPE_RANK.unknown;
-      const bRank = TYPE_RANK[b.type] ?? TYPE_RANK.unknown;
-      if (aRank !== bRank) return aRank < bRank ? 1 : -1;
-
-      if (a.days != null && b.days != null && a.days !== b.days) {
-        return a.days > b.days ? 1 : -1;
-      }
-
-      return 0;
+      const aWeight = accessWeight(a);
+      const bWeight = accessWeight(b);
+      if (aWeight === bWeight) return 0;
+      return aWeight === 'positive' ? 1 : -1;
     }
 
     function rowOutcome(row) {
@@ -4989,13 +4984,8 @@
 
     function differenceScore(row) {
       const entries = PASSPORTS.map(({ code }) => row[code]);
-      const ranks = entries.map((entry) => TYPE_RANK[entry.type] ?? TYPE_RANK.unknown);
-      const statedDays = entries.map((entry) => entry.days).filter((days) => days != null);
-      const rankSpread = Math.max(...ranks) - Math.min(...ranks);
-      const daySpread = statedDays.length > 1
-        ? Math.max(...statedDays) - Math.min(...statedDays)
-        : 0;
-      return (rankSpread * 1000) + daySpread;
+      const weights = entries.map((entry) => accessWeight(entry));
+      return new Set(weights).size > 1 ? 1 : 0;
     }
 
     function filterRows(data, requestedState = {}) {
@@ -5164,7 +5154,8 @@
     globalThis.PassportDashboard = {
       PASSPORTS,
       DESTINATIONS,
-      TYPE_RANK,
+      POSITIVE_TYPES,
+      accessWeight,
       classifyEntry,
       compareEntries,
       rowOutcome,

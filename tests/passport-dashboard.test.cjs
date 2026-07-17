@@ -16,7 +16,7 @@ function loadPage() {
   return { html, api: context.PassportDashboard };
 }
 
-test('visa-free outranks eVisa', () => {
+test('positive access outranks negative access', () => {
   const { api } = loadPage();
   assert.equal(
     api.compareEntries(
@@ -27,26 +27,45 @@ test('visa-free outranks eVisa', () => {
   );
 });
 
-test('a longer stay wins within the same entry type', () => {
+test('visa-free, visa on arrival, and ETA have equal weight', () => {
   const { api } = loadPage();
   assert.equal(
     api.compareEntries(
-      { type: 'visa-free', days: 180 },
-      { type: 'visa-free', days: 90 },
-    ),
-    1,
-  );
-});
-
-test('equal entry type and stay length tie', () => {
-  const { api } = loadPage();
-  assert.equal(
-    api.compareEntries(
-      { type: 'eta', days: 90 },
-      { type: 'eta', days: 90 },
+      { type: 'visa-free', days: 30 },
+      { type: 'eta', days: 180 },
     ),
     0,
   );
+  assert.equal(
+    api.compareEntries(
+      { type: 'visa-on-arrival', days: 7 },
+      { type: 'visa-free', days: 360 },
+    ),
+    0,
+  );
+});
+
+test('permitted stay length never changes comparison weight', () => {
+  const { api } = loadPage();
+  assert.equal(
+    api.compareEntries(
+      { type: 'visa-free', days: 7 },
+      { type: 'visa-free', days: 360 },
+    ),
+    0,
+  );
+});
+
+test('eVisa, visa required, and not admitted have equal negative weight', () => {
+  const { api } = loadPage();
+  assert.equal(api.compareEntries({ type: 'evisa' }, { type: 'visa-required' }), 0);
+  assert.equal(api.compareEntries({ type: 'visa-required' }, { type: 'not-admitted' }), 0);
+});
+
+test('access weight classifies registration as positive and not-admitted as negative', () => {
+  const { api } = loadPage();
+  assert.equal(api.accessWeight({ type: 'registration' }), 'positive');
+  assert.equal(api.accessWeight({ type: 'not-admitted' }), 'negative');
 });
 
 test('row outcome returns the strongest passport', () => {

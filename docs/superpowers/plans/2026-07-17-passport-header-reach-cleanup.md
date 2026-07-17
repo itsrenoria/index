@@ -13,6 +13,7 @@
 - The page remains self-contained.
 - The unified header shows the logo, `PASSPORT INDEX`, and Check / Reach / Compare / Browse without wrapping or horizontal navigation scrolling at 320px and 440px.
 - The red hero descriptor is exactly `PASSPORT ACCESS · COUNTRY BY COUNTRY`.
+- The `2026 DATA / 199 DESTINATIONS` data stamp and its CSS are absent at every viewport width.
 - Reach `Visa free` combines `visa-free`, `eta`, and `registration`; Reach totals exclude `home`.
 - Destination search omits only the passport whose selected destination entry has type `home`.
 - Browse keeps direct status badges and removes Positive / Negative rank badges.
@@ -102,7 +103,7 @@ git commit -m "feat: reconcile passport reach and destination results"
 
 **Interfaces:**
 - Consumes: existing `.bundle-masthead`, `.bundle-brand`, `.section-nav`, `.section-nav-list`, and `.bundle-kicker` visual language.
-- Produces: one sticky `.site-header` containing brand, navigation, and the desktop data stamp; embedded `<img class="bundle-mark">`; restored hero descriptor; no legend markup or legend-only CSS.
+- Produces: one sticky `.site-header` containing only the brand and navigation; embedded `<img class="bundle-mark">`; restored hero descriptor; no data stamp, legend markup, or legend-only CSS.
 
 - [ ] **Step 1: Write failing header, descriptor, and legend tests**
 
@@ -113,6 +114,7 @@ assert.match(html, /<header class="site-header">[\s\S]*?<nav class="section-nav"
 assert.match(html, /<img class="bundle-mark"[^>]+src="data:image\/png;base64,/);
 assert.match(html, /Passport access · country by country/i);
 assert.doesNotMatch(html, /Access legend|weight-note|weight-row|weight-badge/);
+assert.doesNotMatch(html, /2026 DATA|199 DESTINATIONS|bundle-date/);
 assert.match(html, /@media \(max-width:\s*480px\)[\s\S]*?\.site-header/);
 ```
 
@@ -143,7 +145,7 @@ Copy the generated source into a temporary project location, remove the chroma k
 
 - [ ] **Step 4: Implement the unified header and hero cleanup**
 
-Move the navigation inside `.site-header`, retain the data stamp on wide screens, and use compact mobile CSS so the brand and all four nav items fit in one row. Replace the text mark with the transparent PNG embedded as a base64 data URI. Add `<p class="bundle-kicker">Passport access · country by country</p>` above the hero heading. Remove the legend markup and delete `.weight-note`, `.weight-row`, and `.weight-badge` rules.
+Move the navigation inside `.site-header`, remove the data stamp and `.bundle-date` styles entirely, and use compact mobile CSS so the brand and all four nav items fit in one row. Replace the text mark with the transparent PNG embedded as a base64 data URI. Add `<p class="bundle-kicker">Passport access · country by country</p>` above the hero heading. Remove the legend markup and delete `.weight-note`, `.weight-row`, and `.weight-badge` rules.
 
 - [ ] **Step 5: Run the complete suite and verify GREEN**
 

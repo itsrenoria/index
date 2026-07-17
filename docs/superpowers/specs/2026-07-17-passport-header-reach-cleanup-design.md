@@ -11,7 +11,7 @@ Refine the Passport Index header, destination search, reach cards, and passport 
 - Save the final transparent PNG in the project and embed it as a data URI in `index.html` so the page remains self-contained.
 - Combine the brand and primary navigation into one sticky header row.
 - Keep the logo, `PASSPORT INDEX`, and all four navigation labels visible on mobile without wrapping or horizontal scrolling.
-- Keep the existing data stamp on wider screens only; it is secondary to brand and navigation on narrow screens.
+- Remove the `2026 DATA / 199 DESTINATIONS` data stamp from the header at every viewport width.
 - Restore the red hero descriptor as `PASSPORT ACCESS · COUNTRY BY COUNTRY` above the main heading.
 
 ## Destination Search
